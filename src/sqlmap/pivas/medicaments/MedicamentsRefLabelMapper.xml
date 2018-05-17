@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zc.pivas.medicaments.repository.MedicamentsRefLabelDao" >
+
+	<resultMap id="MedicamentsRefLabelMap" type="com.zc.pivas.medicaments.entity.MedicamentsRefLabel" >
+	  <id column="medicaments_id" property="medicamentsId" jdbcType="BIGINT" />
+	  <id column="label_id" property="labelId" jdbcType="BIGINT" />
+	</resultMap>
+ 
+	<select id="getMedicaments" resultMap="MedicamentsRefLabelMap">
+	  	<include refid="common.jqueryPageHead" />
+	  	<include refid="getMedicamentsRefLabelSql"/>
+	  	<include refid="common.jqueryPageBottom" />
+	</select>
+  
+	<select id="getMedicamentsRefLabel" resultMap="MedicamentsRefLabelMap">
+	  	<include refid="common.jqueryPageHead" />
+	  	<include refid="getMedicamentsRefLabelSql"/>
+	  	<include refid="common.jqueryPageBottom" />
+	</select>
+  
+	<sql id="getMedicamentsRefLabelSql">
+	  	SELECT
+			SRVS_MEDICAMENTS_ref_label.medicaments_id,
+			SRVS_MEDICAMENTS_ref_label.label_id
+		FROM
+			SRVS_MEDICAMENTS_ref_label
+		<where>
+			<if test="medicamentsRefLabel != null">
+				<if test="medicamentsRefLabel.medicamentsId != null and '' neq medicamentsRefLabel.medicamentsId">
+					SRVS_MEDICAMENTS_ref_label.medicaments_id = #{medicamentsRefLabel.medicamentsId}
+				</if>
+			</if>
+		</where>
+	</sql>
+  
+  	<insert id="addMedicamentsRefLabel" parameterType="com.zc.pivas.medicaments.entity.MedicamentsRefLabel">
+	  	INSERT INTO SRVS_MEDICAMENTS_ref_label (
+			medicaments_id,
+			label_id
+		)
+		VALUES
+			(
+				#{medicamentsId},
+				#{labelId}
+			)
+	</insert>
+
+	<delete id="delMedicamentsRefLabel" parameterType="com.zc.pivas.medicaments.entity.MedicamentsRefLabel">
+	  	delete from SRVS_MEDICAMENTS_ref_label
+		where 
+			medicaments_id = #{medicamentsId}
+			<if test="labelId != null">
+			and label_id= #{labelId}
+			</if>
+	</delete>
+ 
+  
+ </mapper>

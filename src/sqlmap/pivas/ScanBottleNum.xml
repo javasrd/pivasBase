@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zc.pivas.app.dao.BottleInfoDao" >
+    
+   <select id="queryBottleInfo" parameterType="com.zc.pivas.app.bean.BottleInfo"
+       resultType="com.zc.pivas.app.bean.BottleInfo">
+       select t1.DEPTNAME as wardName,
+                     t1.YYRQ as medicationTime,
+                     t1.PATNAME as patName,
+                     t1.SEX as sex,
+                     t1.BEDNO as bedNo,
+                     t2.SUPPLY_CODE as supplyCode,
+                     t1.AGE as age,
+                     t1.YZLX as doctorAdviceType,
+                     t3.CATEGORY_ISHARD as IsHard,
+                     t4.DRUGNAME as medicName,
+                     t4.DOSE as medicDose,
+                     t4.QUANTITY as medicNum,
+                     t4.SPECIFICATIONS as medicSpec,
+                     t4.DOSE_UNIT as medicDoseUnit,
+                     t4.MEDICAMENTS_PACKING_UNIT as medicNumUnit,
+                     t2.PARENT_NO as parentNo,
+                     t1.ZXBC as batchID,
+                     t6.NAME_ as batchName,
+                     t4.ward_code as wardCode
+    from SRVS_LABEL t1,SRVS_DOCTOR_ADVICE_MAIN t2,SRVS_MEDICAMENTS_CATEGORY t3,SRVS_PRESCRIPTION t4,SRVS_MEDICAMENTS t5,
+    srvs_batch t6
+    where t4.PIDSJ = t1.PIDSJ and t2.PARENT_NO = t1.PARENT_NO and t4.MEDICAMENTS_CODE = t5.MEDICAMENTS_CODE 
+    and  t5.CATEGORY_ID = t3.CATEGORY_ID and t1.YDPQ = #{bottleNum} and t6.ID_ = t1.ZXBC
+     </select>
+     
+
+     
+          </mapper>

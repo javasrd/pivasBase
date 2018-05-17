@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zc.base.sys.modules.user.repository.UserGroupDao" >
+	<resultMap id="UserGroupMap" type="com.zc.base.sys.modules.user.entity.UserGroup" >
+	    <id column="group_id" property="groupId" jdbcType="BIGINT" />
+	    <collection property="user" resultMap="UserMap"></collection>
+	</resultMap>
+	<resultMap id="UserMap" type="com.zc.base.sys.modules.user.entity.User" >
+		<result column="user_id" property="userId" jdbcType="BIGINT" />
+ 	</resultMap>
+ 	
+	<!--获取全部用户组信息-->
+	<select id="getUserGroup" resultType="com.zc.base.sys.modules.user.entity.UserGroup">
+		<include refid="common.jqueryPageHead" />
+		<include refid="getUserGroupSql"/>
+		<include refid="common.jqueryPageBottom" />
+	</select>
+	<select id="getUserGroupTotal" resultType="int">
+  	select count(1) from (
+		<include refid="getUserGroupSql"/>
+  	) t1
+	</select>
+		<sql id="getUserGroupSql">
+		  	SELECT
+				ug.group_id as groupId,
+				ug.group_name as groupName,
+				ug.create_time as createTime,
+				u. NAME as createName,
+				ug.description
+			FROM
+				sys_user_group ug
+			LEFT JOIN sys_user u ON u.user_id = ug.create_id
+			where 1=1
+		<if test="userGroup.groupName != null and '' neq userGroup.groupName">
+			<![CDATA[
+				 AND ug.group_name like #{userGroup.groupName} escape'\'
+			]]>
+		</if>
+		<if test="userGroup.createName != null and '' neq userGroup.createName">
+			<![CDATA[
+				 AND u. NAME like #{userGroup.createName} escape'\'
+			]]>
+		</if>
+		<!--组数据共享 -->
+		<if test="userGroup.createIds != null and '' neq userGroup.createIds">
+			and ug.create_id in
+			<foreach item="item" index="index" collection="userGroup.createIds"  open="(" separator="," close=")" >  
+				#{item}              
+			</foreach>
+		</if>
+	</sql>
+	<!--同过id获取用户组信息-->
+	<select id="queryGroupInfo" resultType="com.zc.base.sys.modules.user.entity.UserGroup">
+		SELECT
+			ug.group_id as groupId,
+			ug.group_name as groupName,
+			ug.create_time as createTime,
+			u. NAME as createName,
+			ug.create_id as createId,
+			ug.description
+		FROM
+			sys_user_group ug
+		LEFT JOIN sys_user u ON u.user_id = ug.create_id
+		where
+		ug.group_id= #{id}
+	</select>
+	<!--新增用户组信息-->
+	<insert id="addGroupInfo" parameterType="com.zc.base.sys.modules.user.entity.UserGroup">
+		<selectKey resultType="java.lang.Long" order="AFTER" keyProperty="groupId">
+  			select sq_sys_user_group.CURRVAL as groupId from DUAL
+		</selectKey>
+	  	INSERT INTO sys_user_group (
+			group_name,
+			create_time,
+			create_id,
+			description
+		)
+		VALUES
+		(
+			#{groupName,jdbcType=VARCHAR},
+			to_date(#{createTime, jdbcType=VARCHAR},'yyyy-mm-dd hh24:mi:ss'),
+			#{createId,jdbcType=BIGINT},
+			#{description, jdbcType=VARCHAR}
+		) 
+	</insert>
+	<!--修改用户组信息-->
+	<update id="editGroupInfo" parameterType="com.zc.base.sys.modules.user.entity.UserGroup">
+ 	update sys_user_group
+ 		set 
+ 	    group_name = #{groupName,jdbcType=VARCHAR},
+ 	    description= #{description,jdbcType=VARCHAR}
+ 	where group_id= #{groupId}
+	</update>
+	<!-- 删除用户组 -->
+	<delete id="deleteGroupInfo">
+		delete from sys_user_group where group_id in
+		<foreach item="item" index="index" collection="array" open="(" separator="," close=")">  
+				#{item}                
+		</foreach>
+	</delete>
+	<!-- 删除用户和用户的关联关系 -->
+	<delete id="deleteGroupAndUserInfo">
+		delete from sys_user_ref_group where group_id in
+		<foreach item="item" index="index" collection="array" open="(" separator="," close=")">  
+				#{item}                
+		</foreach>
+	</delete>
+	<!--获取组成员-->
+	<select id="queryUserMember" resultType="com.zc.base.sys.modules.user.entity.User">
+		select
+			u.name,
+			u.account,
+			u.telephone
+		FROM
+			sys_user_ref_group ug
+		LEFT JOIN sys_user u ON u.user_id = ug.user_id
+		where
+			ug.group_id = #{userGroup.groupId}
+			and u.del_flag = 0
+			and u.account_type=1
+	</select>
+	<!--同过id获取用户组信息-->
+	<select id="verifyGroupByname" resultType="com.zc.base.sys.modules.user.entity.UserGroup">
+		SELECT
+			ug.group_id as groupId,
+			ug.group_name as groupName,
+			ug.create_time as createTime,
+			ug.create_id as createId,
+			ug.description
+		FROM
+			sys_user_group ug
+		where
+			ug.group_name = #{userGroup.groupName} 
+		<if test="userGroup.groupId != null and '' neq userGroup.groupId">
+	 		<![CDATA[
+	 		 and  ug.group_id <> #{userGroup.groupId} 
+	 		 ]]>
+		</if>
+	</select>
+	<!--同过id获取用户组信息-->
+	<select id="queryPartGroupInfo" resultType="com.zc.base.sys.modules.user.entity.UserGroup">
+		SELECT g.group_id as groupId,g.group_name as groupName,
+		case when exists(
+			SELECT null from sys_user_ref_group urg where urg.group_id = g.group_id and urg.user_id=#{0}
+		) then 1 else 0 END as isCheck,
+		case when g.create_id=#{1} then 1 else 0 end as isUse
+		from sys_user_group g
+	</select>
+	<!--删除旧关联-->
+	<delete id="deleteGroupAndUser">
+		delete from sys_user_ref_group where user_id = #{userId} 
+		<if test="cannotAddGroup != null and cannotAddGroup.size > 0"> 
+			and group_id
+			not in
+			<foreach item="item" index="index" collection="cannotAddGroup"
+			      open="(" separator="," close=")">
+			        #{item}
+			 </foreach>
+		</if>
+	</delete>
+	<!-- 批量入组 -->
+	<insert id="addGroupAndUser">
+		begin
+		<foreach item="groupId" index="index" collection="demandGroup" separator=";" >
+		INSERT INTO sys_user_ref_group (group_id,user_id)
+		VALUES
+	        (#{groupId},#{userId})
+  		</foreach>
+  		;end;
+	</insert>
+	<!--获取用户组所有用户id-->
+	<select id="queryAllGroupMemberId" resultMap="UserGroupMap">
+		SELECT
+			g.group_id,
+			g.user_id
+		FROM
+			sys_user_ref_group g
+		WHERE
+			g.group_id IN (
+				SELECT
+					g1.group_id
+				FROM
+					sys_user_ref_group g1
+				WHERE
+					g1.user_id = #{userId}
+			)
+	</select>
+	
+</mapper>

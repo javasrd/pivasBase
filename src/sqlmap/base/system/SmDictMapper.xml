@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zc.base.sys.modules.system.repository.SysDictDao">
+	
+	<resultMap type="com.zc.base.sys.modules.system.entity.SysDict" id="blaDictMap">
+		<id property="id" column="dict_id"/>
+		<result property="category" column="category"/>
+		<result property="desc" column="description"/>
+		<result property="code" column="code"/>
+		<result property="content" column="content"/>
+		<result property="lang" column="lang"/>
+		<result property="sort" column="sort"/>
+	</resultMap>
+	
+	<select id="getAllBLADict" resultMap="blaDictMap">
+		SELECT d.dict_id
+		     , d.category
+		     , d.description
+		     , d.code
+		     , di.content
+		     , l.code as lang
+		     , d.sort
+		FROM
+		  SYS_DICT d, SYS_DICT_INFO di, SYS_LANG l
+		WHERE
+		  d.dict_id = di.dict_id
+		  AND di.language_id = l.language_id
+		ORDER BY
+		  lang
+		, category
+		, sort ASC
+	</select>
+
+	
+</mapper> 

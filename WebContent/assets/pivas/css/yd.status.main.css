@@ -1,0 +1,231 @@
+.medicine-tab {
+    margin-top: 10px;
+}
+
+.tabs-title {
+    height: 28px;
+}
+
+.content {
+    width: 99%;
+}
+
+.classX {
+    width: 15px;
+    min-height: 15px;
+    margin-top: -17px;
+    margin-left: 250px;
+    background:  url(../../assets/search/images/search_reset.gif) center center no-repeat;
+}
+
+.rightDiv table tr:nth-child(2n) {
+    background: transparent;
+}
+
+
+
+.fontBold {
+    font-weight: bold;
+}
+
+.cbit-grid div.bDiv td {
+    background-color: transparent;
+}
+
+.cbit-grid tr.erow td {
+    background-color: transparent;
+    background: transparent;
+}
+
+.trSelect {
+    background-color: #ffeece; /*#E1E9F8;*/
+}
+
+.button:hover{
+    color:blue;
+}
+/*药物优先级 左中右样式 --开始------------------*/
+.tabMain2 {
+    height: 100%;
+    width: 100%;
+    padding-left: 10px;
+    padding-top: 20px;
+}
+
+.tdSortTitle {
+    vertical-align: bottom;
+    padding-right: 5px;
+    color: white;
+}
+
+.divSortTitle {
+    height: 100%;
+    padding-top: 8px;
+    padding-left: 5px;
+    background-color: #6F96E5;
+    font-size: 14px;
+}
+
+.aSortTitle {
+    float: right;
+    padding-left: 10px;
+}
+
+.tdSortContent {
+    vertical-align: top;
+    padding-right: 5px;
+}
+
+.divSortContent {
+    height: 100%;
+    overflow-y: auto;
+}
+
+.tdSortRow {
+    width: 100%;
+    height: 30px;
+    cursor: pointer;
+    padding-left: 10px;
+}
+
+.tdMedSelec {
+    background-color: #99bbe8;
+}
+
+#divSynToOther tr:nth-child(2n) {
+    background: transparent;
+}
+
+/*0 灰色：已停止*/
+.circleClass1 {
+    width: 20px;
+    height: 20px;
+    border-radius: 10px;
+    margin-left: 4px;
+    margin-right: 4px;
+    background-color: #B4B5B9;
+}
+/*2 粉色。 未确认*/
+.circleClass2 {
+    width: 20px;
+    height: 20px;
+    border-radius: 10px;
+    margin-left: 4px;
+    margin-right: 4px;
+    background-color: #ef99f2; /*2撤销--无颜色*/
+}
+/*3 蓝色。 已确认*/
+.circleClass3 {
+    width: 20px;
+    height: 20px;
+    border-radius: 10px;
+    margin-left: 4px;
+    margin-right: 4px;
+    background-color: #7b99f1; /*3未打印-已排批次--*/
+}
+/*4 棕色。 已打印*/
+.circleClass4 {
+    width: 20px;
+    height: 20px;
+    border-radius: 10px;
+    margin-left: 4px;
+    margin-right: 4px;
+    background-color: #f1818d; /*4已打印--*/
+}
+/*5 黄色。 已入仓*/
+.circleClass5 {
+    width: 20px;
+    height: 20px;
+    border-radius: 10px;
+    margin-left: 4px;
+    margin-right: 4px;
+    background-color: #f8b117; /*5已入仓*/
+}
+/*6 仓内*/
+.circleClass6 {
+    width: 20px;
+    height: 20px;
+    border-radius: 10px;
+    margin-left: 4px;
+    margin-right: 4px;
+    background-color: #a5d065; /*6仓内完成*/
+}
+/*7 绿色 已出仓*/
+.circleClass7 {
+    width: 20px;
+    height: 20px;
+    border-radius: 10px;
+    margin-left: 4px;
+    margin-right: 4px;
+    background-color: #3acaec; /*7已出仓*/
+}
+
+.circleClass {
+    width: 20px;
+    height: 20px;
+    border-radius: 10px;
+    margin-left: 4px;
+    margin-right: 4px;
+    background-color: transparent; /*9已生成未确认--无颜色*/
+}
+
+.circleClass-1 {
+    width: 20px;
+    height: 20px;
+    border-radius: 10px;
+    margin-left: 4px;
+    margin-right: 4px;
+    background-color: #FF0000;
+}
+
+.circleClass8 {
+    width: 20px;
+    height: 20px;
+    border-radius: 10px;
+    margin-left: 4px;
+    margin-right: 4px;
+    background-color: #9ACD32; /*8已签收 */
+}
+
+.circleClass0 {
+    width: 20px;
+    height: 20px;
+    border-radius: 10px;
+    margin-left: 4px;
+    margin-right: 4px;
+    background-color: #B4B5B9; /*1停止--无颜色*/
+}
+.medicine-tab table td {
+    padding: 0px 0px 0px 10px;
+    height: 26px;
+}
+.stcolor0{
+    color: #B4B5B9;
+}
+.stcolor1{
+    color: #B4B5B9;
+}
+.stcolor2{
+    color: #ef99f2;
+}
+.stcolor3{
+    color: #7b99f1;
+}
+.stcolor4{
+    color: #f1818d;
+}
+.stcolor5{
+    color: #f8b117;
+}
+.stcolor6{
+    color: #a5d065;
+}
+.stcolor7{
+    color: #3acaec;
+}
+.stcolor8{
+    color:#9ACD32;
+}
+.stcolor-1{
+    color:#ff0000;
+}

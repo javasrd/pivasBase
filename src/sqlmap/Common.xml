@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="common">
+
+	<!-- ORACLE 分页头部 -->
+	<sql id="jqueryPageHead">
+		<if test = "paging != null" >
+			<if test="paging.page != null and paging.rp != null">
+				select wc.*
+				  from (select nc.*, rownum rn
+				          from (
+			</if>
+		</if>
+	</sql>
+	
+	<!-- ORACLE 分页尾部 -->
+	<sql id="jqueryPageBottom">
+		<if test = "paging !=null">
+			<if test="paging.page!=null and paging.rp !=null">
+				<![CDATA[
+								) nc
+				         where rownum <= #{paging.start} + #{paging.rp}) wc
+				 where rn > #{paging.start}
+				 ]]>
+			</if>
+		</if>
+	</sql>
+	
+</mapper> 

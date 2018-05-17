@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zc.pivas.allowork.dao.AlloWorkDao">
+
+	<select id="queryAlloWorkNameList"
+		resultType="com.zc.pivas.statistics.bean.medicalAdvice.StaticDoctorNameBean">
+		select yd.pzcode AS doctorId,
+		yd.pzmc AS doctorName
+		from SRVS_PRESCRIPTION_main yd
+		left join SRVS_LABEL pq on pq.pidsj = yd.pidsj
+		left join SRVS_LABEL_ref_config_fee con on con.pidsj = pq.pidsj
+		left join SRVS_PRESCRIPTION_FEES pzf on con.gid = pzf.pq_ref_fee_id
+		where pq.ydzt > 4
+		and pzf.configfeeruleid is not null
+		group by yd.pzcode, yd.pzmc
+		order by yd.pzcode
+	</select>
+
+
+	<select id="queryPieList" resultType="com.zc.pivas.allowork.bean.AlloWorkPieBean">
+		select yd.pzcode,
+		yd.pzmc as name,
+		sum(pzf.price * pzf.amount) as cost,
+		count(distinct(yd.yd_main_id)) as value
+		from SRVS_PRESCRIPTION_main yd
+		left join SRVS_LABEL pq on pq.pidsj = yd.pidsj
+		left join SRVS_LABEL_ref_config_fee con on con.pidsj = pq.pidsj
+		left join SRVS_PRESCRIPTION_FEES pzf on con.gid = pzf.pq_ref_fee_id
+		where pq.ydzt > 4 and pzf.configfeeruleid is not null 
+			<if test="condition.searchTime != null and '' neq condition.searchTime ">
+				and to_char(YD.pzrq,'yyyy-mm-dd') like #{condition.searchTime} ||'%'
+			</if>
+			
+			<if test="condition.searchDoctorIds != null and '' neq condition.searchDoctorIds ">
+				and YD.pzcode in
+				<foreach item="searchDoctorId" index="index" collection="condition.searchDoctorIds" open="(" separator="," close=")">
+					#{searchDoctorId,jdbcType=VARCHAR}
+				</foreach>
+			</if>
+		group by yd.pzcode, yd.pzmc
+		order by yd.pzcode
+	</select>
+
+    <select id="queryDetailPieList" resultType="com.zc.pivas.allowork.bean.AlloWorkPieBean">
+		select 
+		sum(pzf.price * pzf.amount) as cost,
+		count(distinct(yd.yd_main_id)) as value,
+		pzf.configfeeruleid,
+       (select rule.rulename
+          from SRVS_CONFIGFEE_RULE rule
+         where rule.gid = pzf.configfeeruleid) as name
+		from SRVS_PRESCRIPTION_main yd
+		left join SRVS_LABEL pq on pq.pidsj = yd.pidsj
+		left join SRVS_LABEL_ref_config_fee con on con.pidsj = pq.pidsj
+		left join SRVS_PRESCRIPTION_FEES pzf on con.gid = pzf.pq_ref_fee_id
+		where pq.ydzt > 4 and pzf.configfeeruleid is not null 
+			<if test="condition.searchTime != null and '' neq condition.searchTime ">
+				and to_char(YD.pzrq,'yyyy-mm-dd') like #{condition.searchTime} ||'%'
+			</if>
+			
+			<if test="condition.searchDoctorId != null and '' neq condition.searchDoctorId ">
+				and YD.pzcode = #{condition.searchDoctorId}
+			</if>
+		group by pzf.configfeeruleid
+		order by pzf.configfeeruleid
+	</select>
+	
+	<select id="queryAllRuleNames" resultType="String">
+		select (select rule.rulename
+          from SRVS_CONFIGFEE_RULE rule
+         where rule.gid = pzf.configfeeruleid) as rulename
+		from SRVS_PRESCRIPTION_main yd
+		left join SRVS_LABEL pq on pq.pidsj = yd.pidsj
+		left join SRVS_LABEL_ref_config_fee con on con.pidsj = pq.pidsj
+		left join SRVS_PRESCRIPTION_FEES pzf on con.gid = pzf.pq_ref_fee_id
+		where pq.ydzt > 4 and pzf.configfeeruleid is not null 
+			<if test="condition.searchTime != null and '' neq condition.searchTime ">
+				and to_char(YD.pzrq,'yyyy-mm-dd') like #{condition.searchTime} ||'%'
+			</if>
+			
+			<if test="condition.searchDoctorIds != null and '' neq condition.searchDoctorIds ">
+				and YD.pzcode in
+				<foreach item="searchDoctorId" index="index" collection="condition.searchDoctorIds" open="(" separator="," close=")">
+					#{searchDoctorId,jdbcType=VARCHAR}
+				</foreach>
+			</if>
+		 group by pzf.configfeeruleid
+	</select>
+	
+	<select id="queryBarList" resultType="com.zc.pivas.allowork.bean.AlloWorkPieBean">
+		select yd.pzcode,
+		yd.pzmc as name,
+		(select rule.rulename
+          from SRVS_CONFIGFEE_RULE rule
+         where rule.gid = pzf.configfeeruleid) as rulename,
+		sum(pzf.price * pzf.amount) as cost,
+		count(distinct(yd.yd_main_id)) as value
+		from SRVS_PRESCRIPTION_main yd
+		left join SRVS_LABEL pq on pq.pidsj = yd.pidsj
+		left join SRVS_LABEL_ref_config_fee con on con.pidsj = pq.pidsj
+		left join SRVS_PRESCRIPTION_FEES pzf on con.gid = pzf.pq_ref_fee_id
+		where pq.ydzt > 4 and pzf.configfeeruleid is not null 
+			<if test="condition.searchTime != null and '' neq condition.searchTime ">
+				and to_char(YD.pzrq,'yyyy-mm-dd') like #{condition.searchTime} ||'%'
+			</if>
+			
+			<if test="condition.searchDoctorIds != null and '' neq condition.searchDoctorIds ">
+				and YD.pzcode in
+				<foreach item="searchDoctorId" index="index" collection="condition.searchDoctorIds" open="(" separator="," close=")">
+					#{searchDoctorId,jdbcType=VARCHAR}
+				</foreach>
+			</if>
+		group by yd.pzcode, yd.pzmc, pzf.configfeeruleid
+		order by yd.pzcode
+	</select>
+</mapper>

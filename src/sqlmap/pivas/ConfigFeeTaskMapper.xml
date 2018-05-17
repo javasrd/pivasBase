@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zc.pivas.synresult.dao.ConfigFeeTaskDAO" >
+  	<select id="qryTaskList" resultType="com.zc.pivas.synresult.bean.ConfigFeeTaskBean">
+	  	SELECT
+  			yd_pidsj,
+			costcode,
+			caseid,
+			account,
+			amount,
+       		result,
+       		resultDesc
+		FROM
+			SRVS_CONFIGFEE_TASK
+			<where>
+			RESULT is null and 
+  		    <if test="condition != null and '' neq condition">
+					substr(yd_pidsj,6,1) in 
+					<foreach item="pidsj" index="index"
+						collection="condition" open="(" separator=","
+						close=")">
+						#{pidsj}
+					</foreach>
+			</if>
+			</where>
+  	</select>
+  
+  	<insert id="inster" parameterType="com.zc.pivas.synresult.bean.ConfigFeeTaskBean">
+	  	INSERT INTO SRVS_CONFIGFEE_TASK (
+			yd_pidsj,
+			costcode,
+			caseid,
+			account,
+			amount,
+			<if test="result != null and '' neq result">
+			and result,
+			</if>
+       		resultDesc
+		)
+		VALUES
+		(
+			#{yd_pidsj},
+			#{costCode},
+			#{caseID},
+			#{account},
+			#{amount},
+			<if test="result != null and '' neq result">
+			#{result},
+			</if>
+			#{resultDesc}
+		)
+	</insert>
+
+	<update id="update" parameterType="com.zc.pivas.synresult.bean.ConfigFeeTaskBean">
+  		update SRVS_CONFIGFEE_TASK set
+			account = #{account,jdbcType=VARCHAR},
+			amount = #{amount,jdbcType=VARCHAR},
+			result = #{result,jdbcType=INTEGER},
+			resultDesc = #{resultDesc,jdbcType=VARCHAR}
+			where yd_pidsj = #{yd_pidsj,jdbcType=VARCHAR}
+  	</update>
+  
+  	<delete id="delete" parameterType="com.zc.pivas.synresult.bean.ConfigFeeTaskBean">
+  		delete from SRVS_CONFIGFEE_TASK
+			where 1=1 
+			<if test="yd_pidsj != null and '' neq yd_pidsj">
+			and yd_pidsj = #{yd_pidsj}
+			</if>
+			
+			<if test="addDate != null and '' neq addDate">
+			<![CDATA[ and addDate < (to_date(#{addDate}, 'yyyy-mm-dd')-1)  ]]>
+			</if>
+	</delete>
+	
+</mapper>

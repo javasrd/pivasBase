@@ -1,0 +1,371 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://java.sun.com/xml/ns/javaee" xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" version="2.5">
+  <display-name>pivasBase</display-name>
+  <context-param>
+    <param-name>contextConfigLocation</param-name>
+    <param-value>
+		classpath*:applicationContext.xml,
+		classpath*:applicationContext-rest.xml,
+		classpath*:applicationContext-shiro.xml,
+		classpath*:applicationContext-cache.xml,
+		classpath*:applicationContext-exception.xml,
+		classpath*:applicationContext-validation.xml,
+		classpath*:applicationContext-sm.xml,
+		classpath*:applicationContext-redis.xml
+	</param-value>
+  </context-param>
+  <context-param>
+    <param-name>spring.profiles.default</param-name>
+    <param-value>production</param-value>
+  </context-param>
+  <context-param>
+    <param-name>logbackConfigLocation</param-name>
+    <param-value>classpath:logback-pro.xml</param-value>
+  </context-param>
+  <context-param>
+    <param-name>webAppRootKey</param-name>
+    <param-value>web.app.root</param-value>
+  </context-param>
+	<listener>
+     <listener-class> 
+ 			com.zc.base.web.logback.LogbackConfigListener</listener-class>
+   </listener>
+  <listener>
+    <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+  </listener>
+  <listener>
+    <listener-class>com.zc.base.sys.modules.login.SessionAttributeListener</listener-class>
+  </listener>
+  <listener>
+    <listener-class>com.zc.base.sys.modules.login.SessionListener</listener-class>
+  </listener>
+  <listener>
+    <listener-class>org.springframework.web.context.request.RequestContextListener</listener-class>
+  </listener>
+  <servlet>
+    <servlet-name>springServlet</servlet-name>
+    <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+    <init-param>
+      <param-name>contextConfigLocation</param-name>
+      <param-value>classpath*:/spring-mvc.xml</param-value>
+    </init-param>
+    <load-on-startup>1</load-on-startup>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>springServlet</servlet-name>
+    <url-pattern>/</url-pattern>
+  </servlet-mapping>
+  <filter>
+    <filter-name>encodingFilter</filter-name>
+    <filter-class>org.springframework.web.filter.CharacterEncodingFilter</filter-class>
+    <init-param>
+      <param-name>encoding</param-name>
+      <param-value>UTF-8</param-value>
+    </init-param>
+    <init-param>
+      <param-name>forceEncoding</param-name>
+      <param-value>true</param-value>
+    </init-param>
+  </filter>
+  <filter-mapping>
+    <filter-name>encodingFilter</filter-name>
+    <url-pattern>/*</url-pattern>
+    <dispatcher>REQUEST</dispatcher>
+    <dispatcher>FORWARD</dispatcher>
+  </filter-mapping>
+  <filter>
+    <filter-name>shiroFilter</filter-name>
+    <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
+    <init-param>
+      <param-name>targetFilterLifecycle</param-name>
+      <param-value>true</param-value>
+    </init-param>
+  </filter>
+  <filter-mapping>
+    <filter-name>shiroFilter</filter-name>
+    <url-pattern>/*</url-pattern>
+  </filter-mapping>
+  <filter>
+    <filter-name>backFilter</filter-name>
+    <filter-class>com.zc.pivas.backup.BackFilter</filter-class>
+  </filter>
+  <filter-mapping>
+    <filter-name>backFilter</filter-name>
+    <url-pattern>/*</url-pattern>
+  </filter-mapping>
+  <session-config>
+    <session-timeout>30</session-timeout>
+  </session-config>
+  <error-page>
+    <error-code>404</error-code>
+    <location>/WEB-INF/views/error/404.jsp</location>
+  </error-page>
+  <servlet>
+    <servlet-name>StartUpServlet</servlet-name>
+    <servlet-class>com.zc.base.common.servlet.StartUpServlet</servlet-class>
+    <load-on-startup>1</load-on-startup>
+  </servlet>
+  <servlet>
+    <servlet-name>ServletContextUtil</servlet-name>
+    <servlet-class>com.zc.pivas.common.util.ServletContextUtil</servlet-class>
+    <load-on-startup>1</load-on-startup>
+  </servlet>
+  <filter>
+    <filter-name>requestContextFilter</filter-name>
+    <filter-class>org.springframework.web.filter.RequestContextFilter</filter-class>
+  </filter>
+  <filter-mapping>
+    <filter-name>requestContextFilter</filter-name>
+    <servlet-name>ReportServer</servlet-name>
+  </filter-mapping>
+  
+
+  <!-- Default locale setting.
+	-->
+	<context-param>
+		<param-name>BIRT_VIEWER_LOCALE</param-name>
+		<param-value>en-US</param-value>
+	</context-param>
+
+	<!--
+		Default timezone setting.
+		Examples: "Europe/Paris", "GMT+1".
+		Defaults to the container's timezone.
+	-->
+	<context-param>
+		<param-name>BIRT_VIEWER_TIMEZONE</param-name>
+		<param-value></param-value>
+	</context-param>
+
+	<!--
+		Report resources directory for preview. Defaults to ${birt home}
+	-->
+	<context-param>
+		<param-name>BIRT_VIEWER_WORKING_FOLDER</param-name>
+		<param-value></param-value>
+	</context-param>
+
+	<!--
+		Temporary document files directory. Defaults to ${birt home}/documents
+	-->
+	<context-param>
+		<param-name>BIRT_VIEWER_DOCUMENT_FOLDER</param-name>
+		<param-value>${birt.viewer.working.path}/documents</param-value>
+	</context-param>
+
+	<!--
+		Flag whether the report resources can only be accessed under the
+		working folder. Defaults to true
+	-->
+	<context-param>
+		<param-name>WORKING_FOLDER_ACCESS_ONLY</param-name>
+		<param-value>true</param-value>
+	</context-param>
+
+	<!--
+		Settings for how to deal with the url report path. e.g. "http://host/repo/test.rptdesign". 
+		
+		Following values are supported:
+		
+		<all> 		- All paths.
+		<domain>	- Only the paths with host matches current domain. Note the comparison is literal, "127.0.0.1" and "localhost" are considered as different hosts.
+		<none> 		- URL paths are not supported.
+		
+		Defaults to "domain".
+	-->
+	<context-param>
+		<param-name>URL_REPORT_PATH_POLICY</param-name>
+		<param-value>domain</param-value>
+	</context-param>
+
+	<!--
+		Temporary image/chart directory. Defaults to ${birt home}/report/images
+	-->
+	<context-param>
+		<param-name>BIRT_VIEWER_IMAGE_DIR</param-name>
+		<param-value>${birt.viewer.working.path}/report/images</param-value>
+	</context-param>
+
+	<!-- Engine log directory. Defaults to ${birt home}/logs -->
+	<context-param>
+		<param-name>BIRT_VIEWER_LOG_DIR</param-name>
+		<param-value>${birt.viewer.working.path}/logs</param-value>
+	</context-param>
+
+	<!-- Report engine log level -->
+	<context-param>
+		<param-name>BIRT_VIEWER_LOG_LEVEL</param-name>
+		<param-value>WARNING</param-value>
+	</context-param>
+
+	<!--
+		Directory where to store all the birt report script libraries (JARs).
+		Defaults to ${birt home}/scriptlib
+	-->
+	<context-param>
+		<param-name>BIRT_VIEWER_SCRIPTLIB_DIR</param-name>
+		<param-value></param-value>
+	</context-param>
+
+	<!-- Resource location directory. Defaults to ${birt home} -->
+	<context-param>
+		<param-name>BIRT_RESOURCE_PATH</param-name>
+		<param-value></param-value>
+	</context-param>
+
+	<!-- Preview report rows limit. An empty value means no limit. -->
+	<context-param>
+		<param-name>BIRT_VIEWER_MAX_ROWS</param-name>
+		<param-value></param-value>
+	</context-param>
+
+	<!--
+		Max cube fetch levels limit for report preview (Only used when
+		previewing a report design file using the preview pattern)
+	-->
+	<context-param>
+		<param-name>BIRT_VIEWER_MAX_CUBE_ROWLEVELS</param-name>
+		<param-value></param-value>
+	</context-param>
+	<context-param>
+		<param-name>BIRT_VIEWER_MAX_CUBE_COLUMNLEVELS</param-name>
+		<param-value></param-value>
+	</context-param>
+
+	<!-- Memory size in MB for creating a cube. -->
+	<context-param>
+		<param-name>BIRT_VIEWER_CUBE_MEMORY_SIZE</param-name>
+		<param-value></param-value>
+	</context-param>
+
+	<!-- Defines the BIRT viewer configuration file -->
+	<context-param>
+		<param-name>BIRT_VIEWER_CONFIG_FILE</param-name>
+		<param-value>WEB-INF/viewer.properties</param-value>
+	</context-param>
+
+	<!--
+		Flag whether to allow server-side printing. Possible values are "ON"
+		and "OFF". Defaults to "ON".
+	-->
+	<context-param>
+		<param-name>BIRT_VIEWER_PRINT_SERVERSIDE</param-name>
+		<param-value>ON</param-value>
+	</context-param>
+
+	<!--
+		Flag whether to force browser-optimized HTML output. Defaults to true
+	-->
+	<context-param>
+		<param-name>HTML_ENABLE_AGENTSTYLE_ENGINE</param-name>
+		<param-value>true</param-value>
+	</context-param>
+
+	<!--
+		Filename generator class/factory to use for the exported reports.
+	-->
+	<context-param>
+		<param-name>BIRT_FILENAME_GENERATOR_CLASS</param-name>
+		<param-value>org.eclipse.birt.report.utility.filename.DefaultFilenameGenerator</param-value>
+	</context-param>
+
+	<!--
+		Viewer Filter used to set the request character encoding to UTF-8.
+	-->
+	<filter>
+		<filter-name>ViewerFilter</filter-name>
+		<filter-class>org.eclipse.birt.report.filter.ViewerFilter</filter-class>
+	</filter>
+	<filter-mapping>
+		<filter-name>ViewerFilter</filter-name>
+		<servlet-name>ViewerServlet</servlet-name>
+	</filter-mapping>
+	<filter-mapping>
+		<filter-name>ViewerFilter</filter-name>
+		<servlet-name>EngineServlet</servlet-name>
+	</filter-mapping>
+
+	<!-- Viewer Servlet Context Listener -->
+	<listener>
+		<listener-class>org.eclipse.birt.report.listener.ViewerServletContextListener</listener-class>
+	</listener>
+
+	<!-- Viewer HttpSession Listener -->
+	<listener>
+		<listener-class>org.eclipse.birt.report.listener.ViewerHttpSessionListener</listener-class>
+	</listener>
+
+	<!-- Viewer Servlet, Supports SOAP -->
+	<servlet>
+		<servlet-name>ViewerServlet</servlet-name>
+		<servlet-class>org.eclipse.birt.report.servlet.ViewerServlet</servlet-class>
+	</servlet>
+
+	<!-- Engine Servlet -->
+	<servlet>
+		<servlet-name>EngineServlet</servlet-name>
+		<servlet-class>org.eclipse.birt.report.servlet.BirtEngineServlet</servlet-class>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>ViewerServlet</servlet-name>
+		<url-pattern>/frameset</url-pattern>
+	</servlet-mapping>
+
+	<servlet-mapping>
+		<servlet-name>ViewerServlet</servlet-name>
+		<url-pattern>/run</url-pattern>
+	</servlet-mapping>
+
+	<servlet-mapping>
+		<servlet-name>EngineServlet</servlet-name>
+		<url-pattern>/preview</url-pattern>
+	</servlet-mapping>
+
+	<servlet-mapping>
+		<servlet-name>EngineServlet</servlet-name>
+		<url-pattern>/download</url-pattern>
+	</servlet-mapping>
+
+	<servlet-mapping>
+		<servlet-name>EngineServlet</servlet-name>
+		<url-pattern>/parameter</url-pattern>
+	</servlet-mapping>
+
+	<servlet-mapping>
+		<servlet-name>EngineServlet</servlet-name>
+		<url-pattern>/document</url-pattern>
+	</servlet-mapping>
+
+	<servlet-mapping>
+		<servlet-name>EngineServlet</servlet-name>
+		<url-pattern>/output</url-pattern>
+	</servlet-mapping>
+
+	<servlet-mapping>
+		<servlet-name>EngineServlet</servlet-name>
+		<url-pattern>/extract</url-pattern>
+	</servlet-mapping>
+
+	<jsp-config>
+		<taglib>
+			<taglib-uri>/birt.tld</taglib-uri>
+			<taglib-location>/WEB-INF/tlds/birt.tld</taglib-location>
+		</taglib>
+	</jsp-config>
+
+  
+  <servlet>
+        <servlet-name>RestfullService</servlet-name>
+        <servlet-class>com.sun.jersey.spi.spring.container.servlet.SpringServlet</servlet-class>
+        <init-param>
+            <param-name>com.sun.jersey.config.property.packages</param-name>
+            <param-value>com.zc.pivas</param-value>
+        </init-param>
+        <load-on-startup>2</load-on-startup>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>RestfullService</servlet-name>
+        <url-pattern>/rest/*</url-pattern>
+    </servlet-mapping>
+</web-app>

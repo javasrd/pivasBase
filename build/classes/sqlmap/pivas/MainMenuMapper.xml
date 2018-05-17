@@ -1,0 +1,658 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zc.pivas.mainMenu.dao.MainMenuDao" >
+	
+	<!-- 查询病区信息 -->
+  	<select id="getMenuListYZ" resultType="com.zc.pivas.mainMenu.bean.MainMenuBean">
+	  	select -1 as id,
+       		'-1' as deptcode,
+       		'全部病区' as deptname,
+       		0 as num1,
+       		0 as num2,
+       		0 as levelnum,
+       		0 as state
+    	from dual
+		union all
+	 	select id, deptcode, deptname, num1, num2, levelnum, state
+	   	from (select i.id,
+	               i.deptcode,
+	               i.deptname,
+	               i.levelnum,
+	               i.state,
+	               (select count(*)
+	                  from SRVS_DOCTOR_ADVICE_MAIN m
+	                 where i.deptcode = m.ward_code
+	                   and m.yzzt = 0
+	                   and m.yzshzt = 0
+	                   and (m.rucang_need_check = 1 or not exists
+	                        (select 1
+	                           from SRVS_LABEL pqRC
+	                          where pqRC.pidsj = m.pidsj
+	                            <![CDATA[and pqRC.ydzt >= 5]]>))
+	                ) as num1,
+	               (select count(*)
+	                  from SRVS_DOCTOR_ADVICE_MAIN m
+	                 where i.deptcode = m.ward_code
+	                   and m.yzzt = 0
+	                   and (m.rucang_need_check = 1 or not exists
+	                        (select 1
+	                           from SRVS_LABEL pqRC
+	                          where pqRC.pidsj = m.pidsj
+	                            <![CDATA[and pqRC.ydzt >= 5]]>))
+	                ) as num2
+	          from SRVS_GROUP i
+	         where i.enabled = 1
+	           and i.levelnum = 1
+	         order by i.state desc,i.ordernum,i.deptname,i.id
+	        )
+
+  	</select>
+  	
+  	<select id="getSubMenuListYZ" resultType="com.zc.pivas.mainMenu.bean.MainMenuBean">
+	select id, deptcode, deptname, num1, num2, levelnum, state
+ 	from (select i.id,
+               i.deptcode,
+               i.deptname,
+               i.LEVELNUM,
+               i.STATE,
+               (select count(*)
+                  from SRVS_DOCTOR_ADVICE_MAIN m
+                 where i.deptcode = m.ward_code
+                   and m.yzzt = 0
+                   and m.yzshzt = 0
+                   and (m.rucang_need_check = 1 or not exists
+                        (select 1
+                           from SRVS_LABEL pqRC
+                          where pqRC.pidsj = m.pidsj
+                            <![CDATA[and pqRC.ydzt >= 5]]>))) as num1,
+               (select count(*)
+                  from SRVS_DOCTOR_ADVICE_MAIN m
+                 where i.deptcode = m.ward_code
+                   and m.yzzt = 0
+                   and (m.rucang_need_check = 1 or not exists
+                        (select 1
+                           from SRVS_LABEL pqRC
+                          where pqRC.pidsj = m.pidsj
+                            <![CDATA[and pqRC.ydzt >= 5]]>))) as num2
+          from SRVS_GROUP i
+         where i.enabled = 1
+           and i.levelnum = 2
+           and i.parentid = #{parentid}
+         order by i.deptname,i.id)
+  	</select>
+  	
+	<select id="getMenuListYSSF" resultType="com.zc.pivas.mainMenu.bean.MainMenuBean">
+	select -1 as id,
+       		'-1' as deptcode,
+       		'全部病区' as deptname,
+       		0 as num1,
+       		0 as num2,
+       		0 as levelnum,
+       		0 as state
+    from dual
+	union all
+	select id, deptcode, deptname, num1, num2, levelnum, state
+  	from (select i.id,
+               i.deptcode,
+               i.deptname,
+               i.levelnum,
+               i.state,
+               (select count(*)
+                  from SRVS_DOCTOR_ADVICE_MAIN yzm
+                 where yzm.WARD_CODE = i.deptcode
+                   and yzm.yzzt = 0
+                   and yzm.yzshzt = 0
+                   and (yzm.RUCANG_NEED_CHECK = 1 or not exists
+                        (select 1
+                           from SRVS_LABEL pqRC
+                          where pqRC.pidsj = yzm.pidsj
+                            <![CDATA[and pqRC.ydzt >= 5)))]]> as num1,
+               (select count(*)
+                  from SRVS_DOCTOR_ADVICE_MAIN yzm
+                 where yzm.WARD_CODE = i.deptcode
+                   and yzm.yzzt = 0
+                   and (yzm.RUCANG_NEED_CHECK = 1 or not exists
+                        (select 1
+                           from SRVS_LABEL pqRC
+                          where pqRC.pidsj = yzm.pidsj
+                            <![CDATA[and pqRC.ydzt >= 5)))]]> as num2
+        
+          from SRVS_GROUP i
+         where i.enabled = 1
+           and i.levelnum = 1
+         order by i.state desc,i.ordernum,i.deptname,i.id)
+	</select>
+	<select id="getSubMenuListYSSF" resultType="com.zc.pivas.mainMenu.bean.MainMenuBean">
+	select id, deptcode, deptname, num1, num2, levelnum, state
+  	from (select i.id,
+               i.deptcode,
+               i.deptname,
+               i.levelnum,
+               i.state,
+               (select count(*)
+                  from SRVS_DOCTOR_ADVICE_MAIN yzm
+                 where yzm.WARD_CODE = i.deptcode
+                   and yzm.yzzt = 0
+                   and yzm.yzshzt = 0
+                   and (yzm.RUCANG_NEED_CHECK = 1 or not exists
+                        (select 1
+                           from SRVS_LABEL pqRC
+                          where pqRC.pidsj = yzm.pidsj
+                            <![CDATA[and pqRC.ydzt >= 5)))]]> as num1,
+               (select count(*)
+                  from SRVS_DOCTOR_ADVICE_MAIN yzm
+                 where yzm.WARD_CODE = i.deptcode
+                   and yzm.yzzt = 0
+                   and (yzm.RUCANG_NEED_CHECK = 1 or not exists
+                        (select 1
+                           from SRVS_LABEL pqRC
+                          where pqRC.pidsj = yzm.pidsj
+                            <![CDATA[and pqRC.ydzt >= 5)))]]> as num2
+        
+          from SRVS_GROUP i
+         where i.enabled = 1
+           and i.levelnum = 2
+           and i.parentid = #{parentid}
+         order by i.deptname,i.id)
+	
+	</select>
+	
+	<!-- 批次优化 -->
+	<select id="getMenuListPCYH" resultType="com.zc.pivas.mainMenu.bean.MainMenuBean">
+	select -1 as id,
+       '-1' as deptcode,
+       '全部病区' as deptname,
+       0 as num1,
+       0 as num2,
+       0 as levelnum,
+       0 as state
+    from dual
+	union all
+	select id, deptcode, deptname, num1, num2, levelnum, state
+  	from (select i.id,
+               i.deptcode,
+               i.deptname,
+               i.levelnum,
+               i.state,
+               (select count(*)
+                  from SRVS_PRESCRIPTION_MAIN ydm
+                  join SRVS_LABEL pq on pq.PIDSJ=ydm.PIDSJ
+                 where ydm.WARD_CODE = i.deptcode
+                   and ydm.YDZXZT = 0
+                   and ydm.YZSHZT = 1
+                   and ydm.YDREORDER_STATUS = 0
+                   and pq.ydzt &lt;= 4
+                   and ydm.yyrq &gt;= to_date(#{yyrqStart},'yyyy-MM-DD hh24:mi:ss')
+				   and ydm.yyrq &lt;= to_date(#{yyrqEnd},'yyyy-MM-DD hh24:mi:ss')
+                   ) as num1,
+               (select count(*)
+                  from SRVS_PRESCRIPTION_MAIN ydm
+                  join SRVS_LABEL pq on pq.PIDSJ=ydm.PIDSJ
+                  where ydm.WARD_CODE = i.deptcode
+                   and ydm.YDZXZT = 0
+                   and ydm.YZSHZT = 1
+                   and pq.ydzt &lt;= 4
+                   and ydm.yyrq &gt;= to_date(#{yyrqStart},'yyyy-MM-DD hh24:mi:ss')
+				   and ydm.yyrq &lt;= to_date(#{yyrqEnd},'yyyy-MM-DD hh24:mi:ss')
+                   ) as num2
+          from SRVS_GROUP i
+         where i.enabled = 1
+           and i.levelnum = 1
+         order by i.state desc,i.ordernum,i.deptname,i.id)
+	</select>
+	<select id="getSubMenuListPCYH" resultType="com.zc.pivas.mainMenu.bean.MainMenuBean">
+	select id, deptcode, deptname, num1, num2, levelnum, state
+  	from (select i.id,
+               i.deptcode,
+               i.deptname,
+               i.levelnum,
+               i.state,
+               (select count(*)
+                  from SRVS_PRESCRIPTION_MAIN ydm
+                  join SRVS_LABEL pq on pq.PIDSJ=ydm.PIDSJ
+                 where ydm.WARD_CODE = i.deptcode
+                   and ydm.YDZXZT = 0
+                   and ydm.YZSHZT = 1
+                   and ydm.YDREORDER_STATUS = 0
+                   and pq.ydzt &lt;= 4
+                   and ydm.yyrq &gt;= to_date(#{yyrqStart},'yyyy-MM-DD hh24:mi:ss')
+				   and ydm.yyrq &lt;= to_date(#{yyrqEnd},'yyyy-MM-DD hh24:mi:ss')
+                   ) as num1,
+               (select count(*)
+                  from SRVS_PRESCRIPTION_MAIN ydm
+                  join SRVS_LABEL pq on pq.PIDSJ=ydm.PIDSJ
+                 where ydm.WARD_CODE = i.deptcode
+                   and ydm.YDZXZT = 0
+                   and ydm.YZSHZT=1
+                   and pq.ydzt &lt;= 4
+                   and ydm.yyrq &gt;= to_date(#{yyrqStart},'yyyy-MM-DD hh24:mi:ss')
+				   and ydm.yyrq &lt;= to_date(#{yyrqEnd},'yyyy-MM-DD hh24:mi:ss')
+                   ) as num2
+          from SRVS_GROUP i
+         where i.enabled = 1
+           and i.levelnum = 2
+           and i.parentid = #{parentid}
+         order by i.deptname,i.id)
+	
+	</select>
+	
+	<!-- 打印瓶签 -->
+	<select id="getMenuListDYPQ" resultType="com.zc.pivas.mainMenu.bean.MainMenuBean">
+	select -1 as id,
+       '-1' as deptcode,
+       '全部病区' as deptname,
+       0 as num1,
+       0 as num2,
+       0 as levelnum,
+       0 as state
+    from dual
+	union all
+	select id, deptcode, deptname, num1, num2, levelnum, state
+  	from (select i.id,
+               i.deptcode,
+               i.deptname,
+               i.levelnum,
+               i.state,
+               (select count(*)
+                  from SRVS_PRESCRIPTION_MAIN ydm
+                 where ydm.WARD_CODE = i.deptcode
+                   and ydm.YDZXZT = 0
+                   and ydm.YZSHZT = 1
+                   and ydm.YDREORDER_STATUS = 1
+                   and ydm.DYBZ = 1
+                   and ydm.yyrq &gt;= to_date(#{yyrqStart},'yyyy-MM-DD hh24:mi:ss')
+				   and ydm.yyrq &lt;= to_date(#{yyrqEnd},'yyyy-MM-DD hh24:mi:ss')
+                   ) as num1,
+               (select count(*)
+                  from SRVS_PRESCRIPTION_MAIN ydm
+                  where ydm.WARD_CODE = i.deptcode
+                   and ydm.YDZXZT = 0
+                   and ydm.YZSHZT = 1
+                   and ydm.YDREORDER_STATUS = 1
+                   and ydm.yyrq &gt;= to_date(#{yyrqStart},'yyyy-MM-DD hh24:mi:ss')
+				   and ydm.yyrq &lt;= to_date(#{yyrqEnd},'yyyy-MM-DD hh24:mi:ss')
+                   ) as num2
+          from SRVS_GROUP i
+         where i.enabled = 1
+           and i.levelnum = 1
+         order by i.state desc,i.ordernum,i.deptname,i.id)
+	</select>
+	<select id="getSubMenuListDYPQ" resultType="com.zc.pivas.mainMenu.bean.MainMenuBean">
+	select id, deptcode, deptname, num1, num2, levelnum, state
+  	from (select i.id,
+               i.deptcode,
+               i.deptname,
+               i.levelnum,
+               i.state,
+               (select count(*)
+                  from SRVS_PRESCRIPTION_MAIN ydm
+                 where ydm.WARD_CODE = i.deptcode
+                   and ydm.YDZXZT = 0
+                   and ydm.YDREORDER_STATUS = 1
+                   and ydm.DYBZ = 1
+                   and ydm.yyrq &gt;= to_date(#{yyrqStart},'yyyy-MM-DD hh24:mi:ss')
+				   and ydm.yyrq &lt;= to_date(#{yyrqEnd},'yyyy-MM-DD hh24:mi:ss')
+                   ) as num1,
+               (select count(*)
+                  from SRVS_PRESCRIPTION_MAIN ydm
+                 where ydm.WARD_CODE = i.deptcode
+                   and ydm.YDZXZT = 0
+                   and ydm.YZSHZT = 1
+                   and ydm.YDREORDER_STATUS = 1
+                   and ydm.yyrq &gt;= to_date(#{yyrqStart},'yyyy-MM-DD hh24:mi:ss')
+				   and ydm.yyrq &lt;= to_date(#{yyrqEnd},'yyyy-MM-DD hh24:mi:ss')
+                   ) as num2
+        
+          from SRVS_GROUP i
+         where i.enabled = 1
+           and i.levelnum = 2
+           and i.parentid = #{parentid}
+         order by i.deptname,i.id)
+	
+	</select>
+	
+	<select id="getMenuListPQSM" resultType="com.zc.pivas.mainMenu.bean.MainMenuBean">
+	select -1 as id,
+       '-1' as deptcode,
+       '全部病区' as deptname,
+       0 as num1,
+       0 as num2,
+       0 as levelnum,
+       0 as state
+    from dual
+	union all
+	select id, deptcode, deptname, num1, num2, levelnum, state
+  	from (select i.id,
+               i.deptcode,
+               i.deptname,
+               i.levelnum,
+               i.state,
+               (select count(*)
+                  from SRVS_PRESCRIPTION_main ydm
+                  left join SRVS_LABEL pqs
+                    on ydm.PIDSJ = pqs.PIDSJ
+                 where 1 = 1
+                   and ydm.ward_code = i.deptcode
+                   and ydm.YDZXZT = 0
+                   and ydm.bottle_label_num is not null
+                   and pqs.YDPQ is not null
+                   and pqs.ydzt != 1
+                   and ydm.yyrq &gt;= to_date(#{yyrqStart},'yyyy-MM-DD hh24:mi:ss')
+				   and ydm.yyrq &lt;= to_date(#{yyrqEnd},'yyyy-MM-DD hh24:mi:ss')
+                   <![CDATA[ and pqs.ydzt < 5 ]]>
+                   ) as num1,
+               (select count(*)
+                  from SRVS_PRESCRIPTION_main ydm
+                  left join SRVS_LABEL pqs
+                    on ydm.PIDSJ = pqs.PIDSJ
+                 where 1 = 1
+                   and ydm.ward_code = i.deptcode
+                   and ydm.YDZXZT = 0
+                   and ydm.bottle_label_num is not null
+                   and pqs.YDPQ is not null
+                   and ydm.yyrq &gt;= to_date(#{yyrqStart},'yyyy-MM-DD hh24:mi:ss')
+				   and ydm.yyrq &lt;= to_date(#{yyrqEnd},'yyyy-MM-DD hh24:mi:ss')
+                   and pqs.ydzt != 1) as num2
+          from SRVS_GROUP i
+         where i.enabled = 1
+           and i.levelnum = 1
+         order by i.state desc,i.ordernum, i.deptname, i.id)
+	</select>
+	
+	<select id="getSubMenuListPQSM" resultType="com.zc.pivas.mainMenu.bean.MainMenuBean">
+  	select id, deptcode, deptname, num1, num2, levelnum, state
+    from (select i.id,
+               i.deptcode,
+               i.deptname,
+               i.levelnum,
+               i.state,
+               (select count(*)
+                  from SRVS_PRESCRIPTION_main ydm
+                  left join SRVS_LABEL pqs
+                    on ydm.PIDSJ = pqs.PIDSJ
+                 where 1 = 1
+                   and ydm.ward_code = i.deptcode
+                   and ydm.YDZXZT = 0
+                   and ydm.bottle_label_num is not null
+                   and pqs.YDPQ is not null
+                   and pqs.ydzt != 1
+                   and ydm.yyrq &gt;= to_date(#{yyrqStart},'yyyy-MM-DD hh24:mi:ss')
+				   and ydm.yyrq &lt;= to_date(#{yyrqEnd},'yyyy-MM-DD hh24:mi:ss')
+                   <![CDATA[and pqs.ydzt < 5]]>) as num1,
+               (select count(*)
+                  from SRVS_PRESCRIPTION_main ydm
+                  left join SRVS_LABEL pqs
+                    on ydm.PIDSJ = pqs.PIDSJ
+                 where 1 = 1
+                   and ydm.ward_code = i.deptcode
+                   and ydm.YDZXZT = 0
+                   and ydm.bottle_label_num is not null
+                   and pqs.YDPQ is not null
+                   and ydm.yyrq &gt;= to_date(#{yyrqStart},'yyyy-MM-DD hh24:mi:ss')
+				   and ydm.yyrq &lt;= to_date(#{yyrqEnd},'yyyy-MM-DD hh24:mi:ss')
+                   and pqs.ydzt != 1) as num2
+          from SRVS_GROUP i
+         where i.enabled = 1
+           and i.levelnum = 2
+           and i.parentid = #{parentid}
+         order by i.deptname,i.id)
+	</select>
+	
+	<!-- 打印药物接收单 -->
+	<select id="getMenuListReciver" resultType="com.zc.pivas.mainMenu.bean.MainMenuBean">
+	select -1 as id,
+       '-1' as deptcode,
+       '全部病区' as deptname,
+       0 as num1,
+       0 as num2,
+       0 as levelnum,
+       0 as state
+    from dual
+  union all
+  select id, deptcode, deptname, num1, num2, levelnum, state
+    from (select i.id,
+               i.deptcode,
+               i.deptname,
+               i.levelnum,
+               i.state,
+               (select count(*)
+                  from SRVS_LABEL ppq
+                 where ppq.DEPTCODE = i.deptcode
+                 <![CDATA[and ppq.YDZT >= 7]]> 
+                   and to_char(ppq.yyrq,'yyyy-mm-dd') = to_char(sysdate , 'yyyy-mm-dd')
+                   ) as num1,
+               (select count(*)
+                  from SRVS_LABEL ppq
+                  left join SRVS_PRESCRIPTION_main ydm on ydm.pidsj = ppq.pidsj
+                 where ppq.DEPTCODE = i.deptcode and  ydm.YDREORDER_STATUS = 1
+                   and to_char(ppq.yyrq,'yyyy-mm-dd') = to_char(sysdate , 'yyyy-mm-dd')
+                   ) as num2
+          from SRVS_GROUP i
+         where i.enabled = 1
+           and i.levelnum = 1
+         order by i.state desc,i.ordernum,i.deptname,i.id)
+	</select>
+	
+	<select id="getSubMenuListReciver" resultType="com.zc.pivas.mainMenu.bean.MainMenuBean">
+	select id, deptcode, deptname, num1, num2, levelnum, state
+ 	from (select i.id,
+               i.deptcode,
+               i.deptname,
+               i.levelnum,
+               i.state,
+               (select count(*)
+                  from SRVS_LABEL ppq
+                 where ppq.DEPTCODE = i.deptcode 
+                   <![CDATA[and ppq.YDZT >= 7]]> 
+                   and to_char(ppq.yyrq, 'yyyy-mm-dd') =
+                       to_char(sysdate, 'yyyy-mm-dd')
+                       ) as num1,
+               (select count(*)
+                  from SRVS_LABEL ppq
+                  left join SRVS_PRESCRIPTION_main ydm on ydm.pidsj = ppq.pidsj
+                 where ppq.DEPTCODE = i.deptcode  and  ydm.YDREORDER_STATUS = 1
+                   and to_char(ppq.yyrq, 'yyyy-mm-dd') =
+                       to_char(sysdate, 'yyyy-mm-dd')
+                       ) as num2
+          from SRVS_GROUP i
+         where i.enabled = 1
+           and i.levelnum = 2
+           and i.parentid = #{parentid}
+         order by i.deptname,i.id)
+	</select>
+	
+	<!-- 历史药单 -->
+	<select id="getMenuListYdHis" resultType="com.zc.pivas.mainMenu.bean.MainMenuBean">
+	select -1 as id,
+       '-1' as deptcode,
+       '全部病区' as deptname,
+       nvl(sum(temp.num1), 0) as num1,
+       nvl(sum(temp.num2), 0) as num2,
+       0 as levelnum,
+       0 as state
+  	from (select (select count(*)
+                  from SRVS_LABEL pq
+                 where pq.DEPTCODE = i.deptcode
+                   <![CDATA[and pq.YDZT =7]]> 
+                   and  yyrq = to_date(to_char(sysdate -1, 'yyyy-mm-dd'), 'yyyy/mm/dd')
+                   ) as num1,
+               (select count(*)
+                  from SRVS_LABEL pq
+                 where pq.DEPTCODE = i.deptcode 
+                 and  yyrq = to_date(to_char(sysdate -1 , 'yyyy-mm-dd'), 'yyyy/mm/dd')
+                 ) as num2
+        
+          from SRVS_INPATIENTAREA i
+         where i.enabled = 1) temp
+	union all
+	select id, deptcode, deptname, num1, num2, levelnum, state
+  	from (select i.id,
+               i.deptcode,
+               i.deptname,
+               i.levelnum,
+               i.state,
+               (select count(*)
+                  from SRVS_LABEL pq
+                 where pq.DEPTCODE = i.deptcode
+                   <![CDATA[and pq.YDZT =7]]> 
+                   and  yyrq = to_date(to_char(sysdate -1 , 'yyyy-mm-dd'), 'yyyy/mm/dd')
+                   ) as num1,
+               (select count(*)
+                  from SRVS_LABEL pq
+                 where pq.DEPTCODE = i.deptcode 
+                 and  yyrq = to_date(to_char(sysdate  -1, 'yyyy-mm-dd'), 'yyyy/mm/dd')
+                 ) as num2
+        
+          from SRVS_GROUP i
+         where i.enabled = 1
+           and i.levelnum = 1
+         order by i.state desc,i.ordernum,i.deptname,i.id)
+	</select>
+	
+	<select id="getSubMenuListYdHis" resultType="com.zc.pivas.mainMenu.bean.MainMenuBean">
+	select -1 as id,
+       '-1' as deptcode,
+       '病区组' as deptname,
+       nvl(sum(temp.num1), 0) as num1,
+       nvl(sum(temp.num2), 0) as num2,
+       0 as levelnum,
+       0 as state
+  	from (select (select count(*)
+                  from SRVS_LABEL pq
+                 where pq.DEPTCODE = i.deptcode
+                   <![CDATA[and pq.YDZT = 7]]> 
+                   and  yyrq = to_date(to_char(sysdate -1 , 'yyyy-mm-dd'), 'yyyy/mm/dd')
+                   ) as num1,
+               (select count(*)
+                  from SRVS_LABEL pq
+                 where pq.DEPTCODE = i.deptcode 
+                 and  yyrq = to_date(to_char(sysdate -1 , 'yyyy-mm-dd'), 'yyyy/mm/dd')
+                 ) as num2
+        
+          from SRVS_GROUP i
+         where i.enabled = 1
+           and i.levelnum = 2
+           and i.parentid = #{parentid}) temp
+	union all
+	select id, deptcode, deptname, num1, num2, levelnum, state
+  	from (select i.id,
+               i.deptcode,
+               i.deptname,
+               i.levelnum,
+               i.state,
+               (select count(*)
+                  from SRVS_LABEL pq
+                 where pq.DEPTCODE = i.deptcode
+                   <![CDATA[and pq.YDZT = 7]]> 
+                   and  yyrq = to_date(to_char(sysdate  -1, 'yyyy-mm-dd'), 'yyyy/mm/dd')
+                   ) as num1,
+               (select count(*)
+                  from SRVS_LABEL pq
+                 where pq.DEPTCODE = i.deptcode 
+                 and  yyrq = to_date(to_char(sysdate  -1, 'yyyy-mm-dd'), 'yyyy/mm/dd')
+                 ) as num2
+        
+          from SRVS_GROUP i
+         where i.enabled = 1
+           and i.levelnum = 2
+           and i.parentid = #{parentid}
+         order by i.deptname,i.id)
+	</select>
+	
+	<!-- 配置费收费明细 -->
+	<select id="getMenuListPZF" resultType="com.zc.pivas.mainMenu.bean.MainMenuBean">
+	select -1 as id,
+       '-1' as deptcode,
+       '全部病区' as deptname,
+       nvl(sum(temp.num1), 0) as num1,
+       nvl(sum(temp.num2), 0) as num2,
+       0 as levelnum,
+       0 as state
+  	from (select (select count(*)
+                  from SRVS_LABEL pq
+                 where pq.DEPTCODE = i.deptcode
+                   <![CDATA[and pq.YDZT > 4]]> 
+                   and  yyrq = to_date(to_char(sysdate , 'yyyy-mm-dd'), 'yyyy/mm/dd')
+                   ) as num1,
+               (select count(*)
+                  from SRVS_LABEL pq
+                 where pq.DEPTCODE = i.deptcode 
+                 and  yyrq = to_date(to_char(sysdate , 'yyyy-mm-dd'), 'yyyy/mm/dd')
+                 ) as num2
+        
+          from SRVS_INPATIENTAREA i
+         where i.enabled = 1) temp
+	union all
+	select id, deptcode, deptname, num1, num2, levelnum, state
+  	from (select i.id,
+               i.deptcode,
+               i.deptname,
+               i.levelnum,
+               i.state,
+               (select count(*)
+                  from SRVS_LABEL pq
+                 where pq.DEPTCODE = i.deptcode
+                   <![CDATA[and pq.YDZT > 4]]> 
+                   and  yyrq = to_date(to_char(sysdate , 'yyyy-mm-dd'), 'yyyy/mm/dd')
+                   ) as num1,
+               (select count(*)
+                  from SRVS_LABEL pq
+                 where pq.DEPTCODE = i.deptcode 
+                 and  yyrq = to_date(to_char(sysdate , 'yyyy-mm-dd'), 'yyyy/mm/dd')
+                 ) as num2
+        
+          from SRVS_GROUP i
+         where i.enabled = 1
+           and i.levelnum = 1
+         order by i.state desc,i.ordernum,i.deptname,i.id)
+	</select>
+	
+	<select id="getSubMenuListPZF" resultType="com.zc.pivas.mainMenu.bean.MainMenuBean">
+	select -1 as id,
+       '-1' as deptcode,
+       '病区组' as deptname,
+       nvl(sum(temp.num1), 0) as num1,
+       nvl(sum(temp.num2), 0) as num2,
+       0 as levelnum,
+       0 as state
+  	from (select (select count(*)
+                  from SRVS_LABEL pq
+                 where pq.DEPTCODE = i.deptcode
+                   <![CDATA[and pq.YDZT > 4]]> 
+                   and  yyrq = to_date(to_char(sysdate , 'yyyy-mm-dd'), 'yyyy/mm/dd')
+                   ) as num1,
+               (select count(*)
+                  from SRVS_LABEL pq
+                 where pq.DEPTCODE = i.deptcode 
+                 and  yyrq = to_date(to_char(sysdate , 'yyyy-mm-dd'), 'yyyy/mm/dd')
+                 ) as num2
+        
+          from SRVS_GROUP i
+         where i.enabled = 1
+           and i.levelnum = 2
+           and i.parentid = #{parentid}) temp
+	union all
+	select id, deptcode, deptname, num1, num2, levelnum, state
+  	from (select i.id,
+               i.deptcode,
+               i.deptname,
+               i.levelnum,
+               i.state,
+               (select count(*)
+                  from SRVS_LABEL pq
+                 where pq.DEPTCODE = i.deptcode
+                 and  yyrq = to_date(to_char(sysdate , 'yyyy-mm-dd'), 'yyyy/mm/dd')
+                   <![CDATA[and pq.YDZT > 4]]> ) as num1,
+               (select count(*)
+                  from SRVS_LABEL pq
+                 where pq.DEPTCODE = i.deptcode 
+                 and  yyrq = to_date(to_char(sysdate , 'yyyy-mm-dd'), 'yyyy/mm/dd')
+                 ) as num2
+        
+          from SRVS_GROUP i
+         where i.enabled = 1
+           and i.levelnum = 2
+           and i.parentid = #{parentid}
+         order by i.deptname,i.id)
+	</select>
+</mapper>

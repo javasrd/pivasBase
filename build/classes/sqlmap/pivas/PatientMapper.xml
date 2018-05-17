@@ -1,0 +1,269 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zc.pivas.patient.dao.PatientDAO">
+	<resultMap id="PatientMap" type="com.zc.pivas.patient.bean.PatientBean">
+		<id column="gid" property="gid" jdbcType="VARCHAR" />
+		<result column="inhospno" property="inhospNo" jdbcType="VARCHAR" />
+		<result column="patname" property="patName" jdbcType="VARCHAR" />
+		<result column="sex" property="sex" jdbcType="INTEGER" />
+		<result column="wardcode" property="wardCode" jdbcType="VARCHAR" />
+		<result column="state" property="state" jdbcType="VARCHAR" />
+		<result column="bedno" property="bedNo" jdbcType="VARCHAR" />
+		<result property="wardName" jdbcType="VARCHAR" />
+		<result property="sexName" />
+		<result column="reserve0" property="reserve0" jdbcType="VARCHAR" />
+		<result column="reserve1" property="reserve1" jdbcType="VARCHAR" />
+		<result column="reserve2" property="reserve2" jdbcType="VARCHAR" />
+		<result column="case_id" property="case_ID" jdbcType="VARCHAR" />
+		<result column="birthday" property="birth" jdbcType="TIMESTAMP" />
+		<result column="age" property="age" jdbcType="VARCHAR" />
+		<result column="ageunit" property="ageUnit" jdbcType="INTEGER" />
+		<result column="avdp" property="avdp" jdbcType="VARCHAR" />
+		<result column="hosOutTime" property="hosOutTime" jdbcType="VARCHAR" />
+	</resultMap>
+
+	<sql id="getPatientSql">
+		select b.inhospno,
+		b.patname,
+		case
+		when b.sex = 0 then
+		'女'
+		else
+		'男'
+		end as
+		sexName,
+		a.deptname as wardName,
+		b.state,
+		b.case_id,
+		b.birthday,
+		b.age,
+		b.ageunit,
+		b.avdp,
+		b.hosOutTime,
+		b.bedno
+		from SRVS_PATIENT b
+
+		left JOIN
+		SRVS_INPATIENTAREA a on a.deptcode = b.wardcode
+		<where>
+			1=1
+			<if test="patient != null">
+				<if test="patient.inhospNos != null and '' neq patient.inhospNos">
+					and
+					<foreach item="inhospNo" index="index" collection="patient.inhospNos"
+						open="(" separator="or" close=")">
+						inhospNo like '%'||#{inhospNo}||'%'
+						escape '\'
+					</foreach>
+				</if>
+
+				<if test="patient.patNames != null and '' neq patient.patNames">
+					and
+					<foreach item="patName" index="index" collection="patient.patNames"
+						open="(" separator="or" close=")">
+						patName like '%'||#{patName}||'%'
+						escape '\'
+					</foreach>
+				</if>
+
+				<if test="patient.drugnames != null and '' neq patient.drugnames">
+					and exists (select 1 from SRVS_DOCTOR_ADVICE_MAIN yzm where yzm.INPATIENT_NO
+					= b.INHOSPNO and
+					<foreach item="drugname" index="index" collection="patient.drugnames"
+						open="(" separator="or" close=")">
+						yzm.DRUGNAME like
+						'%'||#{drugname}||'%'
+					</foreach>
+					)
+				</if>
+
+				<if test="patient.doctors != null and '' neq patient.doctors">
+					and exists (select 1 from SRVS_DOCTOR_ADVICE_MAIN yzm where yzm.INPATIENT_NO
+					= b.INHOSPNO and
+					<foreach item="doctor" index="index" collection="patient.doctors"
+						open="(" separator="or" close=")">
+						yzm.DOCTOR_NAME like
+						'%'||#{doctor}||'%'
+					</foreach>
+					)
+				</if>
+
+				<if test="patient.wardCode != null and '' neq patient.wardCode">
+					and b.wardcode = #{patient.wardCode}
+				</if>
+
+			</if>
+		</where>
+	</sql>
+
+	<select id="getPatientList" resultMap="PatientMap">
+		<include refid="common.jqueryPageHead" />
+		<include refid="getPatientSql" />
+		<include refid="common.jqueryPageBottom" />
+	</select>
+
+	<select id="getPatientTotal" resultType="int">
+		select count(1) from (
+		<include refid="getPatientSql" />
+		) t1
+	</select>
+
+	<insert id="addPatient" parameterType="com.zc.pivas.patient.bean.PatientBean">
+		INSERT INTO SRVS_PATIENT (
+		inhospno,
+		patname,
+		sex,
+		wardcode,
+		state,
+		bedno,
+		case_id,
+		<if test="birthDay != null and '' neq birthDay">
+			birthday,
+		</if>
+
+		<if test="hosOutTime != null and '' neq hosOutTime">
+			hosOutTime,
+		</if>
+
+		age,
+		ageunit,
+		avdp
+		)
+		VALUES
+		(
+		#{inhospNo},
+		#{patName},
+		#{sex},
+		#{wardCode},
+		#{state},
+		#{bedNo},
+		#{case_ID},
+		<if test="birth != null and '' neq birth">
+			#{birth},
+		</if>
+		<if test="hosOutTime != null and '' neq hosOutTime">
+			#{hosOutTime},
+		</if>
+
+		#{age},
+		#{ageUnit},
+		#{avdp}
+		)
+	</insert>
+
+	<update id="updatePatient" parameterType="com.zc.pivas.patient.bean.PatientBean">
+		update SRVS_PATIENT set
+		patname = #{patName},
+		sex = #{sex},
+		wardcode =
+		#{wardCode},
+		state = #{state},
+		bedno = #{bedNo},
+		case_id = #{case_ID},
+		<if test="birth != null and '' neq birth">
+			birthday = #{birth},
+		</if>
+
+		<if test="hosOutTime != null and '' neq hosOutTime">
+			hosOutTime = #{hosOutTime},
+		</if>
+		age = #{age},
+		ageunit = #{ageUnit},
+		avdp = #{avdp}
+		where inhospno =
+		#{inhospNo}
+	</update>
+
+	<update id="synData" parameterType="com.zc.pivas.patient.bean.PatientBean">
+
+		merge into SRVS_PATIENT t1
+		using ( select
+		#{inhospNo} as inhospno
+		from
+		dual ) t2
+		ON
+		(
+		t1.inhospno =
+		t2.inhospno
+		)
+		WHEN MATCHED THEN UPDATE SET
+
+		t1.patname = #{patName},
+		t1.sex = #{sex},
+		t1.wardcode = #{wardCode},
+		t1.state = #{state},
+		t1.bedno = #{bedNo}
+		<if test="case_ID != null and '' neq case_ID">
+			,t1.case_id = #{case_ID}
+		</if>
+
+		<if test="birth != null and '' neq birth">
+			,t1.birthday = #{birth}
+		</if>
+
+		<if test="hosOutTime != null and '' neq hosOutTime">
+			,t1.hosOutTime = #{hosOutTime}
+		</if>
+
+		,t1.age = #{age}
+		,t1.ageunit = #{ageUnit}
+		<if test="avdp != null and '' neq avdp">
+			,t1.avdp = #{avdp}
+		</if>
+		where t1.inhospno = #{inhospNo}
+		WHEN NOT MATCHED THEN
+		INSERT
+		(
+		t1.inhospno,
+		t1.patname,
+		t1.sex,
+		t1.wardcode,
+		t1.state,
+		t1.bedno
+		<if test="case_ID != null and '' neq case_ID">
+			,t1.case_id
+		</if>
+		<if test="birth != null and '' neq birth">
+			,t1.birthday
+		</if>
+
+		<if test="hosOutTime != null and '' neq hosOutTime">
+			,t1.hosOutTime
+		</if>
+		,t1.age
+		,t1.ageunit
+
+		<if test="avdp != null and '' neq avdp">
+			,t1.avdp
+		</if>
+		)
+		VALUES
+		(
+		#{inhospNo},
+		#{patName},
+		#{sex},
+		#{wardCode},
+		#{state},
+		#{bedNo}
+
+		<if test="case_ID != null and '' neq case_ID">
+			,#{case_ID}
+		</if>
+
+		<if test="birth != null and '' neq birth">
+			,#{birth}
+		</if>
+
+		<if test="hosOutTime != null and '' neq hosOutTime">
+			,#{hosOutTime}
+		</if>
+		,#{age}
+		,#{ageUnit}
+		<if test="avdp != null and '' neq avdp">
+			,#{avdp}
+		</if>
+
+		)
+	</update>
+
+</mapper>

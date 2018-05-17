@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zc.base.sc.modules.generalRule.repository.GeneralRuleDao" >
+
+  <resultMap id="BaseResultMap" type="com.zc.base.sc.modules.generalRule.entity.GeneralRule" >
+	<id column="ID_" property="id" jdbcType="BIGINT" />
+	<result column="MEDICAL_FREQUENCY_ID_" property="medicalFrequencyId" jdbcType="BIGINT" />
+	<result column="MEDICAL_KEYWORD_" property="medicalKeyword" jdbcType="VARCHAR" />
+	<result column="medicalFreqName" property="medicalFreqName" jdbcType="VARCHAR" />
+  </resultMap>
+  
+  <sql id="Base_Column_List" >
+    t1.ID_, t1.MEDICAL_FREQUENCY_ID_, t1.MEDICAL_KEYWORD_
+  </sql>
+  
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="Long" >
+    select 
+    <include refid="Base_Column_List" />
+    from SRVS_GENERAL_RULE t1
+    where ID_ = #{id,jdbcType=BIGINT}
+  </select>
+  
+  <delete id="deleteByPrimaryKey" parameterType="Long" >
+    delete from SRVS_GENERAL_RULE
+    where ID_ = #{id,jdbcType=BIGINT}
+  </delete>
+  
+  <insert id="insert" parameterType="com.zc.base.sc.modules.generalRule.entity.GeneralRule" >
+  	<selectKey resultType="java.lang.Long" order="AFTER" keyProperty="id">
+		select sq_SRVS_GENERAL_RULE.CURRVAL as id from DUAL
+	</selectKey>
+    insert into SRVS_GENERAL_RULE (ID_, MEDICAL_FREQUENCY_ID_, MEDICAL_KEYWORD_
+      )
+    values (#{id,jdbcType=BIGINT}, #{medicalFrequencyId,jdbcType=BIGINT}, #{medicalKeyword,jdbcType=VARCHAR}
+      )
+  </insert>
+  
+  <insert id="insertSelective" parameterType="com.zc.base.sc.modules.generalRule.entity.GeneralRule" >
+  	<selectKey resultType="java.lang.Long" order="AFTER" keyProperty="id">
+		select sq_SRVS_GENERAL_RULE.CURRVAL as id from DUAL
+	</selectKey>
+    insert into SRVS_GENERAL_RULE
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        ID_,
+      </if>
+      <if test="medicalFrequencyId != null" >
+        MEDICAL_FREQUENCY_ID_,
+      </if>
+      <if test="medicalKeyword != null" >
+        MEDICAL_KEYWORD_,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="medicalFrequencyId != null" >
+        #{medicalFrequencyId,jdbcType=BIGINT},
+      </if>
+      <if test="medicalKeyword != null" >
+        #{medicalKeyword,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  
+  <update id="updateByPrimaryKeySelective" parameterType="com.zc.base.sc.modules.generalRule.entity.GeneralRule" >
+    update SRVS_GENERAL_RULE
+    <set >
+      <if test="medicalFrequencyId != null" >
+        MEDICAL_FREQUENCY_ID_ = #{medicalFrequencyId,jdbcType=BIGINT},
+      </if>
+      <if test="medicalKeyword != null" >
+        MEDICAL_KEYWORD_ = #{medicalKeyword,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where ID_ = #{id,jdbcType=BIGINT}
+  </update>
+  
+  <update id="updateByPrimaryKey" parameterType="com.zc.base.sc.modules.generalRule.entity.GeneralRule" >
+    update SRVS_GENERAL_RULE
+    set MEDICAL_FREQUENCY_ID_ = #{medicalFrequencyId,jdbcType=BIGINT},
+      MEDICAL_KEYWORD_ = #{medicalKeyword,jdbcType=VARCHAR}
+    where ID_ = #{id,jdbcType=BIGINT}
+  </update>
+  
+  <!-- 按条件分页查询 -->
+  <select id="queryByPaging" resultMap="BaseResultMap">
+	  <include refid="common.jqueryPageHead" />
+	  	select
+	  		<include refid="Base_Column_List"/>,
+	  		t2.name_ AS medicalFreqName
+	  	<include refid="Base_Where_Sql"/>
+	  <include refid="common.jqueryPageBottom" />
+  </select>
+  <sql id="Base_Where_Sql">
+  	from
+  		SRVS_GENERAL_RULE t1
+  	JOIN SRVS_MEDICAMENTS_frequency t2 ON t2.id_ = t1.medical_frequency_id_
+	<where>
+		<if test="condition != null">
+			<if test="condition.medicalKeywords != null and '' neq condition.medicalKeywords">
+				and 
+				<foreach item="medicalKeyword" index="index" collection="condition.medicalKeywords"  open="(" separator="or" close=")" >  
+					MEDICAL_KEYWORD_ like  '%'||#{medicalKeyword,jdbcType=VARCHAR}||'%' escape '\'              
+				</foreach>
+			</if>
+			
+		</if>
+	</where>  
+  </sql>
+  <!-- 按批次分页总数 -->
+  <select id="getTotalCount" resultType="int">
+  	select 
+  		count(1)
+  	<include refid="Base_Where_Sql"/>
+  </select>
+  
+  <!-- 判断频次与用药关键字是否重复 -->
+  <select id="isRepeatFreqAndKeyword" resultType="int">
+  	select count(1) 
+  	from SRVS_GENERAL_RULE
+  	<where>
+  		<if test="rule.id != null">
+  		<![CDATA[id_ <> #{rule.id} ]]>
+  		</if>
+  		
+  		AND medical_frequency_id_ = #{rule.medicalFrequencyId}
+  		
+  		<if test="rule.medicalKeyword != null and '' neq rule.medicalKeyword">
+  		AND medical_keyword_ = #{rule.medicalKeyword}
+  		</if>
+  		
+  		<if test="rule.medicalKeyword == null or '' eq rule.medicalKeyword">
+  		AND medical_keyword_ is null
+  		</if>
+  	</where> 
+  </select>
+</mapper>

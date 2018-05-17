@@ -1,0 +1,475 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:p="http://www.springframework.org/schema/p" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:jdbc="http://www.springframework.org/schema/jdbc" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:jpa="http://www.springframework.org/schema/data/jpa" xmlns:cache="http://www.springframework.org/schema/cache"
+	xmlns:task="http://www.springframework.org/schema/task"
+	xsi:schemaLocation="
+	http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.1.xsd
+	http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.1.xsd
+	http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.1.xsd
+	http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc-4.1.xsd
+	http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.1.xsd
+	http://www.springframework.org/schema/data/jpa http://www.springframework.org/schema/data/jpa/spring-jpa-1.3.xsd
+	http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache.xsd
+	http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-3.0.xsd"
+	default-lazy-init="true">
+
+	<description>Spring公共配置</description>
+
+	<!-- 使用annotation 自动注册bean,并检查@Required,@Autowired的属性已被注入 -->
+	<context:component-scan base-package="com.zc">
+		<context:exclude-filter type="annotation"
+			expression="org.springframework.stereotype.Controller" />
+		<context:exclude-filter type="annotation"
+			expression="org.springframework.web.bind.annotation.ControllerAdvice" />
+		<context:exclude-filter type="annotation"
+			expression="com.zc.base.orm.mybatis.annotation.MyBatisRepository" />
+	</context:component-scan>
+
+	<task:scheduled-tasks>
+		<task:scheduled ref="medicamentsService" method="checkMedicamentStock"
+			cron="0 0 1 * * ?" />
+	</task:scheduled-tasks>
+
+	<task:scheduled-tasks>
+		<task:scheduled ref="redisService" method="setKnowledgeData"
+			cron="10 0/10 * * * ?" />
+	</task:scheduled-tasks>
+
+	<task:scheduled-tasks>
+		<task:scheduled ref="configFeeTaskService" method="excute"
+			cron="0 0/10 * * * ?" />
+	</task:scheduled-tasks>
+	
+	<task:scheduled-tasks>
+		<task:scheduled ref="PrintLabelService" method="delPrintFile"
+			cron="0 0 1 * * ?" />
+	</task:scheduled-tasks>
+
+	<!-- 定义aspectj -->
+	<aop:aspectj-autoproxy proxy-target-class="true" />
+
+	<!-- enable the configuration of transactional behavior based on annotations -->
+	<!-- spring 注解事务，不要与声明事务冲突 -->
+	<tx:annotation-driven transaction-manager="txManager" />
+
+	<!-- spring 声明式事务处理 -->
+	<bean id="txManager"
+		class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource" />
+		<!-- 捕获异常主事务不回滚，抛出异常主事务回滚 -->
+		<property name="globalRollbackOnParticipationFailure" value="false"></property>
+	</bean>
+
+	<aop:config>
+		<aop:pointcut id="fooServiceMethods"
+			expression="execution(* com.zc..service.impl.*.*(..))" />
+		<aop:advisor advice-ref="txAdvice" pointcut-ref="fooServiceMethods" />
+	</aop:config>
+
+	<tx:advice id="txAdvice" transaction-manager="txManager">
+		<tx:attributes>
+			<tx:method name="find*" read-only="true" />
+			<tx:method name="load*" read-only="true" />
+			<tx:method name="get*" read-only="true" />
+			<tx:method name="query*" read-only="true" />
+			<tx:method name="*_tran_new" propagation="REQUIRES_NEW"
+				isolation="READ_COMMITTED" />
+			<tx:method name="*" propagation="REQUIRED" rollback-for="java.lang.Exception" />
+		</tx:attributes>
+	</tx:advice>
+
+	<!-- MyBatis配置 -->
+	<bean id="sqlSessionFactory"
+		class="com.zc.base.common.factory.SdSqlSessionFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+		<property name="configLocation" value="classpath:mybatis-config.xml"></property>
+		<!-- 显式指定Mapper文件位置 -->
+		<property name="mapperLocations"
+			value="classpath*:sqlmap/**/*.xml" />
+	</bean>
+
+	<!-- 扫描basePackage下所有以@MyBatisRepository标识的 接口 -->
+	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+		<property name="basePackage" value="com.zc" />
+		<property name="annotationClass"
+			value="com.zc.base.orm.mybatis.annotation.MyBatisRepository" />
+	</bean>
+
+	<!-- 配置国际化资源文件 -->
+	<bean id="messageSource"
+		class="org.springframework.context.support.ResourceBundleMessageSource">
+		<property name="defaultEncoding" value="UTF-8" />
+		<property name="basenames">
+			<array>
+				<value>i18n/message</value>
+				<value>i18n/message_exception</value>
+			</array>
+		</property>
+	</bean>
+
+	<!-- web请求中任何地方使用国际化支持 -->
+	<bean id="messageHolder" class="com.zc.base.web.i18n.MessageHolder">
+		<property name="messageSource" ref="messageSource" />
+	</bean>
+
+	<!-- production环境 -->
+	<beans profile="production">
+		<!-- properties 资源文件 -->
+		<bean id="propertiesConfig"
+			class="org.springframework.beans.factory.config.PropertiesFactoryBean">
+			<property name="locations" value="classpath*:/application.properties" />
+		</bean>
+
+		<!-- 数据源配置, 使用Tomcat JDBC连接池 -->
+		<bean id="dataSource" class="org.apache.tomcat.jdbc.pool.DataSource"
+			destroy-method="close">
+			<!-- Connection Info -->
+			<property name="driverClassName" value="${jdbc.driver}" />
+			<property name="url" value="${jdbc.url}" />
+			<property name="username" value="${jdbc.username}" />
+			<property name="password"
+				value="#{T(com.zc.base.common.util.AES128Util).Decrypt(propertiesConfig['jdbc.password'],propertiesConfig['jdbc.encrypt.key'],propertiesConfig['jdbc.encrypt.encoding'])}" />
+
+			<!-- Connection Pooling Info -->
+			<property name="maxActive" value="${jdbc.pool.maxActive}" />
+			<property name="maxIdle" value="${jdbc.pool.maxIdle}" />
+			<property name="initialSize" value="${jdbc.pool.initialSize}" />
+			<property name="defaultAutoCommit" value="false" />
+
+			<!-- 检查连接 -->
+			<property name="testWhileIdle" value="${jdbc.pool.testWhileIdle}" />
+			<property name="testOnBorrow" value="${jdbc.pool.testOnBorrow}" />
+			<property name="testOnReturn" value="${jdbc.pool.testOnReturn}" />
+			<property name="timeBetweenEvictionRunsMillis" value="${jdbc.pool.timeBetweenEvictionRunsMillis}" />
+			<property name="validationQuery" value="${jdbc.pool.validationQuery}" />
+			<property name="validationInterval" value="${jdbc.pool.validationInterval}" />
+			<property name="minEvictableIdleTimeMillis" value="${jdbc.pool.minEvictableIdleTimeMillis}" />
+			<property name="jdbcInterceptors" value="${jdbc.pool.jdbcInterceptors}" />
+
+		</bean>
+		<bean class="org.springframework.jdbc.core.JdbcTemplate">
+			<property name="dataSource" ref="dataSource" />
+		</bean>
+	</beans>
+
+	<!-- development环境 -->
+	<beans profile="development">
+		<!-- properties 资源文件 -->
+		<bean id="propertiesConfig"
+			class="org.springframework.beans.factory.config.PropertiesFactoryBean">
+			<property name="locations" value="classpath*:/application.properties" />
+		</bean>
+
+		<!-- 数据源配置, 使用Tomcat JDBC连接池 -->
+		<bean id="dataSource" class="org.apache.tomcat.jdbc.pool.DataSource"
+			destroy-method="close">
+			<!-- Connection Info -->
+			<property name="driverClassName" value="${jdbc.driver}" />
+			<property name="url" value="${jdbc.url}" />
+			<property name="username" value="${jdbc.username}" />
+			<property name="password"
+				value="#{T(com.zc.base.common.util.AES128Util).Decrypt(propertiesConfig['jdbc.password'],propertiesConfig['jdbc.encrypt.key'],propertiesConfig['jdbc.encrypt.encoding'])}" />
+
+			<!-- Connection Pooling Info -->
+			<property name="maxActive" value="${jdbc.pool.maxActive}" />
+			<property name="maxIdle" value="${jdbc.pool.maxIdle}" />
+			<property name="defaultAutoCommit" value="false" />
+
+			<!-- 检查连接 -->
+			<property name="testWhileIdle" value="true" />
+			<property name="validationQuery" value="SELECT 1" />
+			<property name="validationInterval" value="30000"></property>
+		</bean>
+		<bean class="org.springframework.jdbc.core.JdbcTemplate">
+			<property name="dataSource" ref="dataSource" />
+		</bean>
+	</beans>
+
+	<!-- test环境 -->
+	<beans profile="test">
+		<!-- properties 资源文件 -->
+		<bean id="propertiesConfig"
+			class="org.springframework.beans.factory.config.PropertiesFactoryBean">
+			<property name="locations" value="classpath*:/application.properties" />
+		</bean>
+
+		<!-- Tomcat JDBC连接池 -->
+		<bean id="dataSource" class="org.apache.tomcat.jdbc.pool.DataSource"
+			destroy-method="close">
+			<property name="driverClassName" value="${jdbc.driver}" />
+			<property name="url" value="${jdbc.url}" />
+			<property name="username" value="${jdbc.username}" />
+			<property name="password"
+				value="#{T(com.zc.base.common.util.AES128Util).Decrypt(propertiesConfig['jdbc.password'],propertiesConfig['jdbc.encrypt.key'],propertiesConfig['jdbc.encrypt.encoding'])}" />
+			<property name="defaultAutoCommit" value="false" />
+		</bean>
+		<bean class="org.springframework.jdbc.core.JdbcTemplate">
+			<property name="dataSource" ref="dataSource" />
+		</bean>
+	</beans>
+
+
+	<beans>
+		<bean id="activeMQ" class="org.apache.activemq.ActiveMQConnectionFactory">
+			<property name="brokerURL" value="${activemq.remote.url}" />
+			<property name="useAsyncSend" value="false" />
+		</bean>
+
+		<!-- activeMQ连接对象 -->
+		<bean id="connectionFactory" class="org.apache.activemq.pool.PooledConnectionFactory">
+			<property name="connectionFactory" ref="activeMQ" />
+		</bean>
+
+		<!-- 发送消息的目的地队列1病人信息 -->
+		<bean id="destPatient" class="org.apache.activemq.command.ActiveMQQueue">
+			<constructor-arg index="0"
+				value="${activemq.queue.patient.name}" />
+		</bean>
+
+		<!-- 发送消息的目的地队列2药品字典 -->
+		<bean id="destMedicamentDict" class="org.apache.activemq.command.ActiveMQQueue">
+			<constructor-arg index="0"
+				value="${activemq.queue.medicamentDict.name}" />
+		</bean>
+
+		<!-- 发送消息的目的地队列3病区信息 -->
+		<bean id="destInpatientArea" class="org.apache.activemq.command.ActiveMQQueue">
+			<constructor-arg index="0"
+				value="${activemq.queue.inpatientArea.name}" />
+		</bean>
+
+		<!-- 发送消息的目的地队列4医嘱 -->
+		<bean id="destDrugway" class="org.apache.activemq.command.ActiveMQQueue">
+			<constructor-arg index="0"
+				value="${activemq.queue.drugway.name}" />
+		</bean>
+
+		<!-- 发送消息的目的地队列5医嘱频次 -->
+		<bean id="destDrugfrequency" class="org.apache.activemq.command.ActiveMQQueue">
+			<constructor-arg index="0"
+				value="${activemq.queue.drugfrequency.name}" />
+		</bean>
+
+		<!-- 发送消息的目的地队列6用药途径 -->
+		<bean id="destDrugAdministration" class="org.apache.activemq.command.ActiveMQQueue">
+			<constructor-arg index="0"
+				value="${activemq.queue.drugAdministration.name}" />
+		</bean>
+
+		<!-- 发送消息的目的地队列7同步activeMQ任务 -->
+		<bean id="destSyncDataScheduleTask" class="org.apache.activemq.command.ActiveMQQueue">
+			<constructor-arg index="0"
+				value="${activemq.queue.syncDataScheduleTask.name}" />
+		</bean>
+
+		<!-- 发送消息的目的地队列8员工信息 -->
+		<bean id="destEmployeeInfo" class="org.apache.activemq.command.ActiveMQQueue">
+			<constructor-arg index="0"
+				value="${activemq.queue.destEmployeeInfo.name}" />
+		</bean>
+
+		<!-- 发送消息的目的地队列9药单执行记录 -->
+		<bean id="destYdExcuteRecord" class="org.apache.activemq.command.ActiveMQQueue">
+			<constructor-arg index="0"
+				value="${activemq.queue.destYdExcuteRecord.name}" />
+		</bean>
+
+		<!-- 消息转换 -->
+		<bean id="messageConverter" class="com.zc.pivas.activemq.MsgConverter" />
+
+		<!-- 配置JMS模版 -->
+		<bean id="jmsTemplate" class="org.springframework.jms.core.JmsTemplate">
+			<property name="connectionFactory" ref="connectionFactory" />
+			<property name="messageConverter" ref="messageConverter" />
+		</bean>
+
+		<!-- 病人消息配置 -->
+		<bean id="patientMQRecive" class="com.zc.pivas.activemq.PatientMQReceiver" />
+
+		<!-- 病人监听 -->
+		<bean id="patientListener" class="org.springframework.jms.listener.adapter.MessageListenerAdapter">
+			<constructor-arg ref="patientMQRecive" />
+			<property name="defaultListenerMethod" value="receive" />
+			<property name="messageConverter" ref="messageConverter" />
+		</bean>
+
+		<bean id="patientListenerContainer" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+			<property name="connectionFactory" ref="connectionFactory" />
+			<property name="destination" ref="destPatient" />
+			<property name="messageListener" ref="patientListener" />
+		</bean>
+
+		<!-- 医嘱消息配置 -->
+		<bean id="adviceMQReceiver" class="com.zc.pivas.activemq.AdviceMQReceiver" />
+
+		<!-- 医嘱监听 -->
+		<bean id="adviceListener" class="org.springframework.jms.listener.adapter.MessageListenerAdapter">
+			<constructor-arg ref="adviceMQReceiver" />
+			<property name="defaultListenerMethod" value="receive" />
+			<property name="messageConverter" ref="messageConverter" />
+		</bean>
+
+		<bean id="adviceListenerContainer" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+			<property name="connectionFactory" ref="connectionFactory" />
+			<property name="destination" ref="destDrugway" />
+			<property name="messageListener" ref="adviceListener" />
+		</bean>
+
+		<!-- 药品字典消息配置 -->
+		<bean id="drugMQReceiver" class="com.zc.pivas.activemq.DrugMQReceiver" />
+
+		<!-- 药品字典监听 -->
+		<bean id="drugListener" class="org.springframework.jms.listener.adapter.MessageListenerAdapter">
+			<constructor-arg ref="drugMQReceiver" />
+			<property name="defaultListenerMethod" value="receive" />
+			<property name="messageConverter" ref="messageConverter" />
+		</bean>
+
+		<bean id="drugListenerContainer" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+			<property name="connectionFactory" ref="connectionFactory" />
+			<property name="destination" ref="destMedicamentDict" />
+			<property name="messageListener" ref="drugListener" />
+		</bean>
+
+		<!-- 病区信息消息配置 -->
+		<bean id="inpatientAreaMQReceiver" class="com.zc.pivas.activemq.InpatientAreaMQReceiver" />
+
+		<!-- 病区信息监听 -->
+		<bean id="inpatientAreaListener" class="org.springframework.jms.listener.adapter.MessageListenerAdapter">
+			<constructor-arg ref="inpatientAreaMQReceiver" />
+			<property name="defaultListenerMethod" value="receive" />
+			<property name="messageConverter" ref="messageConverter" />
+		</bean>
+
+		<bean id="inpatientAreaListenerContainer" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+			<property name="connectionFactory" ref="connectionFactory" />
+			<property name="destination" ref="destInpatientArea" />
+			<property name="messageListener" ref="inpatientAreaListener" />
+		</bean>
+
+		<!-- 医嘱频次配置 -->
+		<bean id="orderFrequencyMQReceiver" class="com.zc.pivas.activemq.OrderFrequencyMQReceiver" />
+
+		<!-- 医嘱频次监听 -->
+		<bean id="orderFrequencyListener" class="org.springframework.jms.listener.adapter.MessageListenerAdapter">
+			<constructor-arg ref="orderFrequencyMQReceiver" />
+			<property name="defaultListenerMethod" value="receive" />
+			<property name="messageConverter" ref="messageConverter" />
+		</bean>
+
+		<bean id="orderFrequencyListenerContainer" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+			<property name="connectionFactory" ref="connectionFactory" />
+			<property name="destination" ref="destDrugfrequency" />
+			<property name="messageListener" ref="orderFrequencyListener" />
+		</bean>
+
+		<!-- 用药途径配置 -->
+		<bean id="drugWayMQReceiver" class="com.zc.pivas.activemq.DrugWayMQReceiver" />
+
+		<!-- 用药途径监听 -->
+		<bean id="drugWayListener" class="org.springframework.jms.listener.adapter.MessageListenerAdapter">
+			<constructor-arg ref="drugWayMQReceiver" />
+			<property name="defaultListenerMethod" value="receive" />
+			<property name="messageConverter" ref="messageConverter" />
+		</bean>
+
+		<bean id="drugWayListenerContainer" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+			<property name="connectionFactory" ref="connectionFactory" />
+			<property name="destination" ref="destDrugAdministration" />
+			<property name="messageListener" ref="drugWayListener" />
+		</bean>
+
+		<!-- 同步任务结果配置 -->
+		<bean id="taskResultMQReceiver" class="com.zc.pivas.activemq.TaskResultMQReceiver" />
+
+		<!-- 同步任务结果监听 -->
+		<bean id="taskResultListener" class="org.springframework.jms.listener.adapter.MessageListenerAdapter">
+			<constructor-arg ref="taskResultMQReceiver" />
+			<property name="defaultListenerMethod" value="receive" />
+			<property name="messageConverter" ref="messageConverter" />
+		</bean>
+
+		<bean id="taskResultListenerContainer" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+			<property name="connectionFactory" ref="connectionFactory" />
+			<property name="destination" ref="destSyncDataScheduleTask" />
+			<property name="messageListener" ref="taskResultListener" />
+		</bean>
+
+
+		<!-- 员工信息消息配置 -->
+		<bean id="employeeInfoMQReceiver" class="com.zc.pivas.activemq.EmployeeInfoMQReceiver" />
+
+		<!-- 员工信息监听 -->
+		<bean id="employeeInfoListener" class="org.springframework.jms.listener.adapter.MessageListenerAdapter">
+			<constructor-arg ref="employeeInfoMQReceiver" />
+			<property name="defaultListenerMethod" value="receive" />
+			<property name="messageConverter" ref="messageConverter" />
+		</bean>
+
+		<bean id="employeeInfoListenerContainer" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+			<property name="connectionFactory" ref="connectionFactory" />
+			<property name="destination" ref="destEmployeeInfo" />
+			<property name="messageListener" ref="employeeInfoListener" />
+		</bean>
+
+
+		<!-- 药单执行记录消息配置 -->
+		<bean id="ydRecordMQRecive" class="com.zc.pivas.activemq.YdRecordMQReceiver" />
+
+		<!-- 病人监听 -->
+		<bean id="ydRecordListener" class="org.springframework.jms.listener.adapter.MessageListenerAdapter">
+			<constructor-arg ref="ydRecordMQRecive" />
+			<property name="defaultListenerMethod" value="receive" />
+			<property name="messageConverter" ref="messageConverter" />
+		</bean>
+
+		<bean id="ydRecordListenerContainer" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+			<property name="connectionFactory" ref="connectionFactory" />
+			<property name="destination" ref="destYdExcuteRecord" />
+			<property name="messageListener" ref="ydRecordListener" />
+		</bean>
+	</beans>
+
+
+	<!--<beans>
+		<bean name="PrescriptionAutoGen" class="org.springframework.scheduling.quartz.JobDetailBean">
+			<property name="jobClass" value="PrescriptionAutoGen" />
+		</bean>
+
+		<bean id="cronTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">
+			<property name="jobDetail" ref="PrescriptionAutoGen" />
+			<property name="cronExpression" value="0 0/30 * * * ?" />   0 0/1 3,5,7 * * ? 【3,5,7点 执行】 0 0-50 20 * * ? 【下午8点开始 0-50分钟 每分钟一次】【0 0/30 20,21 * * ?】
+		</bean>
+
+		<bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+			<property name="triggers">
+				<list>
+					<ref bean="cronTrigger" />
+				</list>
+			</property>
+		</bean>
+	</beans> -->
+ 
+	<!-- 药单同步药单执行记录任务 -->
+	<beans>
+		<bean id="YDRecordTasks" class="org.springframework.scheduling.quartz.JobDetailBean">
+			<property name="jobClass" value="com.zc.pivas.docteradvice.controller.PrescriptionRecordTasks" />
+		</bean>
+		<bean id="cronTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">
+			<property name="jobDetail" ref="YDRecordTasks" />
+			
+			<property name="cronExpression" value="10 0/15 * * * ?" /><!-- 10 5 6,7,12,13,16 * * ? -->
+		</bean>
+		<bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+			<property name="triggers">
+				<list>
+					<ref bean="cronTrigger" />
+				</list>
+			</property>
+		</bean>
+	</beans>
+
+</beans>

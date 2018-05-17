@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.1.xsd
+	http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.1.xsd">
+	
+	<bean id="authc" class="com.zc.base.sys.modules.login.CaptchaFormAuthentication" >
+		<property name="reLoginUrl" value="/reLogin" />
+		<property name="successUrl" value="/main" />
+		<property name="loginInfoDao" ref="loginInfoDao" />
+		<property name="enableUserLock" value="${login.enableUserLock}"/>
+		<property name="userLockTime" value="${login.userLockTime}" />
+		<property name="failLockCount" value="${login.failLockCount}" />
+	</bean>
+	
+	<bean id="logout" class="com.zc.base.sys.modules.login.LogedLogoutFilter">
+		<property name="redirectUrl" value="/login" />
+	</bean>
+	
+	<bean id="shiroFilter" class="org.apache.shiro.spring.web.ShiroFilterFactoryBean" >
+		<property name="securityManager" ref="securityManager" />
+		<property name="loginUrl" value="/login" />
+		<property name="filterChainDefinitions">
+			<value>
+				/reLogin anon
+				/captchaCode anon
+				/assets/** anon
+				/pivasBase/restful/** anon
+				/webSocketServer/** anon
+				/scans/comScans/** anon
+				/rest/** anon
+				/error = anon
+				/logout = logout
+				/app/applogin = anon
+				/app/scanBottle = anon
+				/app/checkOrderStatus = anon
+				/app/exit = anon
+				/app/heart = anon
+				/backup = anon
+				/** = authc
+			</value>
+		</property>
+	</bean>
+
+	<bean id="securityManager" class="org.apache.shiro.web.mgt.DefaultWebSecurityManager">
+		<property name="realm" ref="shiroDbRealm" />
+	</bean>
+
+	<bean id="lifecycleBeanPostProcessor" class="org.apache.shiro.spring.LifecycleBeanPostProcessor" />
+
+	<bean id="hashedCredentialsMatcher"
+		class="org.apache.shiro.authc.credential.HashedCredentialsMatcher">
+		<property name="hashAlgorithmName" value="${shiro.hashAlgorithm}" />
+		<property name="hashIterations" value="${shiro.hashIterations}" />
+	</bean>
+	
+	<bean id="shiroCacheManager" class="org.apache.shiro.cache.ehcache.EhCacheManager">
+		<property name="cacheManager" ref="ehCacheManager"></property>
+	</bean>
+	
+	<bean id="shiroDbRealm" class="com.zc.base.sys.modules.login.ShiroDbRealm">
+		<property name="authorizationCacheName" value="shiro.authorizationCache" />
+		<property name="cacheManager" ref="shiroCacheManager" />
+		<property name="userService" ref="userService" />
+		<property name="systemConfigService" ref="systemConfigService" />
+		<property name="loginInfoDao" ref="loginInfoDao" />
+		<property name="captchaTimeout" value="${login.captchaTimeout}"></property>
+		<property name="enableCaptcha" value="${login.enableCaptcha}" />
+		<property name="enableUserLock" value="${login.enableUserLock}"/>
+		<property name="failCountInterval" value="${login.failCountInterval}" />
+		<property name="credentialsMatcher" ref="hashedCredentialsMatcher" />
+	</bean>
+
+	<!-- 添加注解支持 start -->
+	<bean
+		class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator"
+		depends-on="lifecycleBeanPostProcessor" />
+	<bean
+		class="org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor">
+		<property name="securityManager" ref="securityManager" />
+	</bean>
+	<!-- 添加注解支持 end -->
+
+</beans>

@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zc.pivas.statistics.repository.AuditPrescriptionStatsDao">
+
+	<select id="queryDoctorNameStatusList"
+		resultType="com.zc.pivas.statistics.bean.auditPrescription.AuditPrescriptionStatusBean">
+		SELECT  YZM.SFYSCODE as doctorId, YZM.SFYSMC as doctorName, yzm.yzshzt as statusKey,
+       			case
+         			when YZSHZT = 1 then
+          				'通过'
+         			else
+          				'不通过'
+       			end as statusName,
+       			COUNT(1) AS ststsCount
+		FROM SRVS_DOCTOR_ADVICE_CHECKRESULT YZM
+		<![CDATA[ WHERE 1 = 1 AND YZSHZT <> 0 ]]>
+
+		<if test="staticCheckOrder != null">
+			<if
+				test="staticCheckOrder.searchTime != null and '' neq staticCheckOrder.searchTime ">
+				and to_char(YZM.SFRQ,'yyyy-mm-dd') like #{staticCheckOrder.searchTime}
+				||'%'
+			</if>
+
+			<if
+				test="staticCheckOrder.searchDoctorIds != null and '' neq staticCheckOrder.searchDoctorIds ">
+				and YZM.SFYSCODE in
+				<foreach item="doctorId" index="index"
+					collection="staticCheckOrder.searchDoctorIds" open="(" separator=","
+					close=")">
+					#{doctorId,jdbcType=VARCHAR}
+				</foreach>
+
+			</if>
+		</if>
+		GROUP BY YZM.SFYSCODE, YZM.SFYSMC, YZM.YZSHZT
+        ORDER BY YZM.SFYSCODE
+
+	</select>
+
+	<select id="queryDoctorNamePieList"
+		resultType="com.zc.pivas.statistics.bean.auditPrescription.AuditPrescriptionNamePieBean">
+		SELECT
+		YZM.SFYSCODE AS doctorId,
+		YZM.SFYSMC AS name,
+		COUNT(1) AS value
+		FROM SRVS_DOCTOR_ADVICE_CHECKRESULT YZM
+		<![CDATA[ WHERE 1 = 1 AND YZSHZT <> 0 ]]>
+
+		<if test="staticCheckOrder != null">
+			<if
+				test="staticCheckOrder.searchTime != null and '' neq staticCheckOrder.searchTime ">
+				and to_char(YZM.SFRQ,'yyyy-mm-dd') like #{staticCheckOrder.searchTime}
+				||'%'
+			</if>
+
+			<if
+				test="staticCheckOrder.searchDoctorIds != null and '' neq staticCheckOrder.searchDoctorIds ">
+				and YZM.SFYSCODE in
+				<foreach item="doctorId" index="index" collection="staticCheckOrder.searchDoctorIds" open="(" separator=","
+					close=")">
+					#{doctorId,jdbcType=VARCHAR}
+				</foreach>
+
+			</if>
+		</if>
+		GROUP BY YZM.SFYSCODE, YZM.SFYSMC
+        ORDER BY YZM.SFYSCODE
+	</select>
+
+	<select id="queryDoctorNameStatusListByID"
+		resultType="com.zc.pivas.statistics.bean.auditPrescription.AuditPrescriptionStatusBean">
+		SELECT YZM.SFYSCODE AS doctorId,
+		YZM.SFYSMC AS doctorName,
+		YZM.yzshzt AS statusKey,
+		case
+         	when YZSHZT = 1 then
+          			'通过'
+         		else
+          			'不通过'
+       			end as statusName,
+		COUNT(1) AS ststsCount
+		FROM SRVS_DOCTOR_ADVICE_CHECKRESULT YZM
+		<![CDATA[ WHERE 1 = 1 AND YZSHZT <> 0 AND YZM.SFYSCODE = #{staticCheckOrder.doctorID}]]> 
+		<if test="staticCheckOrder.searchTime != null and '' neq staticCheckOrder.searchTime ">
+			and to_char(YZM.SFRQ,'yyyy-mm-dd') like #{staticCheckOrder.searchTime}||'%'
+		</if>
+		GROUP BY YZM.SFYSCODE, YZM.SFYSMC, YZM.yzshzt
+	</select>
+
+	<select id="queryCheckerNameList"
+		resultType="com.zc.pivas.statistics.bean.medicalAdvice.StaticDoctorNameBean">
+		SELECT YZM.SFYSCODE AS doctorId,YZM.SFYSMC AS doctorName
+		from SRVS_DOCTOR_ADVICE_CHECKRESULT YZM
+		GROUP BY YZM.SFYSCODE ,YZM.SFYSMC
+		order by YZM.SFYSCODE
+	</select>
+
+</mapper>

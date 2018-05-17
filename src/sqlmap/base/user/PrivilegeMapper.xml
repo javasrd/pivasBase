@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zc.base.sys.modules.user.repository.PrivilegeDao">
+	<resultMap id="PrivilegeMap"
+		type="com.zc.base.sys.modules.user.entity.Privilege">
+		<id column="privilege_id" property="privilegeId" jdbcType="BIGINT" />
+		<result column="parent_id" property="parentId" jdbcType="BIGINT" />
+		<result column="privilege_code" property="privilegeCode" jdbcType="VARCHAR" />
+		<result column="name" property="name" jdbcType="VARCHAR" />
+		<result column="type" property="type" jdbcType="INTEGER" />
+		<result column="url" property="url" jdbcType="VARCHAR" />
+		<result column="sys_code" property="sysCode" jdbcType="INTEGER" />
+		<result column="seq" property="seq" jdbcType="INTEGER" />
+		<result column="is_https" property="isHttps" jdbcType="INTEGER" />
+		<result column="level" property="level" jdbcType="INTEGER" />
+		<result property="isUse" />
+		<result property="isCheck"/>
+		<result column="icon" property="icon" jdbcType="INTEGER" />
+	</resultMap>
+
+	<resultMap id="RoleRefPrivilegeMap"
+		type="com.zc.base.bla.modules.menu.entity.RoleRefPrivilege">
+		<result column="role_id" property="roleId" jdbcType="BIGINT" />
+		<result column="privilege_id" property="privilegeId" jdbcType="BIGINT" />
+	</resultMap>
+
+	<sql id="BaseProps">
+		privilege_id,parent_id,name,type,url,module,seq,create_time,is_https,description,privilege_code,sys_code,"LEVEL",icon
+	</sql>
+	
+	<select id="getPrisCount" parameterType="java.util.List" resultType="int">
+		select count(1) from SYS_PRIVILEGE  where privilege_id in
+		<foreach item="item" index="index" collection="list"
+				      open="(" separator="," close=")">
+				        #{item}
+		</foreach> 
+	</select>
+	
+	<!-- 获取用户指定子系统的所有菜单 -->
+	<select id="getMenuListByUser" resultMap="PrivilegeMap">
+		SELECT
+			e.privilege_id,
+			e.parent_id,
+			e.url,
+			e.is_https,
+			e.sys_code,
+			e."LEVEL",
+			e.type,
+			e.icon,
+			n.name
+		FROM
+			SYS_PRIVILEGE e
+		JOIN SYS_ROLE_REF_PRIVILEGE d ON  d.privilege_id = e.privilege_id
+		JOIN SYS_ROLE c ON d.role_id = c.role_id
+		JOIN sys_user_ref_role b ON b.role_id = c.role_id
+		JOIN sys_user a ON a.user_id = b.user_id
+		JOIN SYS_I18N n ON e.privilege_id = n.object_id
+		JOIN SYS_LANG l ON n.language_id = l.language_id
+		WHERE
+			e.type IN (0, 1, 2)
+		AND n.type = 1
+		AND l. CODE = #{language}
+		<if test="sysCode!=null">
+		AND e.sys_code = #{sysCode}
+		</if>
+		AND a.user_id = #{userId}
+		GROUP BY
+			 e.parent_id, e.seq, e.privilege_id, e.url, e.is_https, e.sys_code, e."LEVEL", e.type, e.icon, n.name
+		ORDER BY 
+			e.parent_id,
+			e.seq
+	</select>
+	
+	<!-- 获取指定子系统的所有菜单 -->
+	<select id="getMenuListBySubSys" resultMap="PrivilegeMap">
+		SELECT
+			e.privilege_id,
+			e.parent_id,
+			e.url,
+			e.is_https,
+			e.sys_code,
+			e."LEVEL",
+			e.type,
+			e.icon,
+			n.name
+		FROM
+			SYS_PRIVILEGE e
+		JOIN SYS_I18N n ON e.privilege_id = n.object_id
+		JOIN SYS_LANG l ON n.language_id = l.language_id
+		WHERE
+			e.type IN (0, 1, 2)
+		AND n.type = 1
+		AND l. CODE = #{language}
+		<if test="sysCode!=null">
+		AND e.sys_code = #{sysCode}
+		</if>
+		GROUP BY
+			e.parent_id, e.seq, e.privilege_id, e.url, e.is_https, e.sys_code, e."LEVEL", e.type, e.icon, n.name
+		ORDER BY 
+			e.parent_id,
+			e.seq
+	</select>
+	
+	<!-- 获取指定用户的所有权限 -->
+	<select id="getPrivilegeListByUser" resultMap="PrivilegeMap">
+		SELECT
+			e.privilege_id,
+			e.privilege_code,
+			e.parent_id,
+			e.url,
+			e.is_https,
+			e.sys_code,
+			e.type,
+			e."LEVEL",
+			e.icon
+		FROM
+			SYS_PRIVILEGE e
+		<if test="userId != null">
+			JOIN SYS_ROLE_REF_PRIVILEGE d ON  d.privilege_id = e.privilege_id
+			JOIN SYS_ROLE c ON d.role_id = c.role_id
+			JOIN sys_user_ref_role b ON b.role_id = c.role_id
+			JOIN sys_user a ON a.user_id = b.user_id
+			where a.user_id = #{userId}
+		</if>
+		GROUP BY
+			e.parent_id, e.seq, e.privilege_id, e.privilege_code, e.url, e.is_https, e.sys_code, e.type, e."LEVEL", e.icon
+		ORDER BY 
+			e.parent_id,
+			e.seq
+	</select>
+	
+	<!-- 获取指定用户的所有子系统编码 -->
+	<select id="getSysCodeListByUser" resultType="int">
+		SELECT
+			DISTINCT e.sys_code
+		FROM
+			SYS_PRIVILEGE e
+		<if test="userId != null">
+			JOIN SYS_ROLE_REF_PRIVILEGE d ON  d.privilege_id = e.privilege_id
+			JOIN SYS_ROLE c ON d.role_id = c.role_id
+			JOIN sys_user_ref_role b ON b.role_id = c.role_id
+			JOIN sys_user a ON a.user_id = b.user_id
+			where a.user_id = #{userId}
+		</if>
+		ORDER BY e.sys_code asc
+	</select>
+	
+	<!-- 根据id获取菜单信息 -->
+	<select id="getMenuById" resultMap="PrivilegeMap">
+		SELECT
+			e.privilege_id,
+			e.privilege_code,
+			e.parent_id,
+			e.url,
+			e.is_https,
+			e.sys_code,
+			e."LEVEL",
+			e.icon,
+			n.name
+		FROM
+			SYS_PRIVILEGE e
+		JOIN SYS_I18N n ON e.privilege_id = n.object_id
+		JOIN SYS_LANG l ON n.language_id = l.language_id
+		WHERE
+			e.type IN (0, 1, 2)
+		AND n.type = 1
+		AND l. CODE = #{language}
+		AND e.privilege_id = #{id}
+	</select>
+	
+	<!-- 所有权限及默认权限及权限是否禁用 -->
+	<select id="getPrivilegeListByRoleId"  resultMap="PrivilegeMap">
+		select w.privilege_id,w.parent_id,w.type,w.url,w.seq,w.is_https,w.sys_code,n.name,
+		case when EXISTS(
+			select null from SYS_ROLE_REF_PRIVILEGE a where a.role_id = #{0} and a.privilege_id = w.privilege_id
+		) then 1 else 0 end as isCheck ,
+		case when  EXISTS(
+			select null from  sys_user_ref_role b
+			join SYS_ROLE_REF_PRIVILEGE c
+			on b.role_id= c.role_id
+		where  c.privilege_id = w.privilege_id and b.user_id = #{1}
+		) then 1 else 0 end as isUse
+		from SYS_PRIVILEGE w join SYS_I18N n on w.privilege_id = n.object_id
+		     join SYS_LANG l on n.language_id = l.language_id
+		where n.type = 1 and l.code = #{2}
+		GROUP BY w.privilege_id,w.parent_id,w.type,w.url,w.seq,w.is_https,w.sys_code,n.name
+		ORDER BY 
+			w.parent_id,
+			w.seq
+	</select> 
+	<!-- 权限批量添加 -->
+	<insert id="addRolePrivilegeBatch">
+		<!-- INSERT INTO SYS_ROLE_REF_PRIVILEGE ( role_id, privilege_id)
+		VALUES -->
+		begin
+		<foreach item="pris" index="index" collection="pris" separator=";" >
+	        INSERT INTO SYS_ROLE_REF_PRIVILEGE ( role_id, privilege_id)
+		VALUES(#{roleId},#{pris})
+  		</foreach>
+  		;end;
+	</insert>
+	<delete id="delRolePrivilege">
+		delete from SYS_ROLE_REF_PRIVILEGE where role_id = #{roleId} 
+		<if test="pris != null and pris.size > 0"> 
+			and privilege_id
+			not in
+			<foreach item="item" index="index" collection="pris"
+			      open="(" separator="," close=")">
+			        #{item}
+			 </foreach>
+		</if>
+	</delete>
+
+	<!--根据角色编号删除权限角色关系表 -->
+	<delete id="delRolePrivilegeId">
+		delete from SYS_ROLE_REF_PRIVILEGE
+		where SYS_ROLE_REF_PRIVILEGE.role_id = #{roleId}
+	</delete>
+	
+	<!-- 根据id查询记录树 -->
+	<select id="getCountById" resultType="int">
+		select count(1) from SYS_PRIVILEGE p where p.privilege_id = #{privilegeId}
+	</select>
+	
+</mapper>

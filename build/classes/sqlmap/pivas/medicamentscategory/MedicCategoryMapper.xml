@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zc.pivas.medicamentscategory.repository.MedicCategoryDao" >
+	
+  <resultMap id="MedicCategoryMap" type="com.zc.pivas.medicamentscategory.entity.MedicCategory" >
+    <id column="CATEGORY_ID" property="categoryId" jdbcType="BIGINT" />
+    <result column="CATEGORY_NAME" property="categoryName" jdbcType="VARCHAR" />
+    <result column="CATEGORY_CODE" property="categoryCode" jdbcType="VARCHAR" />
+    <result column="CATEGORY_PRIORITY" property="categoryPriority" jdbcType="VARCHAR" />
+        <result column="CATEGORY_ISHARD" property="categoryIsHard" jdbcType="INTEGER" />
+  </resultMap>
+  
+  <insert id="addMedicCategory" parameterType="com.zc.pivas.medicamentscategory.entity.MedicCategory">
+  		<selectKey resultType="java.lang.Long" order="AFTER" keyProperty="categoryId">
+  			select sq_SRVS_MEDICAMENTS_category.CURRVAL as categoryId from DUAL
+  		</selectKey>
+  		insert into SRVS_MEDICAMENTS_category (
+  			category_name, 
+  			
+  			<if test="categoryCode !=null">
+  			category_code, 
+  			</if>
+  			
+  			category_priority,
+  			category_ishard)
+		values
+  		(	
+  			#{categoryName,jdbcType=VARCHAR},
+  			<if test="categoryCode !=null">
+  			#{categoryCode,jdbcType=VARCHAR},
+  			</if>
+  			
+  			#{categoryPriority,jdbcType=VARCHAR},
+  			#{categoryIsHard,jdbcType=INTEGER}
+  		)
+  </insert>
+  
+  <sql id="listMedicCategorySql">
+  	select 
+  		category_id, 
+  		category_name, 
+  		category_code, 
+  		category_priority,
+  		category_ishard
+    from SRVS_MEDICAMENTS_category
+	<where>
+			1=1
+		<if test="mediccategory != null">
+					
+			<if test="mediccategory.categoryNames != null and '' neq mediccategory.categoryNames">
+				and 
+				<foreach item="categoryName" index="index" collection="mediccategory.categoryNames"  open="(" separator="or" close=")" >  
+					category_name like  '%'||#{categoryName}||'%'   escape '\'           
+				</foreach>
+			</if>
+			
+			<if test="mediccategory.categoryId != null and '' neq mediccategory.categoryId">
+				and category_id = #{mediccategory.categoryId}
+			</if>
+			
+			<if test="mediccategory.categoryCode != null and '' neq mediccategory.categoryCode">
+				and category_code = #{mediccategory.categoryCode}
+			</if>
+		</if>
+	</where>
+	order by category_id 
+  </sql>
+  
+  <select id="listMedicCategory" resultMap="MedicCategoryMap">
+  	<include refid="common.jqueryPageHead" />
+  	<include refid="listMedicCategorySql"/>
+  	<include refid="common.jqueryPageBottom" />
+  </select>
+  
+  <select id="getMedicCategoryTotal" resultType="int">
+  	select count(1) from (
+  	<include refid="listMedicCategorySql"/>
+  	)
+  </select>
+  
+  <delete id="deleteMedicCategory" parameterType="string">
+  	delete from SRVS_MEDICAMENTS_category
+  	 where category_id = #{categoryId}
+  </delete>
+  
+  <select id="listMedicCategoryByName" parameterType="string" resultMap="MedicCategoryMap">
+  select 
+  		category_id, 
+  		category_name, 
+  		category_code, 
+  		category_priority
+    from SRVS_MEDICAMENTS_category
+    where category_name =#{categoryName}
+  </select>
+  
+  <select id="queryAllMedicCategory"  resultMap="MedicCategoryMap">
+  select 
+  		category_id, 
+  		category_name, 
+  		category_code, 
+  		category_priority
+    from SRVS_MEDICAMENTS_category
+    order by category_priority
+  </select>
+  
+  <select id="queryAllForAddConfigFeeRule"  resultMap="MedicCategoryMap">
+  select 
+  		category_id, 
+  		category_name, 
+  		category_code, 
+  		category_priority
+    from SRVS_MEDICAMENTS_category  where CATEGORY_CODE is not null
+    <if test="configFeeRuleGid != null and '' neq  configFeeRuleGid">
+			and category_id not in (select drugtypecode from SRVS_CONFIGFEE_RULE
+			<![CDATA[ where gid <> #{configFeeRuleGid} ]]>
+    )
+	</if>
+    
+  </select>
+  
+  <select id="displayMedicCategory" parameterType="string" resultMap="MedicCategoryMap">
+  select 
+  		category_id, 
+  		category_name, 
+  		category_code, 
+  		category_priority,
+  		category_ishard
+    from SRVS_MEDICAMENTS_category
+    where category_id =#{categoryId}
+  </select>
+
+  <update id="updateMedicCategory" parameterType="com.zc.pivas.medicamentscategory.entity.MedicCategory">
+ 	update SRVS_MEDICAMENTS_category
+ 	set
+		<if test="categoryCode != null and '' neq categoryCode">
+				category_code = #{categoryCode},
+		</if>
+		
+		<if test="categoryCode == null or '' eq categoryCode">
+				category_code = null,
+		</if>
+		
+		<if test="categoryPriority != null and '' neq categoryPriority">
+				category_priority = #{categoryPriority},
+		</if>
+		
+		      <if test="categoryIsHard != null">
+                category_ishard = #{categoryIsHard},
+        </if>
+		
+		category_name = #{categoryName}
+ 	where category_id = #{categoryId}
+ </update>
+ 
+ <select id="checkMedicCategoryName" resultMap="MedicCategoryMap">
+  select 
+  		category_id, 
+  		category_name, 
+  		category_code, 
+  		category_priority
+    from SRVS_MEDICAMENTS_category
+    <where>
+  		    1=1 
+			<if test="mediccategory != null">
+				<if test="mediccategory.categoryId != null and '' neq mediccategory.categoryId ">
+					<![CDATA[ and CATEGORY_ID <> #{mediccategory.categoryId} ]]>
+				</if>
+				
+				<if test="mediccategory.categoryName != null and '' neq mediccategory.categoryName ">
+					and category_name = #{mediccategory.categoryName}
+				</if>
+			</if>
+		  </where>
+  </select>
+  
+   <select id="checkMedicCategoryCode" resultMap="MedicCategoryMap">
+  select 
+  		category_id, 
+  		category_name, 
+  		category_code, 
+  		category_priority
+    from SRVS_MEDICAMENTS_category
+    <where>
+  		    1=1 
+			<if test="mediccategory != null">
+				<if test="mediccategory.categoryId != null and '' neq mediccategory.categoryId ">
+					<![CDATA[ and CATEGORY_ID <> #{mediccategory.categoryId} ]]>
+				</if>
+				
+				<if test="mediccategory.categoryCode != null and '' neq mediccategory.categoryCode ">
+					and category_code = #{mediccategory.categoryCode}
+				</if>
+			</if>
+		  </where>
+  </select>
+  
+     <select id="findCategoryByName" resultMap="MedicCategoryMap">
+  select 
+        category_id, 
+        category_name, 
+        category_code, 
+        category_priority
+    from SRVS_MEDICAMENTS_category
+    <where>
+            1=1 
+            <if test="categoryCode != null and '' neq categoryCode">
+                and category_code = #{categoryCode}
+            </if>
+          </where>
+  </select>
+  
+  <select id="qryMedicCategory" resultMap="MedicCategoryMap">
+  select * from SRVS_MEDICAMENTS_CATEGORY order by category_priority
+  </select>
+  
+  <select id="checkMedicCategoryOrder" resultMap="MedicCategoryMap">
+  	select 
+  		category_id, 
+  		category_name, 
+  		category_code, 
+  		category_priority
+    from SRVS_MEDICAMENTS_category
+    <where>
+ 		1=1 
+		<if test="mediccategory != null">
+			<if test="mediccategory.categoryPriority != null">
+				and CATEGORY_PRIORITY = #{mediccategory.categoryPriority}
+			</if>
+		</if>
+	</where>
+  </select>
+  
+</mapper>

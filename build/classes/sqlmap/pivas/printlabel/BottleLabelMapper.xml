@@ -1,0 +1,1460 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zc.pivas.printlabel.repository.BottleLabelDao">
+	<resultMap id="bottleMap" type="com.zc.pivas.printlabel.entity.BottleLabel" >
+		<result column="PIDSJ" property="pidsj" jdbcType="VARCHAR" />
+		<result column="YDPQ" property="bottleNum" jdbcType="VARCHAR"  />
+		<result column="YDZT" property="dybz" jdbcType="INTEGER"  />
+		<result column="MAIN_HTML" property="mainHtml" jdbcType="CLOB" javaType = "java.lang.String"  typeHandler ="com.zc.pivas.common.util.OracleClobTypeHandler" />
+		<result column="MAINDRUG_HTML" property="mainDrugHtml" jdbcType="CLOB" javaType = "java.lang.String"  typeHandler ="com.zc.pivas.common.util.OracleClobTypeHandler" />
+		<result column="MENSTRUUM_HTML" property="menstruumHtml" jdbcType="CLOB" javaType = "java.lang.String"  typeHandler ="com.zc.pivas.common.util.OracleClobTypeHandler" />
+	</resultMap>
+	
+	<select id="queryBottleLabel" parameterType="com.zc.pivas.printlabel.entity.BottleLabel"
+		resultType="com.zc.pivas.printlabel.entity.BottleLabel">
+		select actOrderNo, yd_transfusion,parentNo,dybz, useDate,batchId,medicamentsCode,drugName,specifications,dose,doseUnit,quantity,bottleNum,zxrq, zxsj, wardCode, wardName,deptAliasName,freqCode,supplyCode,yzType,docName,
+patName, sex,inhospno,bedNo, caseId,birthday,age,ageUnit,pidsj, dropSpeed, avdp, batchName,categoryId, medicamentsDanger, packingUnit,categoryCode, categoryPriority,LISTAGG(medicamentsLabelNo, '') within group(order by actOrderNo) as medicamentsLabelNo,
+  printTimeS, serialNumber, medicamentsMenstruum, medicamentsIsmaindrug, transfusion
+   from (select
+		t1.act_order_no AS actOrderNo,
+		t1.transfusion as yd_transfusion,
+		t1.parent_no AS parentNo,
+		t1.DYBZ AS dybz,
+		pq.YYRQ AS useDate,
+		pq.ZXBC AS batchId,
+		t1.medicaments_code AS medicamentsCode,
+		t5.MEDICAMENTS_ALIAS_NAME AS drugName,
+		t1.SPECIFICATIONS AS specifications,
+		t1.dose AS dose,
+		t1.dose_unit AS doseUnit,
+		t1.quantity AS quantity,
+		pq.YDPQ AS bottleNum,
+		t1.ZXRQ AS zxrq,
+		t1.ZXSJ AS zxsj,
+		t1.WARD_CODE AS wardCode,
+		t1.WARDNAME AS wardName,
+		inarea.DEPTALIASNAME AS deptAliasName,
+		t1.FREQ_CODE AS freqCode,
+		yzMain.SUPPLY_CODE AS supplyCode,
+		t1.YZLX AS yzType,
+		t2.SFYSMC AS docName,
+		pq.patname AS patName,
+		pq.sex AS sex,
+		pq.inhospno AS inhospno,
+		pq.bedno AS bedNo,
+		pq.case_id AS caseId,
+		pq.birthday AS birthday,
+		pq.age AS age,
+		pq.ageunit AS ageUnit,
+		t1.PIDSJ AS pidsj,
+		t2.DROPSPEED AS dropSpeed,
+		pq.avdp AS avdp,
+		t4.name_ AS batchName,
+		decode(t5.category_id,null,2001,t5.category_id) AS categoryId,
+		decode(t5.medicaments_danger,null,1,t5.medicaments_danger) AS
+		medicamentsDanger,
+		decode(t5.medicaments_packing_unit,null,'',t5.medicaments_packing_unit)
+		AS packingUnit,
+		t6.category_code AS categoryCode,
+		t6.category_priority  as categoryPriority,
+		t8.label_no AS medicamentsLabelNo,
+		to_char(pq.print_time,'yyyy-MM-DD hh24:mi:ss') AS printTimeS,
+		t1.SERIAL_NUMBER as serialNumber,
+		t5.medicaments_menstruum as medicamentsMenstruum,
+		t5.medicaments_ismaindrug as medicamentsIsmaindrug,
+		(select transfusion from SRVS_DOCTOR_ADVICE_main yzm where yzm.parent_no=t1.parent_no
+		and yzm.yzlx=t1.yzlx and rownum &lt; 2) as transfusion
+		from
+		SRVS_PRESCRIPTION t1
+		join SRVS_PRESCRIPTION_main t2 on t1.pidsj = t2.pidsj
+		join SRVS_DOCTOR_ADVICE_main yzMain on yzMain.PARENT_NO = t2.PARENT_NO
+		join SRVS_LABEL pq on t1.pidsj = pq.pidsj
+		join SRVS_INPATIENTAREA inarea on inarea.deptcode = t1.WARD_CODE
+		JOIN srvs_batch t4 ON t4.id_ = t1.ZXBC
+		left JOIN SRVS_MEDICAMENTS t5 ON
+		t5.medicaments_code = t1.medicaments_code
+		left JOIN
+		SRVS_MEDICAMENTS_category t6 ON t6.category_id = t5.category_id
+		<if test="categoryId != null and categoryId != ''">
+			JOIN (
+			select p1.act_order_no,p1.parent_no
+			from
+			SRVS_PRESCRIPTION p1
+			JOIN SRVS_MEDICAMENTS p5 ON p5.medicaments_code = p1.medicaments_code
+			JOIN SRVS_MEDICAMENTS_category p6 ON p6.category_id = p5.category_id
+			<where>
+				<if test="useDate != null">
+					TO_CHAR(p1.SCRQ, 'yyyy-MM-dd') = TO_CHAR(#{useDate}, 'yyyy-MM-dd')
+				</if>
+				and p5.category_id = #{categoryId}
+			</where>
+			GROUP BY p1.act_order_no, p1.parent_no
+			)tt ON tt.act_order_no =
+			t1.act_order_no AND tt.parent_no = t1.parent_no
+		</if>
+		LEFT JOIN SRVS_MEDICAMENTS_ref_label t7 ON t7.medicaments_id =
+		t5.medicaments_id
+		LEFT JOIN SRVS_MEDICAMENTS_label t8 ON t8.label_id =
+		t7.label_id
+		<if test="categoryIdN !=null">
+			inner JOIN (
+			select
+			t1.pidsj
+			from SRVS_PRESCRIPTION t1,SRVS_MEDICAMENTS t5 ,SRVS_MEDICAMENTS_category t6
+			where t5.medicaments_code = t1.medicaments_code
+			and t6.category_id =
+			t5.category_id
+			and t6.category_id in
+			<foreach collection="categoryIdN" item="categoryId" open="("
+				close=")" separator=",">
+				#{categoryId}
+			</foreach>
+			) t7 on t7.pidsj = t1.pidsj
+		</if>
+		<where>
+			1=1
+			and t1.ydzxzt = 0 
+			<if test="ydreorderStatusNull ==null" >
+			and t2.ydreorder_status = 1
+			</if>
+			<if test="useDate != null">
+				and TO_CHAR(t1.SCRQ, 'yyyy-MM-dd') = TO_CHAR(#{useDate},
+				'yyyy-MM-dd')
+			</if>
+			<if test="batchId != null and batchId != ''">
+				and t1.ZXBC = #{batchId}
+			</if>
+			<if test="wardCode != null and wardCode != ''">
+				and t1.ward_code = #{wardCode}
+			</if>
+
+			<if test="medicamentsCode != null and '' neq medicamentsCode ">
+				and t2.charge_code like '%' || #{medicamentsCode,jdbcType=VARCHAR}
+				||'%'
+			</if>
+
+			<if test="categoryId != null and '' neq categoryId ">
+				and t1.charge_code in (select medicaments_code from SRVS_MEDICAMENTS
+				where CATEGORY_ID = #{categoryId,jdbcType=VARCHAR})
+			</if>
+
+			<if test="bottleNumList != null">
+				and t1.pidsj IN
+				<foreach collection="bottleNumList" item="num" open="("
+					separator="," close=")">
+					#{num}
+				</foreach>
+			</if>
+
+			<if test="pidsj != null and '' neq pidsj ">
+				and t1.pidsj = #{pidsj,jdbcType=VARCHAR}
+			</if>
+		</where>
+		order by t1.wardName,t1.bedno,t5.MEDICAMENTS_MENSTRUUM,t1.TRANSFUSION,t5.medicaments_ismaindrug ) 
+		 group by actOrderNo, parentNo,dybz, useDate,batchId,medicamentsCode,drugName,specifications,dose,doseUnit,quantity,bottleNum,zxrq, zxsj, wardCode, wardName,deptAliasName,freqCode,supplyCode,yzType,docName,
+					patName, sex,inhospno,bedNo, caseId,birthday,age,ageUnit,pidsj, dropSpeed, avdp, batchName,categoryId, medicamentsDanger, packingUnit,categoryCode, categoryPriority,
+  					printTimeS, serialNumber, medicamentsMenstruum, medicamentsIsmaindrug, transfusion	,yd_transfusion
+	order by medicamentsMenstruum desc,cast(yd_transfusion as int) desc, medicamentsIsmaindrug,drugName
+	</select>
+
+	<update id="updateBedByBottNum" parameterType="Map">
+		begin
+
+		update SRVS_LABEL pq set BEDNO = (select BEDNO from SRVS_PRESCRIPTION_main ydm where
+		ydm.pidsj = pq.pidsj )
+		where pidsj = #{map.pidsj,jdbcType=VARCHAR} ;
+
+		end;
+	</update>
+	<!-- <update id="updateBedByBottNum" parameterType="Map" > begin update 
+		SRVS_LABEL pq set BEDNO = (select BEDNO from SRVS_PRESCRIPTION_main ydm where ydm.pidsj
+		= pq.pidsj ) , ydpq_last=ydpq_last||','||ydpq , YDPQ = #{map.bottleLabel,jdbcType=VARCHAR} 
+		where pidsj = #{map.pidsj,jdbcType=VARCHAR} ; update SRVS_PRESCRIPTION_MAIN set BOTTLE_LABEL_NUM=#{map.bottleLabel,jdbcType=VARCHAR}
+		where pidsj = #{map.pidsj,jdbcType=VARCHAR} ; update SRVS_PRESCRIPTION set BOTTLE_LABEL_NUM=#{map.bottleLabel,jdbcType=VARCHAR}
+		where pidsj = #{map.pidsj,jdbcType=VARCHAR} ; end; </update> -->
+	<!-- and not exists ( select 1 from SRVS_PRESCRIPTION_main ydm where ydm.pidsj =
+		pq.pidsj and ydm.BEDNO = pq.BEDNO ) and YDZT &lt 5 ; -->
+
+	<!-- 把瓶签数据插入瓶签表 -->
+	<insert id="insertBottleLabel" parameterType="com.zc.pivas.printlabel.entity.BottleLabel">
+		insert into
+		SRVS_LABEL(
+		PARENT_NO,
+		ZXBC,
+		YYRQ,
+		YDZT,
+		YDPQ,
+		DEPTNAME,
+		CATEGORY_CODE_LIST,
+		INHOSPNO,
+		PATNAME,
+		SEX,
+		CASE_ID,
+		BIRTHDAY,
+		AGE,
+		AGEUNIT,
+		AVDP,
+		SFYSMC,
+		BEDNO,
+		ZXRQ,
+		ZXSJ,
+		PIDSJ,
+		DEPTCODE
+		)
+		values(
+		#{parentNo,jdbcType=BIGINT},
+		#{batchId,jdbcType=BIGINT},
+		#{useDate},
+		4,
+		#{bottleNum,jdbcType=VARCHAR},
+		#{wardName,jdbcType=VARCHAR},
+		#{categoryCode,jdbcType=VARCHAR},
+		#{inhospno,jdbcType=VARCHAR},
+		#{patName,jdbcType=VARCHAR},
+		#{sex,jdbcType=INTEGER},
+		#{caseId,jdbcType=VARCHAR},
+		#{birthday,jdbcType=VARCHAR},
+		#{age,jdbcType=INTEGER},
+		#{ageUnit,jdbcType=INTEGER},
+		#{avdp,jdbcType=INTEGER},
+		#{docName,jdbcType=VARCHAR},
+		#{bedNo,jdbcType=VARCHAR},
+		#{zxrq,jdbcType=VARCHAR},
+		#{zxsj,jdbcType=VARCHAR},
+		#{pidsj,jdbcType=VARCHAR},
+		#{wardCode,jdbcType=VARCHAR}
+		)
+	</insert>
+
+	<!-- 更新药单瓶签码 -->
+	<update id="updateYDBottleNum" parameterType="com.zc.pivas.printlabel.entity.BottleLabel">
+		begin
+		update SRVS_PRESCRIPTION set <!-- bottle_label_num = #{bottleNum}, -->
+		DYBZ=0 where pidsj = #{pidsj};
+		update
+		SRVS_PRESCRIPTION_main set <!-- bottle_label_num = #{bottleNum}, -->
+		DYBZ=0 where pidsj = #{pidsj};
+		
+		<if test="hasScanIn != null and hasScanIn == 1">
+			update SRVS_LABEL set YDZT=5 where YDPQ = #{bottleNum} and ydzt &lt; 5
+		</if>
+		
+		<if test="hasScanIn != null and hasScanIn == 0">
+			update SRVS_LABEL set YDZT=4 where YDPQ = #{bottleNum} and ydzt &lt; 5
+		</if>
+		
+		;end;
+	</update>
+
+	<select id="queryYDList" parameterType="com.zc.pivas.printlabel.entity.BottleLabel"
+		resultType="com.zc.pivas.printlabel.entity.BottleLabel">
+		select
+		t1.medicaments_code AS medicamentsCode,
+		<if test="groupByMedical != null and groupByMedical == 1">
+			sum(ceil(t1.quantity)) AS quantity,
+		</if>
+		<if test="groupByMedical != null and groupByMedical != 1">
+			ceil(t1.quantity) AS quantity,
+		</if>
+		t1.DRUGNAME AS drugName,
+		t1.SPECIFICATIONS AS specifications,
+		t1.dose AS dose,
+		t1.dose_unit AS doseUnit,
+		t1.WARD_CODE AS wardCode,
+		t1.wardname AS wardName,
+		t4.name_ AS batchName,
+		t5.medicaments_packing_unit AS packingUnit,
+		t5.medicaments_place AS medicamentsPlace,
+		t6.category_code AS categoryCode
+		from
+		SRVS_PRESCRIPTION t1
+		JOIN srvs_batch t4 ON t4.id_ = t1.ZXBC
+		JOIN SRVS_MEDICAMENTS t5 ON
+		t5.medicaments_code = t1.medicaments_code
+		JOIN
+		SRVS_MEDICAMENTS_category t6 ON t6.category_id = t5.category_id
+		join
+		SRVS_PRESCRIPTION_main t2 on t1.pidsj = t2.pidsj
+		<if test="categoryIdN !=null">
+			inner JOIN (
+			select
+			t1.pidsj
+			from SRVS_PRESCRIPTION t1,SRVS_MEDICAMENTS t5 ,SRVS_MEDICAMENTS_category t6
+			where t5.medicaments_code = t1.medicaments_code
+			and t6.category_id =
+			t5.category_id
+			and t6.category_id in
+			<foreach collection="categoryIdN" item="categoryId" open="("
+				close=")" separator=",">
+				#{categoryId}
+			</foreach>
+			) t7 on t7.pidsj = t1.pidsj
+		</if>
+		<where>
+			t1.ydzxzt = 0 and t2.ydreorder_status = 1
+			<if test="useDate != null">
+				and TO_CHAR(t1.SCRQ, 'yyyy-MM-dd') = TO_CHAR(#{useDate},
+				'yyyy-MM-dd')
+			</if>
+			<if test="batchId != null">
+				and t1.ZXBC = #{batchId}
+			</if>
+			<if test="wardCode != null and wardCode != ''">
+				and t1.ward_code = #{wardCode}
+			</if>
+			
+			<if test="wardCode == null or '' eq wardCode">
+				and t1.ward_code in (SELECT deptcode from SRVS_INPATIENTAREA where enabled = 1 )
+			</if>
+		</where>
+		<if test="groupByMedical != null and groupByMedical == 1">
+			group by
+			t1.medicaments_code,
+			t1.DRUGNAME, t1.SPECIFICATIONS, t1.dose,
+			t1.dose_unit, t1.WARD_CODE, t1.wardname, t4.name_,
+			t5.medicaments_packing_unit,
+			t5.medicaments_place, t6.category_code
+		</if>
+		order by t1.wardName,t1.bedno,t1.DRUGNAME
+	</select>
+	
+	
+	<!-- exists (select 1 from SRVS_DOCTOR_ADVICE_main yz where yz.parent_no =t1.parent_no
+		and yz.yzlx = t1.yzlx and yz.yzzt = 0) -->
+
+	<select id="queryYDReciverCount" parameterType="com.zc.pivas.printlabel.entity.BottleLabel"
+		resultType="com.zc.pivas.printlabel.entity.BottleLabel">
+		SELECT BC.id_ AS batchId,
+		sum(CEIL(YD.QUANTITY)) AS quantity,
+		CAT.CATEGORY_NAME AS categoryName,
+		CAT.CATEGORY_ID AS categoryId,
+		BC.NAME_ AS batchName,
+		YD.WARDNAME as wardName,
+		yd.ward_code as wardCode
+		FROM SRVS_PRESCRIPTION YD
+		LEFT OUTER JOIN SRVS_MEDICAMENTS YP ON YD.MEDICAMENTS_CODE =
+		YP.MEDICAMENTS_CODE
+		LEFT OUTER JOIN SRVS_LABEL PQ ON YD.PIDSJ = PQ.PIDSJ
+		LEFT OUTER JOIN srvs_batch BC ON BC.ID_ = YD.ZXBC
+		LEFT OUTER JOIN SRVS_MEDICAMENTS_CATEGORY CAT ON CAT.CATEGORY_ID =
+		YP.CATEGORY_ID
+		<where>
+			PQ.YDZT > 6
+			<if test="useDate != null">
+				and TO_CHAR(yd.YYRQ, 'yyyy-MM-dd') = TO_CHAR(#{useDate},
+				'yyyy-MM-dd')
+			</if>
+			<if test="batchIDList != null">
+				and yd.ZXBC in
+				<foreach collection="batchIDList" item="batch" open="("
+					close=")" separator=",">
+					#{batch}
+				</foreach>
+			</if>
+			<if test="wardCode != null and wardCode != ''">
+				and yd.ward_code = #{wardCode}
+			</if>
+		</where>
+		group by YD.WARDNAME, yd.ward_code, BC.id_, BC.NAME_, CAT.CATEGORY_ID,
+		CAT.CATEGORY_NAME
+		order by yd.ward_code,BC.id_
+	</select>
+
+	<select id="queryYDReciverDetail" parameterType="com.zc.pivas.printlabel.entity.BottleLabel"
+		resultType="com.zc.pivas.printlabel.entity.BottleLabel">
+		SELECT BC.id_ AS batchId,
+		sum(CEIL(YD.QUANTITY)) AS quantity,
+		yd.drugName,
+		yd.charge_code as medicamentsCode,
+		yd.patName,
+		yd.inpatient_no as inhospno,
+		yd.bedNo,
+		BC.NAME_ AS batchName,
+		YD.WARDNAME as wardName,
+		yd.ward_code as wardCode,
+		YD.Specifications
+		FROM SRVS_PRESCRIPTION YD
+		LEFT OUTER JOIN SRVS_MEDICAMENTS YP ON YD.MEDICAMENTS_CODE =
+		YP.MEDICAMENTS_CODE
+		LEFT OUTER JOIN SRVS_LABEL PQ ON YD.PIDSJ = PQ.PIDSJ
+		LEFT OUTER JOIN srvs_batch BC ON BC.ID_ = YD.ZXBC
+		LEFT OUTER JOIN SRVS_MEDICAMENTS_CATEGORY CAT ON CAT.CATEGORY_ID =
+		YP.CATEGORY_ID
+		<where>
+			PQ.YDZT > 6
+			<if test="useDate != null">
+				and TO_CHAR(yd.YYRQ, 'yyyy-MM-dd') = TO_CHAR(#{useDate},
+				'yyyy-MM-dd')
+			</if>
+			<if test="batchIDList != null">
+				and yd.ZXBC in
+				<foreach collection="batchIDList" item="batch" open="("
+					close=")" separator=",">
+					#{batch}
+				</foreach>
+			</if>
+			<if test="wardCode != null and wardCode != ''">
+				and yd.ward_code = #{wardCode}
+			</if>
+		</where>
+		group by YD.WARDNAME, yd.ward_code, BC.id_, BC.NAME_, yd.charge_code,
+		yd.drugname, yd.bedno, yd.patname, yd.inpatient_no, YD.Specifications
+		order by yd.ward_code,BC.id_ ,yd.bedno
+	</select>
+
+	<!-- 更新药单瓶签码 -->
+	<update id="setPQBottle" parameterType="Map">
+		update SRVS_LABEL
+		<set>
+			<if test="firstHtml != null">
+			MAIN_HTML = #{firstHtml},
+			</if>
+			<if test="html != null">
+			MAINDRUG_HTML = #{html}, 
+			</if>
+			<if test="menstruumHtml != null">
+			MENSTRUUM_HTML = #{menstruumHtml}
+			</if>
+		</set>
+		where pidsj = #{pidsj}
+	</update>
+
+	<select id="queryBottleLabelList" resultMap="bottleMap">
+		<include refid="qrybottleSql"/>
+	</select>
+	
+	<select id="qryBottleLabelList" resultMap="bottleMap">
+  		<include refid="common.jqueryPageHead" />
+  		<include refid="qrybottleSql"/>
+  		<include refid="common.jqueryPageBottom" />
+  	</select>
+  	
+  	<sql id="qrybottleSql">
+  		SELECT
+			pq.pidsj,
+			pq.ydzt,
+			pq.ydpq,
+			pq.MAIN_HTML,
+			pq.MAINDRUG_HTML,
+			pq.MENSTRUUM_HTML
+		FROM SRVS_LABEL pq
+		JOIN SRVS_PRESCRIPTION_main t1 ON t1.pidsj = pq.pidsj
+		<where>
+			1=1
+			<if test="bottleLabel.isHistoryPrint == null">
+			and t1.ydzxzt = 0 
+ 			and t1.ydreorder_status = 1 
+			</if>
+ 			
+			<if test="bottleLabel.categoryId != null and bottleLabel.categoryId != ''">
+				and #{bottleLabel.categoryId} in (select category_id
+				from SRVS_MEDICAMENTS where medicaments_code in (SELECT *
+				FROM TABLE(CAST(fn_split(t1.charge_code,
+				'@@') AS ty_str_split))))
+			</if>
+
+			<if test="bottleLabel.categoryIdN !=null">
+				and
+				<foreach collection="bottleLabel.categoryIdN" item="categoryId" open="("
+					close=")" separator="or">
+					#{categoryId} in (select category_id
+					from SRVS_MEDICAMENTS where medicaments_code in (SELECT *
+					FROM TABLE(CAST(fn_split(t1.charge_code,
+					'@@') AS ty_str_split))))
+				</foreach>
+				) t7 on t7.pidsj = t1.pidsj
+			</if>
+
+			<if test="bottleLabel.useDate != null">
+				and TO_CHAR(t1.SCRQ, 'yyyy-MM-dd') = TO_CHAR(#{bottleLabel.useDate},
+				'yyyy-MM-dd')
+			</if>
+			<if test="bottleLabel.batchId != null and bottleLabel.batchId != ''">
+				and t1.ZXBC = #{bottleLabel.batchId}
+			</if>
+			<if test="bottleLabel.wardCode != null and bottleLabel.wardCode != ''">
+				and t1.ward_code = #{bottleLabel.wardCode}
+			</if>
+			
+			<if test="bottleLabel.wardCode == null or '' eq bottleLabel.wardCode">
+				and t1.ward_code in (SELECT deptcode from SRVS_INPATIENTAREA where enabled = 1 )
+			</if>
+
+			<if test="bottleLabel.medicamentsCode != null and '' neq bottleLabel.medicamentsCode ">
+				and t1.charge_code like '%' || #{bottleLabel.medicamentsCode,jdbcType=VARCHAR}
+				||'%'
+			</if>
+
+			<if test="bottleLabel.bottleNumList != null">
+				and pq.pidsj IN
+				<foreach collection="bottleLabel.bottleNumList" item="num" open="(" separator="," close=")">
+					#{num}
+				</foreach>
+			</if>
+
+			<if test="bottleLabel.pidsj != null and '' neq bottleLabel.pidsj ">
+				and pq.pidsj = #{bottleLabel.pidsj,jdbcType=VARCHAR}
+			</if>
+		</where>
+		order by t1.wardName,t1.bedno
+  	</sql>
+  	
+  	<select id="queryPQBedNoForUpdate" parameterType="Map"
+		resultType="com.zc.pivas.printlabel.entity.BottleLabel">
+		select pidsj,bedno,
+		MAIN_HTML as mainHtml,
+		MAINDRUG_HTML as mainDrugHtml,
+		MENSTRUUM_HTML as menstruumHtml from SRVS_LABEL
+		<![CDATA[  where PARENT_NO = #{parentNo} and yyrq >= to_date( to_char(sysdate, 'yyyy-mm-dd') || ' 00:00:00', 'yyyy-mm-dd hh24:mi:ss')]]>
+	</select>
+
+
+	<select id="queryShowBottleLabelList" resultType="com.zc.pivas.printlabel.entity.PrintLabelBean">
+		
+		<if test="printLabelBean.drugnameyArray !=null">
+			select * from (
+	    </if> 
+		<include refid="selectBottleLableSql"/>
+		<where>
+			1=1
+			<include refid="whereShowLableSql"/>
+			<if test="printLabelBean.bednoArray !=null">
+				and (
+				<foreach collection="printLabelBean.bednoArray" item="bedno" separator="or">
+					t1.bedno like '%'||Upper(#{bedno,jdbcType=VARCHAR})||'%' escape '\'
+				</foreach>
+				)
+			</if> 
+		</where>
+		
+		<if test="printLabelBean.sortType != null">
+			<choose>  
+				<when test="printLabelBean.sortType == 0 ">  
+			       	order by batch.order_num,t1.wardname_en,t1.bedno_en
+			    </when >  
+			    <when test="printLabelBean.sortType == 1">  
+			        order by t1.wardname_en,t1.bedno_en,batch.order_num
+			    </when >  
+			    <otherwise>  
+			    </otherwise>  
+			</choose> 
+		</if>
+		<if test="printLabelBean.sortType == null">
+			order by t1.wardname_en,t1.bedno_en,batch.order_num
+		</if>
+		<if test="printLabelBean.drugnameyArray !=null">
+			) temp where 1= 1
+			and (
+			<foreach collection="printLabelBean.drugnameyArray" item="drugnameQry" separator="or">
+				temp.drugname like '%'||#{drugnameQry,jdbcType=VARCHAR}||'%' escape '\' or
+				temp.drugSuchama like '%' || Upper(#{drugnameQry,jdbcType=VARCHAR}) || '%' escape '\' 
+			</foreach>
+			)
+	    </if>
+		
+	</select>
+	
+	<sql id="selectBottleLableSql">
+  		select
+			t1.ward_code as wardcode,
+			t1.wardname as wardname,
+			t1.bedno as bedno,
+			t1.zxbc as batchid,
+			batch.name_ as batchname,
+			t1.parent_no as parentno,
+			t1.patname as patname,
+			t1.freq_code as freqcode,
+			t1.transfusion as transfusion,
+			t1.drugname as drugname,
+			to_char(t1.yyrq, 'yyyy-mm-dd') as usedatestring,
+			t1.dose as dose,
+			t1.dose_unit as doseunit,
+			<if test="printLabelBean.isPreview == 1">
+				pq.main_html as mainhtml,
+			</if>
+			<if test="printLabelBean.drugnameyArray !=null">
+			(select LISTAGG(m.medicaments_suchama, ',') WITHIN GROUP(ORDER BY m.medicaments_code)
+	                          from SRVS_MEDICAMENTS m
+	                         where m.medicaments_code in
+	                               (select t.charge_code
+	                                  from SRVS_DOCTOR_ADVICE t
+	                                 where t.parent_no = pq.parent_no)) as drugsuchama,
+	        </if> 
+			t1.dybz as dybz,
+			pq.pidsj as bottlenum,
+			to_char(pq.print_time,'yyyy-mm-dd hh24:mi:ss') as printTimeStr,
+			pq.print_name as printName
+		from SRVS_LABEL pq
+		join SRVS_PRESCRIPTION_main t1 on t1.pidsj = pq.pidsj
+		join srvs_batch batch on t1.zxbc=batch.id_
+		join SRVS_INPATIENTAREA area on t1.ward_code = area.deptcode
+  	</sql>
+  	
+	<sql id="whereShowLableSql">
+			and t1.yzshzt = 1
+			and t1.ydzxzt = 0 
+	 		and t1.ydreorder_status = 1 
+			and area.enabled = 1
+		<if test="printLabelBean.useDate != null">
+			and t1.yyrq &gt;= to_date(to_char(#{printLabelBean.useDate},'yyyy-MM-dd')||' '||'${@com.zc.pivas.common.util.DataFormat@getTimeStart()}','yyyy-MM-DD hh24:mi:ss')
+			and t1.yyrq &lt; to_date('${@com.zc.pivas.common.util.DataFormat@getNextDate(printLabelBean.useDate)}'||' '||'${@com.zc.pivas.common.util.DataFormat@getTimeEnd()}','yyyy-MM-DD hh24:mi:ss')
+		</if>
+		
+		<if test=' printLabelBean.isPack == null or printLabelBean.isPack == "0" '>
+			<if test="printLabelBean.batchIDList != null">
+	  			and t1.ZXBC IN 
+				<foreach collection="printLabelBean.batchIDList" item="batchID" open="(" separator="," close=")">
+					#{batchID}
+				</foreach>
+	  		</if>
+  		</if>
+  		
+  		<if test=' printLabelBean.isPack == "1" '>
+  				and t1.ZXBC IN (select id_ from srvs_batch where is_empty_batch_=1 )
+  			</if>
+		<if test="printLabelBean.medicamentsCountsArray != null">
+			and
+			<foreach collection="printLabelBean.medicamentsCountsArray" item="medicamentsCounts" open="("
+					close=")" separator="or">
+				exists ( select 1 from SRVS_PRESCRIPTION_main ydm1 where (regexp_count(ydm1.drugname,'@@')+1) ${medicamentsCounts} and ydm1.pidsj = pq.pidsj )
+		     </foreach> 
+		</if>
+		
+		<if test="printLabelBean.dybz != null">
+			and t1.DYBZ=#{printLabelBean.dybz}
+		</if>
+		
+		<if test="printLabelBean.medicamentsCodeListArray != null" >
+			
+			and exists (select 1 from SRVS_PRESCRIPTION yd where yd.charge_code in
+			
+			<foreach collection="printLabelBean.medicamentsCodeListArray" item="medicamentsCode" open="("
+				close=")" separator=",">
+				#{medicamentsCode}
+			</foreach>
+			
+			and yd.pidsj = t1.pidsj)
+		</if>	
+		
+		<if test="printLabelBean.isPreview != 1">
+			<if test="printLabelBean.medicamentsCodeListArray == null">
+				and '-1' in (SELECT *
+					FROM TABLE(CAST(fn_split(t1.charge_code,
+					'@@') AS ty_str_split)))
+			</if>	
+		</if>
+		<if test="printLabelBean.wardCodeArray !=null"> 
+			and t1.ward_code  in 
+			<foreach collection="printLabelBean.wardCodeArray" item="wardCode" open="(" separator="," close=")">
+				#{wardCode}
+			</foreach>
+		</if>
+		<if test="printLabelBean.bottleNumList != null">
+			and pq.pidsj IN
+			<foreach collection="printLabelBean.bottleNumList" item="num" open="(" separator="," close=")">
+				#{num}
+			</foreach>
+		</if>
+	</sql>
+	
+	<select id="queryShowBottleLabelHistoryList" resultType="com.zc.pivas.printlabel.entity.PrintLabelBean">
+		<include refid="selectBottleLableHistorySql"/>
+		<where>
+			1=1
+			<include refid="whereShowLableHistorySql"/>
+		</where>
+		<if test="printLabelBean.sortType != null">
+			<choose>  
+				<when test="printLabelBean.sortType == 0 ">  
+			       	order by batch.order_num,t1.wardname_en,t1.bedno_en
+			    </when >  
+			    <when test="printLabelBean.sortType == 1">  
+			        order by t1.wardname_en,t1.bedno_en,batch.order_num
+			    </when >  
+			    <otherwise>  
+			    </otherwise>  
+			</choose> 
+		</if>
+		<if test="printLabelBean.sortType == null">
+			order by t1.wardname_en,t1.bedno_en,batch.order_num
+		</if>
+	</select>
+	
+	<sql id="selectBottleLableHistorySql">
+  		SELECT
+			t1.WARD_CODE as wardCode,
+			t1.WARDNAME as wardName,
+			t1.BEDNO as bedNo,
+			t1.zxbc as batchId,
+			batch.name_ as batchName,
+			t1.PARENT_NO as parentNo,
+			t1.PATNAME as patName,
+			t1.FREQ_CODE as freqCode,
+			t1.TRANSFUSION as transfusion,
+			t1.DRUGNAME as drugName,
+			to_char(t1.YYRQ, 'yyyy-MM-DD') as useDateString,
+			t1.DOSE as dose,
+			t1.DOSE_UNIT as doseUnit,
+			<if test="printLabelBean.isPreview == 1">
+				pq.PRINT_INFO as mainHtml,
+			</if>
+			t1.DYBZ as dybz,
+			t1.PIDSJ as bottleNum
+		FROM SRVS_PRINT_HISTORY pq
+		JOIN SRVS_PRESCRIPTION_main t1 ON t1.pidsj = pq.PIDSJ
+		JOIN srvs_batch batch on t1.zxbc=batch.id_
+  	</sql>
+
+	<sql id="whereShowLableHistorySql">
+		<if test="printLabelBean.printIndex != null">          
+			and pq.gid = #{printLabelBean.printIndex}
+		</if>
+		<if test="printLabelBean.printStartNumber != null">  
+			and pq.PAGE_INDEX &gt;=#{printLabelBean.printStartNumber}
+		</if>
+		<if test="printLabelBean.printEndNumber != null">  
+			and pq.PAGE_INDEX &lt;=#{printLabelBean.printEndNumber}
+		</if>
+		<if test="printLabelBean.bottleNumList != null">
+			and pq.pidsj IN
+			<foreach collection="printLabelBean.bottleNumList" item="num" open="(" separator="," close=")">
+				#{num}
+			</foreach>
+		</if>
+	</sql>
+	
+	<!-- 打包 -->
+	<select id="queryPrintBottleLabelList" resultType="com.zc.pivas.printlabel.entity.PrintLabelBean">
+		SELECT
+			pq.pidsj,
+			pq.ydzt as dybz,
+			area.deptaliasname as deptAliasName,
+			(select medicaments_name
+				from SRVS_PRESCRIPTION yd
+				join SRVS_MEDICAMENTS medic on medic.medicaments_code = yd.medicaments_code
+		        where yd.pidsj = pq.pidsj and medic.medicaments_ismaindrug = 0 and rownum=1) as mainDrug,
+			pq.ydpq as bottleNum,
+			pq.MAIN_HTML as mainHtml,
+			pq.MAINDRUG_HTML as mainDrugHtml,
+			pq.MENSTRUUM_HTML as menstruumHtml
+		FROM SRVS_LABEL pq
+		JOIN SRVS_PRESCRIPTION_main ydMain ON pq.pidsj = ydMain.pidsj
+		JOIN srvs_batch batch on ydMain.zxbc=batch.id_
+		LEFT JOIN SRVS_INPATIENTAREA area on area.deptcode = pq.deptcode
+		<where>
+			1=1
+			<if test="printLabelBean.printAgain == null or '' eq printLabelBean.printAgain ">
+				and ydMain.DYBZ = 1
+			</if>
+			<if test="printLabelBean.bottleNumList != null">
+				and pq.pidsj IN
+				(select t.pidsj from SRVS_PIDSJ_TEMP t where t.gid = #{printLabelBean.pidsjIndex})
+				
+			</if>
+			<if test="printLabelBean.bottleNumList == null">
+				and pq.pidsj IN ('')
+			</if>
+		</where>
+		<if test="printLabelBean.sortType != null">
+			<choose>  
+				<when test="printLabelBean.sortType == 0 ">  
+			       	order by batch.order_num,ydMain.wardname_en,ydMain.bedno_en,mainDrug
+			    </when >  
+			    <when test="printLabelBean.sortType == 1">  
+			        order by ydMain.wardname_en,ydMain.bedno_en,batch.order_num,mainDrug
+			    </when >  
+			    <otherwise>  
+			    </otherwise>  
+			</choose> 
+		</if>
+		<if test="printLabelBean.sortType == null">
+			order by ydMain.wardname_en,ydMain.bedno_en,mainDrug,batch.order_num
+		</if>
+	</select>
+	
+	<!-- 配置 -->
+	<select id="queryPrintBottleLabelListKong" resultType="com.zc.pivas.printlabel.entity.PrintLabelBean">
+		select tab1.* from (
+			select tab.*,
+				decode(tab.menstCount,0,10000,tab.menstCount) as menCount
+			  from (SELECT pq.pidsj,
+			               pq.ydzt as dybz,
+			               area.deptaliasname as deptAliasName,
+			               pq.ydpq as bottleNum,
+			               (select count(medicaments_name) from SRVS_PRESCRIPTION yd
+                               join SRVS_MEDICAMENTS medic on medic.medicaments_code = yd.medicaments_code
+                               where yd.pidsj = pq.pidsj and medic.medicaments_menstruum != 1) as exceptNum,
+                           (select tab11.quantity from (select yd.quantity,yd.pidsj from SRVS_PRESCRIPTION yd join (
+                              	select ydsub.pidsj,count(1) numbe from SRVS_PRESCRIPTION ydsub join SRVS_MEDICAMENTS medic
+                                  	on medic.medicaments_code = ydsub.medicaments_code
+                                   	where  medic.medicaments_menstruum != 1
+                                  	group by ydsub.pidsj) tab1 on yd.pidsj = tab1.pidsj
+                             		join  SRVS_MEDICAMENTS medic on medic.medicaments_code = yd.medicaments_code
+                              where tab1.numbe = 1  and medic.medicaments_menstruum!=1)tab11 where tab11.pidsj = pq.pidsj
+                           ) as exceptCount,
+			               (select medicaments_name
+								from SRVS_PRESCRIPTION yd
+							  join SRVS_MEDICAMENTS medic on medic.medicaments_code = yd.medicaments_code
+						      where yd.pidsj = pq.pidsj and medic.medicaments_ismaindrug = 0 and rownum=1) as mainDrug,
+						    (select yd.quantity
+								from SRVS_PRESCRIPTION yd
+							  join SRVS_MEDICAMENTS medic on medic.medicaments_code = yd.medicaments_code
+						      where yd.pidsj = pq.pidsj and medic.medicaments_ismaindrug = 0 and rownum=1) as mainDrugQuan,
+			               pq.MAIN_HTML as mainHtml,
+			               pq.MAINDRUG_HTML as mainDrugHtml,
+			               pq.MENSTRUUM_HTML as menstruumHtml,
+			               (select count(1)
+			                  from SRVS_PRESCRIPTION yd
+			                  left join SRVS_MEDICAMENTS medic
+			                    on medic.medicaments_code = yd.medicaments_code
+			                 where yd.pidsj = pq.pidsj
+			                   and medic.medicaments_menstruum = 1) as menstCount,
+			               (select LISTAGG(medic.medicaments_alias_name, '@@') within group(order by medic.medicaments_name)
+			                  from SRVS_PRESCRIPTION yd
+			                  left join SRVS_MEDICAMENTS medic
+			                    on medic.medicaments_code = yd.medicaments_code
+			                 where yd.pidsj = pq.pidsj
+			                   and medic.medicaments_menstruum = 1) as drugAliasName,
+			               (select LISTAGG(medic.medicaments_code, '@@') within group(order by medic.medicaments_code)
+                        	  from SRVS_PRESCRIPTION yd
+                              left join SRVS_MEDICAMENTS medic
+                                on medic.medicaments_code = yd.medicaments_code
+                              where yd.pidsj = pq.pidsj
+                               and medic.medicaments_menstruum = 1) as menstCode
+			          FROM SRVS_LABEL pq
+			          JOIN SRVS_PRESCRIPTION_main ydMain
+			            ON pq.pidsj = ydMain.pidsj
+			          JOIN srvs_batch batch
+			            on ydMain.zxbc = batch.id_
+			          LEFT JOIN SRVS_INPATIENTAREA area
+			            on area.deptcode = pq.deptcode
+			         <where>
+						1=1
+						<if test="printLabelBean.printAgain == null or '' eq printLabelBean.printAgain ">
+							and ydMain.DYBZ = 1
+						</if>
+						<if test="printLabelBean.bottleNumList != null">
+							and pq.pidsj IN
+							<!-- <foreach collection="printLabelBean.bottleNumList" item="num" open="(" separator="," close=")">
+								#{num}
+							</foreach> -->
+							(select t.pidsj from SRVS_PIDSJ_TEMP t where t.gid = #{printLabelBean.pidsjIndex})
+							
+						</if>
+						<if test="printLabelBean.bottleNumList == null">
+							and pq.pidsj IN ('')
+						</if>
+					</where>
+			    ) tab
+			 order by tab.menstCode,tab.mainDrug,tab.mainDrugQuan
+			 ) tab1 
+		 	order by tab1.menCount,tab1.menstCode,tab1.exceptNum,tab1.exceptCount,tab1.mainDrug
+	</select>
+	
+	<insert id="addPrintInfoToHistory">
+		INSERT INTO SRVS_PRINT_HISTORY (
+			GID, 
+			PIDSJ, 
+			PAGE_INDEX,
+			PRINT_INFO,
+			PRINT_DATE
+		) VALUES ( 
+			#{printHistoryBean.gid,jdbcType=INTEGER},
+			#{printHistoryBean.pidsj,jdbcType=VARCHAR},
+			#{printHistoryBean.pageIndex,jdbcType=INTEGER},
+			#{printHistoryBean.printInfo,jdbcType=CLOB},
+			sysdate
+		)
+	</insert>
+	
+	<select id="getPrintHistoryGid" resultType="int">
+		select sq_pivas_printlabel_index.nextval from dual
+	</select>
+	
+	<select id="getCurrHistoryGid" resultType="int">
+		select max(gid) from SRVS_PRINT_HISTORY
+	</select>
+	
+	<select id="getMedicamentsCounts" resultType="int">
+		SELECT DISTINCT getcount(drugname,'@@') FROM SRVS_PRESCRIPTION_main
+	</select>
+	
+	<!-- 获取汇总单信息 空--> 
+	<select id="printStatisicInfoKong" resultType="com.zc.pivas.printlabel.entity.BottleLabel">
+		SELECT
+	      t1.wardname AS wardName,
+	      t1.ward_code AS wardCode,
+	      t2.wardname_en,
+		  area.deptaliasname AS deptAliasName,
+		  t1.specifications AS specifications,
+	      t5.medicaments_shelf_no AS shelfNo,
+	      t5.medicaments_alias_name AS drugAliasName,
+	      t1.medicaments_code AS medicamentsCode,
+	      sum(ceil(t1.quantity)) AS quantity,
+	      t1.medicaments_packing_unit AS packingUnit
+	      
+	    FROM SRVS_PRESCRIPTION t1
+	    JOIN SRVS_PRESCRIPTION_main t2 on t1.pidsj = t2.pidsj
+	    left JOIN SRVS_MEDICAMENTS t5 ON t5.medicaments_code = t1.medicaments_code
+	    left join SRVS_INPATIENTAREA area on t2.ward_code = area.deptcode
+		<where>
+			1=1
+			<if test=' printLabelBean.isPack == "1" '>
+				and t1.ZXBC IN (select id_ from srvs_batch where is_empty_batch_=1 )
+			</if>
+			<if test="printLabelBean.bottleNumList != null">
+				and t1.pidsj IN
+				<!-- <foreach collection="printLabelBean.bottleNumList" item="num" open="(" separator="," close=")">
+					#{num}
+				</foreach> -->
+				(select t.pidsj from SRVS_PIDSJ_TEMP t where t.gid = #{printLabelBean.pidsjIndex})
+			</if>
+			<if test="printLabelBean.bottleNumList == null">
+				and t1.pidsj IN ('')
+			</if>
+		</where>
+		group by 
+			t1.wardname,
+			t2.wardname_en,
+			t1.medicaments_code,
+			t5.medicaments_alias_name,
+			t1.ward_code,
+			area.deptaliasname,
+			t1.specifications,
+			t1.medicaments_packing_unit,
+			t5.medicaments_shelf_no
+    	order by t2.wardname_en,t5.medicaments_shelf_no,t5.medicaments_alias_name
+	</select>
+	
+	<!-- 获取汇总单信息  -->
+	<select id="printStatisicInfo" resultType="com.zc.pivas.printlabel.entity.BottleLabel">
+		select 
+			t1.medicaments_code AS medicamentsCode,
+		   	t5.medicaments_alias_name AS drugAliasName,
+		   	t1.specifications AS specifications,
+		   	sum(ceil(t1.quantity)) AS quantity,
+		   	t1.medicaments_packing_unit AS packingUnit,
+		   	t5.medicaments_shelf_no AS shelfNo
+		FROM SRVS_PRESCRIPTION t1
+		  left JOIN SRVS_MEDICAMENTS t5 ON t5.medicaments_code = t1.medicaments_code
+		  <if test="printLabelBean.statisticTwo == null">
+		  	left join (select ydmain.pidsj, (select count(1) from SRVS_PRESCRIPTION yd join SRVS_MEDICAMENTS medic on medic.medicaments_code = yd.medicaments_code where yd.pidsj = ydmain.pidsj
+		                        and medic.medicaments_menstruum = 1) as mentrumCount
+		               from SRVS_PRESCRIPTION_main ydmain) mentrumTab on t1.pidsj = mentrumTab.pidsj
+		  </if>
+		<where>
+			1=1
+			<if test="printLabelBean.statisticTwo == null">
+			 	and mentrumTab.mentrumCount = 1
+				and t5.medicaments_menstruum = 1
+			</if>
+			<if test="printLabelBean.bottleNumList != null">
+				and t1.pidsj IN
+				<!-- <foreach collection="printLabelBean.bottleNumList" item="num" open="(" separator="," close=")">
+					#{num}
+				</foreach> -->
+				(select t.pidsj from SRVS_PIDSJ_TEMP t where t.gid = #{printLabelBean.pidsjIndex})
+			</if>
+			<if test="printLabelBean.bottleNumList == null">
+				and t1.pidsj IN ('')
+			</if>
+		</where>
+		group by 
+			t1.medicaments_code,
+			t5.medicaments_alias_name, 
+			t1.specifications,
+			t1.medicaments_packing_unit,
+			t5.medicaments_shelf_no
+    	order by t1.medicaments_code
+	</select>
+	
+	<select id="getAllMedicLabel" resultType="com.zc.pivas.medicamentslabel.entity.MedicLabel">
+		select 
+			label_id as labelId, 
+			label_name as labelName, 
+			is_active as isActive,
+			label_no as labelNo
+		from SRVS_MEDICAMENTS_label
+		where is_active=1
+	</select>
+	
+	<select id="queryAllMedicaments" resultType="com.zc.pivas.printlabel.entity.PrintLabelBean">
+		select
+  			yd.medicaments_code as medicamentsCode,
+  			yd.drugname as drugName,
+  			count(1) as singleDrugTotalCount
+		from SRVS_PRESCRIPTION yd
+		join SRVS_PRESCRIPTION_main ydMain on yd.pidsj=ydMain.pidsj
+		left join SRVS_MEDICAMENTS medic on yd.medicaments_code=medic.medicaments_code
+		left join SRVS_INPATIENTAREA area on yd.ward_code = area.deptcode
+		where
+  			1=1
+  			and ydMain.ydreorder_status = 1
+  			and yd.ydzxzt = 0
+  			and area.enabled = 1
+  			and ydMain.yzshzt = 1
+  			<if test="printLabelBean.medicamentsCodeListArray != null" >
+				and yd.charge_code in 
+				<foreach collection="printLabelBean.medicamentsCodeListArray" item="medicamentsCode" open="("
+					close=")" separator=",">
+					#{medicamentsCode}
+				</foreach>
+			</if>
+			
+  			<if test="printLabelBean.useDate != null ">
+  				and yd.yyrq &gt;= to_date(to_char(#{printLabelBean.useDate},'yyyy-MM-dd')||' '||'${@com.zc.pivas.common.util.DataFormat@getTimeStart()}','yyyy-MM-DD hh24:mi:ss')
+				and yd.yyrq &lt; to_date('${@com.zc.pivas.common.util.DataFormat@getNextDate(printLabelBean.useDate)}'||' '||'${@com.zc.pivas.common.util.DataFormat@getTimeEnd()}','yyyy-MM-DD hh24:mi:ss')
+  			</if>
+  			
+  			<if test="printLabelBean.medicamentLabelArray != null">
+  				and  
+				<foreach collection="printLabelBean.medicamentLabelArray" item="medicamentsLabel" open="("
+					close=")" separator="or">
+					#{medicamentsLabel} in (select label_id from SRVS_MEDICAMENTS_REF_LABEL labelRef where labelRef.medicaments_id= medic.medicaments_id)
+				</foreach>
+			</if>
+			
+			<if test=' printLabelBean.isPack == null or printLabelBean.isPack == "0" '>
+				<if test="printLabelBean.batchIDList != null">
+	  				and yd.zxbc IN 
+					<foreach collection="printLabelBean.batchIDList" item="batchID" open="(" separator="," close=")">
+						#{batchID}
+					</foreach>
+	  			</if>
+  			</if>
+  			<if test=' printLabelBean.isPack == "1" '>
+  				and yd.zxbc IN (select id_ from srvs_batch where is_empty_batch_=1 )
+  			</if>
+  			
+			<if test="printLabelBean.categoryIdArray != null">
+  				and medic.category_id IN 
+  				<foreach collection="printLabelBean.categoryIdArray" item="categoryId" open="(" separator="," close=")">
+					#{categoryId}
+				</foreach>
+  			</if> 
+  			
+			<if test="printLabelBean.medicamentsCountsArray != null">
+				and
+				<foreach collection="printLabelBean.medicamentsCountsArray" item="medicamentsCounts" open="("
+					close=")" separator="or">
+					exists ( select 1 from SRVS_PRESCRIPTION_main ydm1 where (regexp_count(ydm1.drugname,'@@')+1) ${medicamentsCounts} and ydm1.pidsj = ydMain.pidsj )
+				</foreach>
+			</if>
+			<if test="printLabelBean.dybz != null">
+				and ydMain.DYBZ = #{printLabelBean.dybz}
+			</if> 
+			
+			<if test="printLabelBean.wardCodeArray !=null"> 
+				and ydMain.WARD_CODE in 
+				<foreach collection="printLabelBean.wardCodeArray" item="wardCode" open="(" separator="," close=")">
+					#{wardCode}
+				</foreach>
+			</if>
+			<if test="printLabelBean.bednoArray !=null">
+				and (
+				<foreach collection="printLabelBean.bednoArray" item="bedno" separator="or">
+					ydMain.bedno like '%'||Upper(#{bedno,jdbcType=VARCHAR})||'%' escape '\'
+				</foreach>
+				)
+			</if> 
+			<if test="printLabelBean.drugnameyArray !=null">
+				and (
+				<foreach collection="printLabelBean.drugnameyArray" item="drugnameQry" separator="or">
+					yd.drugname like '%'||#{drugnameQry,jdbcType=VARCHAR}||'%' escape '\' or
+					medic.medicaments_suchama like '%' || Upper(#{drugnameQry,jdbcType=VARCHAR}) || '%' escape '\' 
+				</foreach>
+				)
+			</if>
+		
+		group by yd.drugname,yd.medicaments_code
+		<if test="printLabelBean.medicTotal != null and  printLabelBean.medicTotal != '' ">
+			having count(1) ${printLabelBean.medicTotal}
+		</if>
+		order by singleDrugTotalCount desc,medicamentsCode
+	</select>
+	
+	<select id="queryPrintLabelConfig"  resultType="com.zc.pivas.printlabel.entity.PrintLabelConBean">
+		select 
+			id,
+			name,
+			yyrq,
+			batchid,
+			mediccategory,
+			mediclabel,
+			printstate,
+			medical,
+			deptcode,
+			ispack,
+			usetype
+		from SRVS_PRINTLABEL_CON
+		order by ordernum
+	</select>
+	
+	<select id="printMedicTotSingCount" resultType="String">
+		select description from SYS_DICT where category = #{map.category}
+	</select>
+	
+	<select id="getWardNameByCode" resultType="String">
+		select LISTAGG(deptname,',') within group(order by deptcode) deptname from SRVS_INPATIENTAREA where deptcode in
+			<foreach collection="wardCodes" item="wardCode" open="(" separator="," close=")">
+				#{wardCode}
+			</foreach>
+	</select>
+	
+	<select id="getMedicLabelByCode" resultType="String">
+		select LISTAGG(label_name,',') within group(order by label_id) label_name from SRVS_MEDICAMENTS_label where label_id in
+			<foreach collection="medicLabelCodes" item="medicLabelCode" open="(" separator="," close=")">
+				#{medicLabelCode}
+			</foreach>
+	</select>
+	
+	<select id="getBatchNameById" resultType="String">
+		select LISTAGG(name_,',') within group(order by order_num) name_ from srvs_batch where id_ in
+			<foreach collection="batchIds" item="batchId" open="(" separator="," close=")">
+				#{batchId}
+			</foreach>
+	</select>
+	
+	<select id="getCategoryByCode" resultType="String">
+		select LISTAGG(category_name,',') within group(order by category_priority) category_name from SRVS_MEDICAMENTS_category where category_id in
+			<foreach collection="categorys" item="category" open="(" separator="," close=")">
+				#{category}
+			</foreach>
+	</select>
+	
+	<select id="queryDelFileTask" resultType="com.zc.pivas.printlabel.entity.DelFileTaskBean">
+		select filePath,day from SRVS_DELETEFIEL_TASK
+	</select>
+	
+	<update id="addDelFileTask" parameterType="com.zc.pivas.printlabel.entity.DelFileTaskBean">
+
+		merge into
+		SRVS_DELETEFIEL_TASK t1
+		using ( select #{filePath} as filePath from dual ) t2
+		ON
+		(
+		 	t1.filePath = t2.filePath 
+		)
+		WHEN MATCHED THEN UPDATE SET
+			t1.day = #{day}
+		where t1.filePath = #{filePath}
+
+		WHEN
+		NOT
+		MATCHED THEN
+		INSERT
+		(
+			t1.filePath,
+			t1.day
+		)
+		VALUES
+		(
+			#{filePath},
+			#{day}
+		)
+	</update>
+	
+	<select id="queryYDCount" resultType="com.zc.pivas.docteradvice.entity.BatchBean" parameterType="com.zc.pivas.printlabel.entity.BottleLabel">
+		select bc.id_,bc.name_ ,
+		nvl(
+		(
+			select count(ydm.zxbc) 
+			from SRVS_PRESCRIPTION_main ydm
+			left join SRVS_LABEL pqm on ydm.pidsj = pqm.pidsj
+			where 1= 1
+			<choose>  
+            <when test="specialBtach != null and specialBtach != '' ">  
+                   and pqm.ydzt > 3 
+            </when>  
+            <otherwise>  
+                   and pqm.ydzt > 6
+            </otherwise>  
+       	 	</choose>  
+       	 	
+       	 	<if test="yyrqStart != null and yyrqEnd != null">
+				and ydm.yyrq &gt;=
+				to_date(#{yyrqStart,jdbcType=VARCHAR},'yyyy-MM-DD hh24:mi:ss')
+				and ydm.yyrq &lt;=
+				to_date(#{yyrqEnd,jdbcType=VARCHAR},'yyyy-MM-DD hh24:mi:ss')
+			</if>
+			
+			<if test="wardCode != null and wardCode != '' ">
+				and ydm.ward_code = #{wardCode}
+			</if>
+			and bc.id_ = ydm.zxbc
+			group by ydm.zxbc
+		),0)
+		<if test="isFourReciver  == null">
+		 ||  '(普' ||
+		nvl(
+		(
+			select count(ydm.zxbc) 
+			from SRVS_PRESCRIPTION_main ydm
+			left join SRVS_LABEL pqm on ydm.pidsj = pqm.pidsj
+			where 1= 1
+			<choose>  
+            <when test="specialBtach != null and specialBtach != '' ">  
+                   and pqm.ydzt > 3 
+            </when>  
+            <otherwise>  
+                   and pqm.ydzt > 6
+            </otherwise>  
+       	 	</choose>  
+       	 	
+       	 	<if test="yyrqStart != null and yyrqEnd != null">
+				and ydm.yyrq &gt;=
+				to_date(#{yyrqStart,jdbcType=VARCHAR},'yyyy-MM-DD hh24:mi:ss')
+				and ydm.yyrq &lt;=
+				to_date(#{yyrqEnd,jdbcType=VARCHAR},'yyyy-MM-DD hh24:mi:ss')
+			</if>
+			
+			<if test="wardCode != null and wardCode != '' ">
+				and ydm.ward_code = #{wardCode}
+			</if>
+			and bc.id_ = ydm.zxbc
+			<![CDATA[ and ydm.transfusion < 850]]>
+			group by ydm.zxbc
+		),0) 
+		
+		 || '/营' ||
+		
+		nvl(
+		(
+			select count(ydm.zxbc) 
+			from SRVS_PRESCRIPTION_main ydm
+			left join SRVS_LABEL pqm on ydm.pidsj = pqm.pidsj
+			where 1= 1
+			<choose>  
+            <when test="specialBtach != null and specialBtach != '' ">  
+                   and pqm.ydzt > 3 
+            </when>  
+            <otherwise>  
+                   and pqm.ydzt > 6
+            </otherwise>  
+       	 	</choose>  
+       	 	
+       	 	<if test="yyrqStart != null and yyrqEnd != null">
+				and ydm.yyrq &gt;=
+				to_date(#{yyrqStart,jdbcType=VARCHAR},'yyyy-MM-DD hh24:mi:ss')
+				and ydm.yyrq &lt;=
+				to_date(#{yyrqEnd,jdbcType=VARCHAR},'yyyy-MM-DD hh24:mi:ss')
+			</if>
+			
+			<if test="wardCode != null and wardCode != '' ">
+				and ydm.ward_code = #{wardCode}
+			</if>
+			and bc.id_ = ydm.zxbc
+			<![CDATA[ and ydm.transfusion >= 850]]>
+			group by ydm.zxbc
+		),0) ||')'
+		</if>
+		as reserve3_ 
+		from srvs_batch bc
+		where bc.enabled_ = 1
+		<if test="batchIDList != null">
+			and bc.id_ in
+			<foreach collection="batchIDList" item="batch" open="("
+				close=")" separator=",">
+				#{batch}
+			</foreach>
+		</if>
+		order by bc.order_num
+		
+	</select>
+	
+	<select id="qryYdWardCode" resultType="com.zc.pivas.printlabel.entity.ReceiveBean" parameterType="com.zc.pivas.printlabel.entity.BottleLabel">
+		select distinct(ydm.ward_code) as wardcode,inp.deptaliasname as wardname
+		from SRVS_PRESCRIPTION_main ydm
+		left join SRVS_LABEL pqm on ydm.pidsj = pqm.pidsj
+		left join srvs_batch bc on bc.id_ = ydm.zxbc
+		left join SRVS_INPATIENTAREA inp on inp.deptcode = ydm.ward_code
+		<where>
+			1 = 1
+			<choose>  
+            <when test="specialBtach != null and specialBtach != '' ">  
+                   and pqm.ydzt > 3 
+            </when>  
+            <otherwise>  
+                   and pqm.ydzt > 6
+            </otherwise>  
+       	 	</choose>  
+			<if test="yyrqStart != null and yyrqEnd != null">
+				and ydm.yyrq &gt;=
+				to_date(#{yyrqStart,jdbcType=VARCHAR},'yyyy-MM-DD hh24:mi:ss')
+				and ydm.yyrq &lt;=
+				to_date(#{yyrqEnd,jdbcType=VARCHAR},'yyyy-MM-DD hh24:mi:ss')
+			</if>
+			<if test="batchIDList != null">
+				and ydm.zxbc in
+				<foreach collection="batchIDList" item="batch" open="("
+					close=")" separator=",">
+					#{batch}
+				</foreach>
+			</if>
+			<if test="wardCodeArray != null">
+				and ydm.ward_code in
+				<foreach collection="wardCodeArray" item="wardCode" open="("
+					close=")" separator=",">
+					#{wardCode}
+				</foreach>
+			</if>
+			and bc.enabled_ = 1
+		</where>
+		order by ydm.ward_code
+	</select>
+	
+	
+	<select id="queryPQCount" resultType="com.zc.pivas.printlabel.entity.PrintPqBean" parameterType="com.zc.pivas.printlabel.entity.BottleLabel">
+	select pqm.bedno,pqm.patname,pqm.inhospno,listagg(pqm.ydpq,',') within GROUP (order by pqm.ydpq) as ydpq
+	from SRVS_LABEL pqm
+	<where> 
+	1 = 1
+	<choose>  
+    <when test="specialBtach != null and specialBtach != '' ">  
+           and pqm.ydzt > 3 
+    </when>  
+    <otherwise>  
+           and pqm.ydzt > 6
+    </otherwise>  
+ 	</choose>  
+	<if test="yyrqStart != null and yyrqEnd != null">
+		and pqm.yyrq &gt;=
+		to_date(#{yyrqStart,jdbcType=VARCHAR},'yyyy-MM-DD hh24:mi:ss')
+		and pqm.yyrq &lt;=
+		to_date(#{yyrqEnd,jdbcType=VARCHAR},'yyyy-MM-DD hh24:mi:ss')
+	</if>
+	<if test="batchIDList != null">
+		and pqm.zxbc in
+		<foreach collection="batchIDList" item="batch" open="("
+			close=")" separator=",">
+			#{batch}
+		</foreach>
+	</if>
+	<if test="wardCode != null and wardCode != '' ">
+		and pqm.deptcode = #{wardCode}
+	</if>
+	</where>
+	group by pqm.bedno,pqm.inhospno,pqm.patname
+	order by pqm.bedno,pqm.inhospno,pqm.patname
+	</select>
+	
+	<select id="qryBtachCode" resultType = "String">
+		select id_ from srvs_batch  where num_= #{btachName} and enabled_ = 1
+	</select>
+	
+	<select id="callMedicStatisticList" resultType="com.zc.pivas.printlabel.entity.BottleLabel">
+		select
+			medic.medicaments_shelf_no as shelfNo,
+			medic.medicaments_alias_name as drugAliasName,
+			yd.specifications as specifications,
+			sum(ceil(yd.quantity)) as quantity,
+			yd.medicaments_packing_unit as packingUnit
+		  from SRVS_PRESCRIPTION yd
+		  left join SRVS_MEDICAMENTS medic
+		  on yd.medicaments_code = medic.medicaments_code
+		 <where>
+		    1=1 
+		    <if test="param.pidsjArr != null">
+		    	and yd.pidsj in 
+				<foreach collection="param.pidsjArr" item="pidsj" open="(" close=")" separator=",">
+					#{pidsj,jdbcType=VARCHAR}
+				</foreach>
+		   	</if>
+		   	<if test="param.pidsjArr == null">
+		   		and to_char(yd.yyrq,'yyyy-mm-dd') = to_char(#{param.yyrq},'yyyy-mm-dd')
+		   		<if test="param.medLabelNoArr != null">
+				    and exists (select *
+				          from SRVS_MEDICAMENTS_ref_label label_ref
+				         where label_ref.medicaments_id = medic.medicaments_id 
+							and label_ref.label_id in 
+				          	<foreach collection="param.medLabelNoArr" item="medLabelNo" open="(" close=")" separator=",">
+								#{medLabelNo}
+							</foreach>
+				         )
+			    </if>
+			   
+			    <if test="param.batchIdSingle != null">
+			    	<choose>
+			    		<when test="param.batchIdSingle == 0">
+			    			and exists (select * from srvs_batch bat where yd.zxbc = bat.id_ and bat.IS_EMPTY_BATCH_ = 1 and bat.name_ not like '%T%')
+			    		</when>
+			    		<when test="param.batchIdSingle == 1">
+			    			and exists (select * from srvs_batch bat where yd.zxbc = bat.id_ and bat.IS_EMPTY_BATCH_ = 0 and bat.name_ not like '%T%')
+			    		</when>
+			    	</choose>
+			    </if>
+			    
+			    <if test="param.batchIdArr != null">
+			    	and yd.zxbc in 
+					<foreach collection="param.batchIdArr" item="batchId" open="(" close=")" separator=",">
+						#{batchId}
+					</foreach>
+			    </if>
+			    
+			    <if test="param.categoryIdArr != null">
+			    	and medic.category_id in 
+			    	<foreach collection="param.categoryIdArr" item="categoryId" open="(" close=")" separator=",">
+						#{categoryId}
+					</foreach>
+			    </if>
+			    <if test="param.dybz != null">
+			    	and yd.dybz = #{param.dybz}
+			    </if>
+			    <if test="param.menstruumArr != null">
+			    	and yd.medicaments_code in 
+			    	<foreach collection="param.menstruumArr" item="menstruum" open="(" close=")" separator=",">
+						#{menstruum}
+					</foreach>
+			    </if>
+			    <if test="param.wardCodeArr != null">
+			    	and yd.ward_code in 
+			    	<foreach collection="param.wardCodeArr" item="wardCode" open="(" close=")" separator=",">
+						#{wardCode}
+					</foreach>
+			   	</if>
+			   	<if test="param.printStartTime != null and param.printEndTime != null">
+				    and exists (
+				        select * from SRVS_LABEL ppq
+				        where yd.pidsj = ppq.pidsj
+				        and ppq.print_time &gt;= to_date(#{param.printStartTime},'yyyy/mm/dd hh24:mi:ss')
+				        and ppq.print_time &lt;= to_date(#{param.printEndTime},'yyyy/mm/dd hh24:mi:ss')
+				    )
+				</if>
+		   	</if>
+		   	</where>
+		 	group by yd.medicaments_code,
+				medic.medicaments_alias_name,
+				medic.medicaments_shelf_no,
+				yd.specifications,
+				yd.medicaments_packing_unit
+			order by shelfNo
+	</select>
+	
+	<update id="updatePrintTime">
+		update SRVS_LABEL
+		  set 
+		  	print_time = sysdate,
+			print_name = #{printLabelBean.printName}
+		<where>
+			<if test="printLabelBean.bottleNumList != null">
+				pidsj IN
+				<foreach collection="printLabelBean.bottleNumList" item="num" open="("
+					separator="," close=")">
+					#{num}
+				</foreach>
+			</if>
+		</where>
+	</update>
+	
+	<select id="getPidsjIndex" resultType="int">
+		select SQ_SRVS_PIDSJ_TEMP.nextval from dual
+	</select>
+	
+	<insert id="addPidsjToTmp">
+		insert into SRVS_PIDSJ_TEMP (gid,pidsj) values (#{param.gid},#{param.pidsj})
+	</insert>
+	
+	<delete id="deleteAllPidsj">
+		delete from SRVS_PIDSJ_TEMP temp where temp.gid = #{gid}
+	</delete>
+	
+</mapper>

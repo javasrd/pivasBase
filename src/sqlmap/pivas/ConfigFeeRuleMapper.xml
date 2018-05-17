@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zc.pivas.configfee.dao.ConfigFeeRuleDAO" >
+	<resultMap id="ConfigFeeRuleMap" type="com.zc.pivas.configfee.bean.ConfigFeeRuleBean" >
+		<id column="gid" property="gid" jdbcType="VARCHAR" />
+		<result column="rulename" property="ruleName" jdbcType="VARCHAR" />
+		<result column="drugtypecode" property="drugTypeCode" jdbcType="VARCHAR" />
+		<result column="drugcode" property="drugCode" jdbcType="VARCHAR" />
+		<result column="volume" property="volume" jdbcType="VARCHAR" />
+		<result column="reserve0" property="reserve0" jdbcType="VARCHAR" />
+		<result column="reserve1" property="reserve1" jdbcType="VARCHAR" />
+		<result column="reserve2" property="reserve2" jdbcType="VARCHAR" />
+		<result property="drugTypeName" jdbcType="VARCHAR" />
+		<result property="drugName" jdbcType="VARCHAR" />
+	</resultMap>
+	
+	<sql id="getConfigFeeRuleSql">
+  		select a.gid,
+         	   a.rulename,
+         	   a.drugCode,
+       		   c.category_name    as drugTypeName,
+               a.volume
+  			   from SRVS_CONFIGFEE_RULE       a
+       			left join 	SRVS_MEDICAMENTS_CATEGORY c on a.drugtypecode = c.category_id
+			<where>
+  		    	1=1
+			<if test="configFeeRule != null">
+				<if test="configFeeRule.ruleNames != null and '' neq configFeeRule.ruleNames">
+				and 
+				<foreach item="ruleName" index="index" collection="configFeeRule.ruleNames"  open="(" separator="or" close=")" >  
+					a.ruleName like  '%'||#{ruleName}||'%' escape '\'              
+				</foreach>
+				</if>
+				
+				<if test="configFeeRule.drugTypeNames != null and '' neq configFeeRule.drugTypeNames">
+				and 
+				<foreach item="drugTypeName" index="index" collection="configFeeRule.drugTypeNames"  open="(" separator="or" close=")" >  
+					c.category_name like  '%'||#{drugTypeName}||'%'  escape '\'                 
+				</foreach>
+				</if>
+				
+				<if test="configFeeRule.volumes != null and '' neq configFeeRule.volumes">
+				and 
+				<foreach item="volume" index="index" collection="configFeeRule.volumes"  open="(" separator="or" close=")" >  
+					a.volume like  '%'||#{volume}||'%'  escape '\'                
+				</foreach>
+				</if>
+			</if>
+		  </where>
+ 	</sql>
+  
+  <select id="getConfigFeeRuleList" resultMap="ConfigFeeRuleMap">
+  	<include refid="common.jqueryPageHead" />
+  	<include refid="getConfigFeeRuleSql"/>
+  	<include refid="common.jqueryPageBottom" />
+  </select>
+  
+  <select id="getConfigFeeRuleTotal" resultType="int">
+  	select count(1) from (
+  		<include refid="getConfigFeeRuleSql"/>
+  	) t1
+  </select>
+  
+  <select id="getConfigFeeRule" resultMap="ConfigFeeRuleMap">
+	  	select * from SRVS_CONFIGFEE_RULE
+			<where>
+  		    	1=1
+			<if test="configFeeRule != null">
+				<if test="configFeeRule.gid != null and '' neq configFeeRule.gid ">
+					and gid = #{configFeeRule.gid}
+				</if>
+				
+				<if test="configFeeRule.ruleName != null and '' neq configFeeRule.ruleName ">
+					and ruleName = #{configFeeRule.ruleName}
+				</if>
+			</if>
+		  </where>
+  </select>
+  
+   <select id="getConfigFeeRuleByInfo" resultMap="ConfigFeeRuleMap">
+        select * from SRVS_CONFIGFEE_RULE
+            <where>
+                1=1
+            <if test="configFeeRule != null">
+                <if test="configFeeRule.drugTypeCode != null and '' neq configFeeRule.drugTypeCode ">
+                    and drugtypecode = #{configFeeRule.drugTypeCode}
+                </if>
+                
+                <if test="configFeeRule.drugTypeCode == null or '' eq configFeeRule.drugTypeCode ">
+                    and drugtypecode is null
+                </if>
+                
+                <if test="configFeeRule.ruleName != null and '' neq configFeeRule.ruleName ">
+                    and ruleName = #{configFeeRule.ruleName}
+                </if>
+                
+                <if test=" configFeeRule.drugCode !=null and '' neq configFeeRule.drugCode  ">
+                    and DRUGCODE like '%'|| #{configFeeRule.drugCode} || '%'
+                </if>
+                
+                 <if test="configFeeRule.volume != null and '' neq configFeeRule.volume  ">
+                    <![CDATA[ and VOLUME >= #{configFeeRule.volume} ]]>
+                  </if>
+               </if>
+          </where>
+          
+          order by VOLUME
+  </select>
+  
+  <select id="checkConfigFeeRuleName" resultMap="ConfigFeeRuleMap">
+	select a.gid,a.rulename,a.volume
+	from SRVS_CONFIGFEE_RULE  a
+	where  1= 1
+	<if test="configFeeRule != null">
+		<if test="configFeeRule.ruleName != null and '' neq configFeeRule.ruleName ">
+			and a.rulename = #{configFeeRule.ruleName}
+		</if>
+	</if>
+	  	<!-- select a.gid,
+         	   a.rulename,
+       		   c.category_name    as drugTypeName,
+               b.medicaments_name as drugName,
+               a.volume
+  			   from SRVS_CONFIGFEE_RULE  a
+           	   left join  SRVS_MEDICAMENTS b on a.drugcode = b.medicaments_id
+               left join  SRVS_MEDICAMENTS_CATEGORY c on a.drugtypecode = c.category_id
+			where  1= 1
+			<if test="configFeeRule != null">
+				<if test="configFeeRule.gid != null and '' neq configFeeRule.gid ">
+					<![CDATA[ and gid <> #{configFeeRule.gid} ]]>
+				</if>
+				
+				<if test="configFeeRule.ruleName != null and '' neq configFeeRule.ruleName ">
+					and a.rulename = #{configFeeRule.ruleName}
+				</if>
+			</if> -->
+  </select>
+  
+  <select id="checkDrugClass" resultMap="ConfigFeeRuleMap">
+	  	select * from SRVS_CONFIGFEE_RULE
+			<where>
+			1=1
+			<if test="configFeeRule != null">
+				<if test="configFeeRule.gid != null and '' neq configFeeRule.gid ">
+					<![CDATA[ and gid <> #{configFeeRule.gid} ]]>
+				</if>
+				
+				<if test="configFeeRule.drugTypeCode != null and '' neq configFeeRule.drugTypeCode ">
+					and drugTypeCode = #{configFeeRule.drugTypeCode}
+				</if>
+				
+				  <if test="configFeeRule.drugTypeCode == null or '' eq configFeeRule.drugTypeCode ">
+                    and drugTypeCode is null
+                </if>
+			</if>
+		  </where>
+  </select>
+  
+  <insert id="addConfigFeeRule" parameterType="com.zc.pivas.configfee.bean.ConfigFeeRuleBean">
+	  	INSERT INTO SRVS_CONFIGFEE_RULE (
+		rulename,
+		drugtypecode,
+		drugcode,
+		volume
+	)
+	VALUES
+		(
+			#{ruleName},
+			#{drugTypeCode},
+			#{drugCode},
+			#{volume}
+		)
+	</insert>
+
+	<update id="updateConfigFeeRule" parameterType="com.zc.pivas.configfee.bean.ConfigFeeRuleBean">
+  		update SRVS_CONFIGFEE_RULE set
+			ruleName = #{ruleName},
+			drugTypeCode = #{drugTypeCode},
+			drugCode = #{drugCode},
+			volume = #{volume}
+		where gid = #{gid}
+  	</update>
+  
+  	<delete id="delConfigFeeRule" parameterType="com.zc.pivas.configfee.bean.ConfigFeeRuleBean">
+  		delete from SRVS_CONFIGFEE_RULE
+		where gid = #{gid}
+	</delete>
+	
+	<select id="checkIsExist" resultMap="ConfigFeeRuleMap">
+	select * from SRVS_CONFIGFEE_RULE
+	where 1 = 1
+	<if test="configFeeRule.drugTypeCode != null and '' neq configFeeRule.drugTypeCode ">
+		and drugtypecode = #{configFeeRule.drugTypeCode}
+	</if>
+	<if test="configFeeRule.drugTypeCode == null or '' eq configFeeRule.drugTypeCode ">
+		and drugtypecode is null
+	</if>
+	<if test="configFeeRule.volume != null and '' neq configFeeRule.volume ">
+		and volume = #{configFeeRule.volume}
+	</if>
+	<if test="configFeeRule.volume == null or '' eq configFeeRule.volume">
+		and volume is null
+	</if>
+	<if test="configFeeRule.drugCode != null and '' neq configFeeRule.drugCode ">
+		and drugcode = #{configFeeRule.drugCode}
+	</if>
+	<if test="configFeeRule.drugCode == null or '' eq configFeeRule.drugCode">
+		and drugcode is null
+	</if>
+	
+	<if test="configFeeRule.ruleName != null and '' neq configFeeRule.ruleName ">
+		<![CDATA[ 	and rulename <> #{configFeeRule.ruleName}]]>
+	</if>
+	</select>
+
+</mapper>

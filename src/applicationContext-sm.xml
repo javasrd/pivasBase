@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:context="http://www.springframework.org/schema/context" 
+	xsi:schemaLocation="
+	http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.1.xsd
+	http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.1.xsd"
+	default-lazy-init="true">
+	
+	<!--bean name="PwdExpireJob" class="org.springframework.scheduling.quartz.JobDetailBean">
+		<property name="jobClass"
+			value="com.zc.zchl.sm.modules.user.service.impl.PwdExpireJob" />
+		<property name="jobDataAsMap">
+			<map>
+				<entry key="userService" value-ref="userService"/>
+			</map>
+		</property>
+	</bean-->
+
+	<!-- 扫描所有用户的密码有效期 每天早上六点执行 -->
+	<!-- 需要调度的任务 -->
+	<!--bean id="PwdExpireJobTrigger"
+		class="org.springframework.scheduling.quartz.CronTriggerBean">
+		<property name="jobDetail" ref="PwdExpireJob" />
+		<property name="cronExpression"
+			value="0 0 6 * * ?" />
+	</bean-->
+	
+	<!-- ##############################################################################  调度容器 ##################################################### -->
+	<!--bean id="PwdExpireSchedulerFactoryBean"
+		class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+		<property name="autoStartup" value="true" />
+		<property name="triggers">
+			<list>
+				<ref bean="PwdExpireJobTrigger" />
+			</list>
+		</property>
+	</bean-->
+</beans>

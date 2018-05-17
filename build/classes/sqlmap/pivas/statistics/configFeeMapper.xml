@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper
+	namespace="com.zc.pivas.statistics.repository.STConfigFeeDao">
+
+	<select id="getConfigFeeTypeList" resultType="Integer">
+		select
+		fee.CONFIGFEETYPE as statusKey
+		
+		<choose>
+			<when test="compareResult != null and '' neq compareResult and compareResult == 0">from SRVS_PRESCRIPTION_FEES_HIS pzf,</when>
+			<otherwise>from SRVS_PRESCRIPTION_FEES pzf,</otherwise>
+		</choose>
+		
+		SRVS_CONFIG_FEE
+		fee,
+		srvs_batch ba
+		where ba.ID_ = pzf.PC_ID
+		group by fee.CONFIGFEETYPE
+		order by fee.CONFIGFEETYPE
+	</select>
+
+	<select id="queryBatchStatusList"
+		resultType="com.zc.pivas.statistics.bean.configFee.ConfigFeeStatusBean">
+		select ba.NAME_ as batchNAME, fee.CONFIGFEETYPE as statusKey, SUM(PZF.PRICE * PZF.AMOUNT) as ststsCount
+
+		<choose>
+			<when test="configFee != null and configFee.compareResult != null and '' neq configFee.compareResult and configFee.compareResult == 0">from SRVS_PRESCRIPTION_FEES_HIS pzf,</when>
+			<otherwise>from SRVS_PRESCRIPTION_FEES pzf,</otherwise>
+		</choose>
+
+		SRVS_CONFIG_FEE fee, srvs_batch ba
+		where ba.ID_ = pzf.PC_ID AND
+		FEE.COSTCODE = PZF.COSTCODE AND PZF.PZFZT IN
+		('1','3')
+		<if test="configFee != null">
+			<if test="configFee.searchTime != null and '' neq configFee.searchTime ">
+				and to_char(pzf.pzfsqrq,'yyyy-mm-dd') like
+				#{configFee.searchTime}
+				||'%'
+			</if>
+
+			<if
+				test="configFee.searchBatchs != null and '' neq configFee.searchBatchs ">
+				and pzf.PC_ID in
+				<foreach item="batch" index="index" collection="configFee.searchBatchs"
+					open="(" separator="," close=")">
+					#{batch,jdbcType=INTEGER}
+				</foreach>
+
+			</if>
+		</if>
+		group by ba.NAME_,fee.CONFIGFEETYPE,pzf.PC_ID
+		order by pzf.PC_ID
+	</select>
+
+	<select id="queryBatchPieList"
+		resultType="com.zc.pivas.statistics.bean.configFee.ConfigFeeBatchPieBean">
+		select
+		ba.NAME_ as name,
+		pzf.PC_ID as zxbc,
+		SUM( PZF.PRICE * PZF.AMOUNT) as value
+		
+		<choose>
+			<when test="configFee != null and configFee.compareResult != null and '' neq configFee.compareResult and configFee.compareResult == 0">from SRVS_PRESCRIPTION_FEES_HIS pzf,</when>
+			<otherwise>from SRVS_PRESCRIPTION_FEES pzf,</otherwise>
+		</choose>
+		
+		SRVS_CONFIG_FEE fee,
+		srvs_batch ba
+		where ba.ID_
+		= pzf.PC_ID AND FEE.COSTCODE = PZF.COSTCODE AND PZF.PZFZT IN
+		('1','3')
+		<if test="configFee != null">
+			<if test="configFee.searchTime != null and '' neq configFee.searchTime ">
+				and to_char(pzf.pzfsqrq,'yyyy-mm-dd') like
+				#{configFee.searchTime}
+				||'%'
+			</if>
+
+			<if
+				test="configFee.searchBatchs != null and '' neq configFee.searchBatchs ">
+				and pzf.PC_ID in
+				<foreach item="batch" index="index" collection="configFee.searchBatchs"
+					open="(" separator="," close=")">
+					#{batch,jdbcType=INTEGER}
+				</foreach>
+
+			</if>
+		</if>
+		group by ba.NAME_, pzf.PC_ID
+		order by pzf.PC_ID
+	</select>
+
+	<select id="queryBatchStatusListByID"
+		resultType="com.zc.pivas.statistics.bean.configFee.ConfigFeeStatusBean">
+		select
+		ba.NAME_ as batchNAME,
+		pzf.PC_ID as zxbc,
+		fee.CONFIGFEETYPE as statusKey,
+		SUM(PZF.PRICE * PZF.AMOUNT) as ststsCount
+		<choose>
+			<when test="configFee != null and configFee.compareResult != null and '' neq configFee.compareResult and configFee.compareResult == 0">from SRVS_PRESCRIPTION_FEES_HIS pzf,</when>
+			<otherwise>from SRVS_PRESCRIPTION_FEES pzf,</otherwise>
+		</choose>
+		SRVS_CONFIG_FEE fee,
+		srvs_batch ba
+		where ba.ID_
+		= pzf.PC_ID
+		and pzf.PC_ID = #{configFee.batchID} AND PZF.COSTCODE = FEE.COSTCODE
+		<if test="configFee.searchTime != null and '' neq configFee.searchTime ">
+			and to_char(pzf.pzfsqrq,'yyyy-mm-dd') like #{configFee.searchTime} ||'%'
+		</if>
+		AND PZF.PZFZT
+		IN ('1','3')
+		group by ba.NAME_,pzf.PC_ID,fee.CONFIGFEETYPE
+		order by pzf.PC_ID
+	</select>
+
+	<select id="queryDeptStatusList"
+		resultType="com.zc.pivas.statistics.bean.configFee.ConfigFeeStatusBean">
+		select
+		INPAT.DEPTNAME as deptName,
+		fee.CONFIGFEETYPE as statusKey,
+		SUM(PZF.PRICE * PZF.AMOUNT) as ststsCount
+		<choose>
+			<when test="configFee != null and configFee.compareResult != null and '' neq configFee.compareResult and configFee.compareResult == 0">from SRVS_PRESCRIPTION_FEES_HIS pzf,</when>
+			<otherwise>from SRVS_PRESCRIPTION_FEES pzf,</otherwise>
+		</choose>
+		SRVS_CONFIG_FEE fee,
+		SRVS_INPATIENTAREA INPAT
+		where PZF.DEPTCODE =
+		INPAT.DEPTCODE
+		and PZF.PZFZT IN ('1','3') AND PZF.COSTCODE =
+		FEE.COSTCODE AND PZF.PZFZT
+		IN ('1','3')
+		<if test="configFee != null">
+			<if test="configFee.searchTime != null and '' neq configFee.searchTime ">
+				and to_char(pzf.pzfsqrq,'yyyy-mm-dd') like
+				#{configFee.searchTime}
+				||'%'
+			</if>
+
+			<if
+				test="configFee.searchDeptNames != null and '' neq configFee.searchDeptNames ">
+				and INPAT.DEPTNAME in
+				<foreach item="deptName" index="index" collection="configFee.searchDeptNames"
+					open="(" separator="," close=")">
+					#{deptName,jdbcType=VARCHAR}
+				</foreach>
+
+			</if>
+		</if>
+		group by INPAT.DEPTNAME,fee.CONFIGFEETYPE
+		order by INPAT.DEPTNAME
+	</select>
+
+	<select id="queryDeptPieList"
+		resultType="com.zc.pivas.statistics.bean.configFee.ConfigFeeDeptPieBean">
+		select
+		INPAT.DEPTNAME as name,
+		SUM( PZF.PRICE * PZF.AMOUNT) as value
+		<choose>
+			<when test="configFee != null and configFee.compareResult != null and '' neq configFee.compareResult and configFee.compareResult == 0">from SRVS_PRESCRIPTION_FEES_HIS pzf,</when>
+			<otherwise>from SRVS_PRESCRIPTION_FEES pzf,</otherwise>
+		</choose>
+		SRVS_CONFIG_FEE fee,
+		SRVS_INPATIENTAREA INPAT
+		where
+		PZF.DEPTCODE = INPAT.DEPTCODE
+		and PZF.PZFZT IN ('1','3') AND
+		FEE.COSTCODE = PZF.COSTCODE
+		<if test="configFee != null">
+			<if test="configFee.searchTime != null and '' neq configFee.searchTime ">
+				and to_char(pzf.pzfsqrq,'yyyy-mm-dd') like
+				#{configFee.searchTime}
+				||'%'
+			</if>
+
+			<if
+				test="configFee.searchDeptNames != null and '' neq configFee.searchDeptNames ">
+				and INPAT.DEPTNAME in
+				<foreach item="deptName" index="index" collection="configFee.searchDeptNames"
+					open="(" separator="," close=")">
+					#{deptName,jdbcType=VARCHAR}
+				</foreach>
+
+			</if>
+		</if>
+		group by INPAT.DEPTNAME
+		order by INPAT.DEPTNAME
+	</select>
+
+	<select id="queryDeptStatusListByName"
+		resultType="com.zc.pivas.statistics.bean.configFee.ConfigFeeStatusBean">
+		select
+		INPAT.DEPTNAME as deptName,
+		fee.CONFIGFEETYPE as
+		statusKey,
+		SUM(PZF.PRICE * PZF.AMOUNT) as ststsCount
+		<choose>
+			<when test="configFee != null and configFee.compareResult != null and '' neq configFee.compareResult and configFee.compareResult == 0">from SRVS_PRESCRIPTION_FEES_HIS pzf,</when>
+			<otherwise>from SRVS_PRESCRIPTION_FEES pzf,</otherwise>
+		</choose>
+		SRVS_CONFIG_FEE fee,
+		SRVS_INPATIENTAREA INPAT
+		where INPAT.DEPTNAME =
+		#{configFee.deptName}
+		<if test="configFee.searchTime != null and '' neq configFee.searchTime ">
+			and to_char(pzf.pzfsqrq,'yyyy-mm-dd') like #{configFee.searchTime} ||'%'
+		</if>
+		and PZF.PZFZT IN ('1','3') and PZF.DEPTCODE =
+		INPAT.DEPTCODE AND
+		FEE.COSTCODE = PZF.COSTCODE
+		group by
+		INPAT.DEPTNAME,fee.CONFIGFEETYPE
+		order by INPAT.DEPTNAME
+	</select>
+
+</mapper>

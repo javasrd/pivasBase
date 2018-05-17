@@ -1,0 +1,246 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zc.pivas.drugDamage.dao.DrugDamageDao">
+
+	<resultMap id="DrugDamageMap" type="com.zc.pivas.drugDamage.bean.DrugDamageBean">
+		<id column="GID" property="gid" jdbcType="BIGINT" />
+		<result column="DRUG_CODE" property="drugCode" jdbcType="VARCHAR" />
+		<result column="DRUG_NAME" property="drugName" jdbcType="VARCHAR" />
+		<result column="SPECIFICATIONS" property="specifications" jdbcType="VARCHAR" />
+		<result column="DRUG_PLACE" property="drugPlace" jdbcType="VARCHAR" />
+		<result column="DAMAGE_PROBLEM" property="damageProblem" jdbcType="INTEGER" />
+		<result column="DAMAGE_LINK" property="damageLink" jdbcType="INTEGER" />
+		<result column="REGIST_QUANTITY" property="quantity" jdbcType="INTEGER" />
+		<result column="REGIST_NAME" property="registName" jdbcType="VARCHAR" />
+		<result column="REGIST_TIME" property="registTime" jdbcType="VARCHAR" />
+		<result column="RESERVE1" property="reserve1" jdbcType="VARCHAR" />
+		<result column="RESERVE2" property="reserve2" jdbcType="VARCHAR" />
+		<result column="RESERVE3" property="reserve3" jdbcType="VARCHAR" />
+	</resultMap>
+
+	<sql id="drugDamageListSql">
+		select 
+			GID,
+			DRUG_CODE,
+			DRUG_NAME,
+			SPECIFICATIONS,
+			DRUG_PLACE,
+			DAMAGE_PROBLEM,
+			DAMAGE_LINK,
+			REGIST_QUANTITY,
+			REGIST_NAME,
+			REGIST_TIME
+       	from SRVS_DRUG_DAMAGE
+		<where>
+			1=1
+			<if test="drugDamage != null">
+				<if test="drugDamage.drugCodes != null">
+					and 
+					<foreach item="code" index="index" collection="drugDamage.drugCodes"  open="(" separator="or" close=")" >  
+						DRUG_CODE like  '%'||#{code}||'%'   escape '\'           
+					</foreach>
+				</if>
+				<if test="drugDamage.drugNames != null">
+					and 
+					<foreach item="name" index="index" collection="drugDamage.drugNames"  open="(" separator="or" close=")" >  
+						DRUG_NAME like  '%'||#{name}||'%'   escape '\'           
+					</foreach>
+				</if>
+				<if test="drugDamage.drugPlaces != null">
+					and 
+					<foreach item="place" index="index" collection="drugDamage.drugPlaces"  open="(" separator="or" close=")" >  
+						DRUG_PLACE like  '%'||#{place}||'%'   escape '\'           
+					</foreach>
+				</if>
+			</if>
+		</where>
+		order by DRUG_CODE
+	</sql>
+	
+	<select id="getAllDrugDamage" resultMap="DrugDamageMap">
+		<include refid="common.jqueryPageHead" />
+		<include refid="drugDamageListSql" />
+		<include refid="common.jqueryPageBottom" />
+	</select>
+	
+	<select id="getDrugDamageTotal" resultType="int">
+		select count(1) from SRVS_DRUG_DAMAGE
+		<where>
+			1=1
+			<if test="drugDamage != null">
+				<if test="drugDamage.drugCodes != null">
+					and 
+					<foreach item="code" index="index" collection="drugDamage.drugCodes"  open="(" separator="or" close=")" >  
+						DRUG_CODE like  '%'||#{code}||'%'   escape '\'           
+					</foreach>
+				</if>
+				<if test="drugDamage.drugNames != null">
+					and 
+					<foreach item="name" index="index" collection="drugDamage.drugNames"  open="(" separator="or" close=")" >  
+						DRUG_NAME like  '%'||#{name}||'%'   escape '\'           
+					</foreach>
+				</if>
+				<if test="drugDamage.drugPlaces != null">
+					and 
+					<foreach item="place" index="index" collection="drugDamage.drugPlaces"  open="(" separator="or" close=")" >  
+						DRUG_PLACE like  '%'||#{place}||'%'   escape '\'           
+					</foreach>
+				</if>
+			</if>
+		</where>
+	</select>
+	
+	<insert id="addDrugDamage" parameterType="com.zc.pivas.drugDamage.bean.DrugDamageBean">
+		<selectKey resultType="java.lang.Long" order="BEFORE" keyProperty="gid">
+			select SQ_SRVS_DRUG_DAMAGE.NEXTVAL as GID from DUAL
+  		</selectKey>
+		insert into SRVS_DRUG_DAMAGE(
+			GID,
+			DRUG_CODE,
+			DRUG_NAME,
+			SPECIFICATIONS,
+			DRUG_PLACE,
+			DAMAGE_PROBLEM,
+			DAMAGE_LINK,
+			REGIST_QUANTITY,
+			REGIST_NAME,
+			REGIST_TIME		
+		)values(
+			#{gid,jdbcType=VARCHAR},
+			#{drugCode,jdbcType=VARCHAR},
+			#{drugName,jdbcType=VARCHAR},
+			#{specifications,jdbcType=VARCHAR},
+			#{drugPlace,jdbcType=VARCHAR},
+			#{damageProblem,jdbcType=INTEGER},
+			#{damageLink,jdbcType=INTEGER},
+			#{quantity,jdbcType=INTEGER},
+			#{registName,jdbcType=VARCHAR},
+			to_char(sysdate,'yyyy-mm-dd')
+		)
+	</insert>
+	
+	<select id="isDrugDamageExit" parameterType="long" resultMap="DrugDamageMap">
+		select 
+			GID,
+			DRUG_CODE,
+			DRUG_NAME,
+			SPECIFICATIONS,
+			DRUG_PLACE,
+			DAMAGE_PROBLEM,
+			DAMAGE_LINK,
+			REGIST_QUANTITY,
+			REGIST_NAME
+       	from SRVS_DRUG_DAMAGE
+		where GID =#{gid}
+	</select>
+	
+	<update id="updateDrugDamage" parameterType="com.zc.pivas.drugDamage.bean.DrugDamageBean">
+		update SRVS_DRUG_DAMAGE
+		set
+			DRUG_CODE = #{drugCode},
+			DRUG_NAME = #{drugName},
+			SPECIFICATIONS = #{specifications},
+			DRUG_PLACE = #{drugPlace},
+			DAMAGE_PROBLEM = #{damageProblem},
+			DAMAGE_LINK = #{damageLink},
+			REGIST_QUANTITY = #{quantity},
+			REGIST_NAME = #{registName}
+		where GID = #{gid}
+	</update>
+	
+	<select id="getDrugDamageByCode" parameterType="string" resultMap="DrugDamageMap">
+		select 
+			GID,
+			DRUG_CODE,
+			DRUG_NAME,
+			SPECIFICATIONS,
+			DRUG_PLACE,
+			DAMAGE_PROBLEM,
+			DAMAGE_LINK,
+			REGIST_QUANTITY,
+			REGIST_NAME
+       	from SRVS_DRUG_DAMAGE
+		where DRUG_CODE =#{drugCode}
+  	</select>
+	
+	<delete id="deleteDrugDamage" parameterType="long">
+		delete from SRVS_DRUG_DAMAGE
+		where gid = #{gid}
+  	</delete>
+
+	<select id="getDrugDamageCount" parameterType="long" resultType="int" >
+		select count(1) from SRVS_DRUG_DAMAGE
+		<where>
+			gid = #{gid}
+		</where>
+	</select>
+	
+	<select id="displayDrugDamage" parameterType="long" resultMap="DrugDamageMap">
+		select 
+			GID,
+			DRUG_CODE,
+			DRUG_NAME,
+			SPECIFICATIONS,
+			DRUG_PLACE,
+			DAMAGE_PROBLEM,
+			DAMAGE_LINK,
+			REGIST_QUANTITY,
+			REGIST_NAME
+       	from SRVS_DRUG_DAMAGE
+		where GID =#{gid}
+  	</select>
+  	
+  	
+  	<select id="getAllUsers" resultType="com.zc.base.sys.modules.user.entity.User">
+  		SELECT 
+  			user_id AS userId,
+  			name as name,
+  			account AS account
+		<![CDATA[ FROM SYS_USER where del_flag=0 and USER_TYPE<>6 ]]>
+  	</select>
+  	
+  	<resultMap id="BaseResultMap" type="com.zc.pivas.medicaments.entity.Medicaments">
+  		<result column="MEDICAMENTS_CODE" property="medicamentsCode"
+			jdbcType="VARCHAR" />
+		<result column="MEDICAMENTS_NAME" property="medicamentsName"
+			jdbcType="VARCHAR" />
+		<result column="MEDICAMENTS_SPECIFICATIONS" property="medicamentsSpecifications"
+			jdbcType="VARCHAR" />
+		<result column="MEDICAMENTS_PLACE" property="medicamentsPlace"
+			jdbcType="VARCHAR" />
+  	</resultMap>
+  	
+  	<select id="queryMedicByCondition" resultMap="BaseResultMap">
+		select * from SRVS_MEDICAMENTS
+		<where>
+			1=1
+			<if test="condition != null">
+				<if test="condition.categoryId != null and '' neq condition.categoryId ">
+					and CATEGORY_ID = #{condition.categoryId} 
+				</if>
+				<if test="condition.medicamentsCode != null and '' neq condition.medicamentsCode ">
+					and MEDICAMENTS_CODE like '%'||#{condition.medicamentsCode,jdbcType=VARCHAR}||'%' escape '\'
+				</if>
+
+				<if test="condition.medicamentsName != null and '' neq condition.medicamentsName ">
+					and MEDICAMENTS_NAME like  '%'||#{condition.medicamentsName,jdbcType=VARCHAR}||'%' escape '\'
+					or lower(MEDICAMENTS_SUCHAMA) like '%'||lower(#{condition.medicamentsName,jdbcType=VARCHAR})||'%' escape '\'
+				</if>
+				
+				<if test="condition.medicamentsPlace != null and '' neq condition.medicamentsPlace ">
+					and MEDICAMENTS_PLACE like  '%'||#{condition.medicamentsPlace,jdbcType=VARCHAR}||'%' escape '\'
+				</if>
+			</if>
+		</where>
+	</select>
+	
+	<select id="getAlldamageProblemOrLink" resultType="com.zc.pivas.drugDamage.bean.DrugDamageProblemOrLink">
+		select 
+			dict.code as code,
+			dict.description as description
+		from SYS_DICT dict 
+		where dict.category = #{type,jdbcType=VARCHAR}
+		order by dict.sort
+	</select>
+	
+</mapper>

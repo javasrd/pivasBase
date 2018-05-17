@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zc.pivas.synresult.dao.TaskResultDAO" >
+	<resultMap id="TaskResultMap" type="com.zc.pivas.synresult.bean.TaskResultBean" >
+		<id column="task_id" property="taskID" jdbcType="VARCHAR" />
+		<result column="task_name" property="taskName" jdbcType="VARCHAR" />
+		<result column="task_type" property="taskType" jdbcType="INTEGER" />
+		<result column="task_result" property="taskResult" jdbcType="INTEGER" />
+		<result column="task_exestart_time" property="taskExecStartTime" jdbcType="TIMESTAMP" />
+		<result column="task_exestop_time" property="taskExecStopTime" jdbcType="TIMESTAMP" />
+		<result column="task_content_type" property="taskContentType" jdbcType="INTEGER" />
+		<result column="reserve0" property="reserve0" jdbcType="VARCHAR" />
+		<result column="reserve1" property="reserve1" jdbcType="VARCHAR" />
+		<result column="reserve2" property="reserve2" jdbcType="VARCHAR" />
+	</resultMap>
+	
+	<sql id="getTaskResultSql">
+  		SELECT * FROM SRVS_TASK_RESULT
+			<where>
+  		    1=1 
+			<if test="taskResult != null">
+				<if test="taskResult.taskNames != null and '' neq taskResult.taskNames">
+				and 
+				<foreach item="taskName" index="index" collection="taskResult.taskNames"  open="(" separator="or" close=")" >  
+					task_name like  '%'||#{taskName}||'%' escape '\'             
+				</foreach>
+				</if>
+			</if>
+			
+			order by task_exestart_time desc
+		  </where>
+ 	</sql>
+  
+  <select id="getTaskResultList" resultMap="TaskResultMap">
+  	<include refid="common.jqueryPageHead" />
+  	<include refid="getTaskResultSql"/>
+  	<include refid="common.jqueryPageBottom" />
+  </select>
+  
+  <select id="getTaskResultTotal" resultType="int">
+  	select count(1) from (
+  		<include refid="getTaskResultSql"/>
+  	) t1
+  </select>
+  
+  <insert id="addTaskResult" parameterType="com.zc.pivas.synresult.bean.TaskResultBean">
+	  	INSERT INTO SRVS_TASK_RESULT (
+			TASK_ID,
+			TASK_NAME,
+			TASK_TYPE,
+			TASK_RESULT,
+			TASK_EXESTART_TIME,
+			TASK_EXESTOP_TIME,
+			TASK_CONTENT_TYPE
+		)
+		VALUES
+		(
+			#{taskID},
+			#{taskName},
+			#{taskType},
+			#{taskResult},
+			#{taskExecStartTime},
+			#{taskExecStopTime},
+			#{taskContentType}
+		)
+	</insert>
+
+	<update id="updateTaskResult" parameterType="com.zc.pivas.synresult.bean.TaskResultBean">
+  		update SRVS_TASK_RESULT set
+			TASK_NAME = #{taskName},
+			TASK_TYPE = #{taskType},
+			TASK_RESULT = #{taskResult},
+			TASK_EXESTART_TIME = #{taskExecStartTime},
+			TASK_EXESTOP_TIME = #{taskExecStopTime},
+			TASK_CONTENT_TYPE = #{taskContentType}
+		where TASK_ID = #{taskID}
+  	</update>
+  	
+</mapper>

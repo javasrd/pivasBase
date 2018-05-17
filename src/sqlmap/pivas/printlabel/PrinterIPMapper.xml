@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zc.pivas.printlabel.repository.PrinterIPDao">
+
+	<resultMap id="printerIPMap" type="com.zc.pivas.printlabel.entity.PrinterIPBean" >
+		<result column="GID" property="gid" jdbcType="BIGINT"/>
+		<result column="COMPNAME" property="compName" jdbcType="VARCHAR"/>
+		<result column="IPADDR" property="ipAddr" jdbcType="VARCHAR"/>
+		<result column="PRINNAME" property="prinName" jdbcType="VARCHAR"/>
+	</resultMap>
+	
+	<insert id="addPrinterIP" >
+		<selectKey resultType="java.lang.Long" order="BEFORE"
+			keyProperty="gid">
+			select SQ_SRVS_PRINTER_CONF.NEXTVAL as gid from DUAL
+  		</selectKey>
+		INSERT INTO SRVS_PRINTER_CONF
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			GID,
+			<if test="bean.compName != null and bean.compName !='' ">
+				COMPNAME,
+			</if>
+			<if test="bean.ipAddr != null and bean.ipAddr !='' ">
+				IPADDR,
+			</if>
+			<if test="bean.prinName != null and bean.prinName !='' ">
+				PRINNAME,
+			</if>
+		</trim>
+		VALUES
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			#{gid},
+			<if test="bean.compName != null and bean.compName !='' ">
+				#{bean.compName},
+			</if>
+			<if test="bean.ipAddr != null and bean.ipAddr !='' ">
+				#{bean.ipAddr},
+			</if>
+			<if test="bean.prinName != null and bean.prinName !='' ">
+				#{bean.prinName},
+			</if>
+		</trim>
+	</insert>
+
+	<select id="queryPrinterIPList" resultMap="printerIPMap">
+		<include refid="common.jqueryPageHead" />
+		SELECT 
+			ip.gid, 
+			ip.compname, 
+			ip.ipaddr, 
+			ip.prinname 
+		FROM SRVS_PRINTER_CONF ip
+		<include refid="Base_Where_Sql" />
+		ORDER BY ip.ipaddr
+		<include refid="common.jqueryPageBottom" />
+	</select>
+	
+	<select id="queryPrinterIPById" resultMap="printerIPMap">
+		SELECT 
+			ip.gid, 
+			ip.compname, 
+			ip.ipaddr, 
+			ip.prinname 
+		FROM SRVS_PRINTER_CONF ip
+		WHERE ip.gid = #{id}
+	</select>
+	
+	<delete id="delPrinterIP">
+		delete from SRVS_PRINTER_CONF
+		<where>
+			<if test="gids != null">
+				gid in
+				<foreach collection="gids" item="gid" open="("
+					close=")" separator=",">
+					#{gid}
+				</foreach>
+			</if>
+		</where> 
+	</delete>
+	
+	<update id="updatePrinterIP">
+		UPDATE 
+		SRVS_PRINTER_CONF
+		<set>
+			<trim suffixOverrides=",">
+				<if test="bean.compName != null and bean.compName !='' "> 
+					compname = #{bean.compName}, 
+				</if>
+				<if test="bean.ipAddr != null and bean.ipAddr !='' "> 
+					ipaddr = #{bean.ipAddr},
+				</if>
+				<if test="bean.prinName != null and bean.prinName !='' ">
+					prinname = #{bean.prinName},
+				</if>
+			</trim>
+		</set>
+		WHERE gid = #{bean.gid} 
+	</update>
+	
+	<select id="checkPrinterIP" resultMap="printerIPMap">
+		SELECT 
+			ip.gid, 
+			ip.compname, 
+			ip.ipaddr, 
+			ip.prinname 
+		FROM SRVS_PRINTER_CONF ip
+		<where>
+			<!-- <trim prefix="(" suffix=")" suffixOverrides="or" >
+				<if test="bean.ipAddr != null and bean.ipAddr !='' ">
+					ip.ipaddr = #{bean.ipAddr} 
+				</if>
+				
+				<if test="bean.prinName != null and bean.prinName !='' ">
+					or ip.prinname = #{bean.prinName} 
+				</if>
+			</trim> -->
+			<if test="bean.ipAddr != null and bean.ipAddr !='' ">
+				ip.ipaddr = #{bean.ipAddr} 
+			</if>
+			<if test="bean.gid != null" >
+					and ip.gid != #{bean.gid}
+			</if>
+		</where>
+			
+	</select>
+	
+	<sql id="Base_Where_Sql">
+		<where>
+		</where>
+	</sql>
+	
+	<select id="getPrinterIPCounts" resultType="int">
+		select count(1) from SRVS_PRINTER_CONF
+		<include refid="Base_Where_Sql" />
+	</select>
+	
+	<select id="getAllPrinterByName" resultType="String">
+		select ip.prinname from SRVS_PRINTER_CONF ip where ip.ipaddr = #{ipAddress}
+	</select>
+</mapper>

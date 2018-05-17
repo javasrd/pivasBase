@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zc.schedule.product.report.dao.ReportDao" >
+
+	<!-- 获取正常休班次  -->
+	<select id="getResetWork"  resultType="com.zc.schedule.product.report.entity.WorkBean">
+		select workid,workname from sche_work
+    	where  status = '1'
+    	and worktype in (2,3)
+    	order by worktype,workid asc
+	</select>
+	
+	<select id="getUser"  resultType="com.zc.schedule.product.report.entity.UserBean">
+    	select user_id,user_name from sche_user
+    	<!-- where deltype = '0' -->
+    	order by user_id asc
+	</select>
+	
+	<select id="getWorkTotal"  resultType="Double">
+    	select nvl(sum(wo.totaltime),0) as totaltime from sche_record_week d ,sche_work wo
+		where d.workid in (
+							select w.workid from sche_work w
+							start with w.workid = #{workid}
+							connect by prior w.copyid = w.workid
+							)
+		and d.workid = wo.workid
+		and d.user_id = #{userid}
+		and d.workdate between #{startDate} and #{endDate}
+	</select>
+	
+	<select id="getWorkList"  resultType="com.zc.schedule.product.report.entity.WorkBean">
+    	select workid,workname from sche_work
+    	where  status = '1'
+    	and worktype in (0,1)
+    	order by worktype,workid asc
+	</select>
+	
+	
+</mapper>

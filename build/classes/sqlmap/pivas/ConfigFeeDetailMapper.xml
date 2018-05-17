@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zc.pivas.configfee.dao.ConfigFeeDetailDAO" >
+	<resultMap id="ConfigFeeDetailMap" type="com.zc.pivas.configfee.bean.ConfigFeeDetailBean" >
+		<id column="detailcode" property="detailCode" jdbcType="VARCHAR" />
+		<id column="costcode" property="costCode" jdbcType="VARCHAR" />
+		<result column="amount" property="amount" jdbcType="VARCHAR" />
+		<result column="rate" property="rate" jdbcType="INTEGER" />
+		<result column="reserve0" property="reserve0" jdbcType="VARCHAR" />
+		<result column="reserve1" property="reserve1" jdbcType="VARCHAR" />
+		<result column="reserve2" property="reserve2" jdbcType="VARCHAR" />
+		<result property="costName" jdbcType="VARCHAR" />
+	</resultMap>
+	
+<sql id="getConfigFeeDetailSql">
+  		select detailcode,
+         	   costname,
+       		   amount,
+               rate
+  			   from SRVS_CONFIGFEE_DETAIL a,SRVS_CONFIG_FEE b
+			<where>
+  		    	a.costcode=b.costcode
+			<if test="configFeeDetail != null">
+				<if test="configFeeDetail.detailCode != null and '' neq configFeeDetail.detailCode ">
+					and detailcode = #{configFeeDetail.detailCode}
+				</if>
+				
+				<if test="configFeeDetail.costCode != null and '' neq configFeeDetail.costCode ">
+					and a.costcode = #{configFeeDetail.costCode}
+				</if>
+			</if>
+		  </where>
+ 	</sql>
+  
+  <select id="getConfigFeeDetailList" resultMap="ConfigFeeDetailMap">
+  	<include refid="common.jqueryPageHead" />
+  	<include refid="getConfigFeeDetailSql"/>
+  	<include refid="common.jqueryPageBottom" />
+  </select>
+  
+  <select id="getConfigFeeDetailTotal" resultType="int">
+  	select count(1) from (
+  		<include refid="getConfigFeeDetailSql"/>
+  	) t1
+  </select>
+  
+  <select id="getConfigFeeDetail" resultMap="ConfigFeeDetailMap">
+	  	SELECT
+  			detailcode,
+         	costcode,
+       		amount,
+            rate
+		FROM
+			SRVS_CONFIGFEE_DETAIL
+			<where>
+  		    1=1 
+			<if test="configFeeDetail != null">
+				<if test="configFeeDetail.detailCode != null and '' neq configFeeDetail.detailCode ">
+					and detailcode = #{configFeeDetail.detailCode}
+				</if>
+				
+				<if test="configFeeDetail.costCode != null and '' neq configFeeDetail.costCode ">
+					and costcode = #{configFeeDetail.costCode}
+				</if>
+			</if>
+		  </where>
+  </select>
+  
+  <insert id="addConfigFeeDetail" parameterType="com.zc.pivas.configfee.bean.ConfigFeeDetailBean">
+	  	INSERT INTO SRVS_CONFIGFEE_DETAIL (
+		detailcode,
+        costcode,
+        amount,
+        rate
+	)
+	VALUES
+		(
+			#{detailCode},
+			#{costCode},
+			#{amount},
+			#{rate}
+		)
+	</insert>
+
+	<update id="updateConfigFeeDetail" parameterType="com.zc.pivas.configfee.bean.ConfigFeeDetailBean">
+  		update SRVS_CONFIGFEE_DETAIL set
+			detailCode = #{detailCode},
+			costCode = #{costCode},
+			amount = #{amount},
+			rate = #{rate}
+		where detailCode = #{detailCode} and costCode = #{costCode}
+  	</update>
+  
+  	<delete id="delConfigFeeDetail" parameterType="String">
+  		delete from SRVS_CONFIGFEE_DETAIL
+		where detailCode = #{detailCode,jdbcType=VARCHAR}
+	</delete>
+	
+	<select id="getConfigFeeDetailListByDetailCode" resultMap="ConfigFeeDetailMap" parameterType="String">
+  		select detailcode, costcode, amount, rate from SRVS_CONFIGFEE_DETAIL where detailCode = #{detailCode,jdbcType=VARCHAR}
+    </select>
+</mapper>

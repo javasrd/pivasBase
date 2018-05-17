@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">      
+
+<mapper namespace="com.zc.schedule.system.config.dao.CommDao">
+	
+	<select id="qryDicByMap" resultType="com.zc.schedule.system.config.entity.Dict">
+	SELECT 
+		d.dict_id as "dictId", 
+		d.category as "category", 
+		d.description as "description", 
+		d.code as "code",
+		di.content as "content", 
+		l.code as "lang", 
+		d.sort as "sort"
+    FROM
+      SYS_DICT d, SYS_DICT_INFO di, SYS_LANG l
+    WHERE
+      d.dict_id = di.dict_id
+      AND di.language_id = l.language_id 
+    <if test="map.category !=null and map.category !=''">
+    	and d.category = #{map.category,jdbcType=VARCHAR} 
+    </if>
+    <if test="map.categoryN !=null and map.categoryN !=''">
+    	and d.category in 
+    	<foreach collection="map.categoryN" item="category" separator="," open="(" close=")" >
+			#{category,jdbcType=VARCHAR} 
+		</foreach>
+    </if>
+    <if test="map.lang !=null and map.lang !=''">
+    	and l.code = #{map.lang,jdbcType=VARCHAR} 
+    </if>
+    ORDER BY l.code, category, sort ASC 
+	</select>
+	
+  	
+	<insert id="addLog" parameterType="com.zc.schedule.system.config.entity.Log" >
+		insert into SYS_LOG_OPER (
+			user_account,
+			sub_system,
+			module,
+			content,
+			status,
+			create_time
+		)
+		values(
+			#{userAccount},
+			#{subSystem},
+			#{module},
+			#{content},
+			#{status},
+			#{createTime}
+		)
+	</insert>
+	
+	<insert id="addErrLog" parameterType="com.zc.schedule.system.config.entity.ErrLog" >
+		<selectKey keyProperty="errId" resultType="long" order="BEFORE">
+         	select sq_sys_error_log.nextval from dual
+     	</selectKey>
+		insert into SYS_ERROR_LOG (
+			  err_id,
+			  err_time,
+			  err_fun,
+			  err_cause,
+			  err_mess,
+			  err_stack
+			  <if test="errUserId !=null and errUserId !=''">,err_userid</if>
+			  <if test="errParam !=null and errParam !=''">,err_param</if>
+		)
+		values(
+			#{errId},
+			#{errTime},
+			#{errFun,jdbcType=VARCHAR},
+			#{errCause,jdbcType=VARCHAR},
+			#{errMess,jdbcType=VARCHAR},
+			#{errStack,jdbcType=VARCHAR}
+			<if test="errUserId !=null and errUserId !=''">,#{errUserId,jdbcType=INTEGER}</if>
+			<if test="errParam !=null and errParam !=''">,#{errParam,jdbcType=VARCHAR}</if>
+		)
+	</insert>
+	
+</mapper>

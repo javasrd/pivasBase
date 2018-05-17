@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">      
+
+<mapper namespace="com.zc.schedule.system.user.dao.ScheduleUserDao">
+	
+	<select id="qryList" resultType="com.zc.schedule.system.user.entity.User" >
+		select 
+		  user_id as "userId",
+		  account as "account",
+		  name as "name",
+		  telephone as "telephone",
+		  email as "email",
+		  create_time as "createTime",
+		  del_flag as "delFlag"
+		from sys_user u
+		where 1=1 
+		<if test="map.account !=null and map.account !=''">
+		and account = #{map.account}
+		</if>
+		<if test="map.name !=null and map.name !=''">
+		and name = #{map.name}
+		</if>
+		
+		<if test="map.qryStr !=null and map.qryStr !=''">
+		and ( name like '%'||#{map.qryStr}||'%' or account like '%'||#{map.qryStr}||'%' )
+		</if>
+		
+		<choose>
+		<when test="map.sort !=null and map.sort =='name.desc'">
+			order by name desc
+		</when>
+		<when test="map.sort !=null and map.sort =='name.asc'">
+			order by name asc
+		</when>
+		<when test="map.sort !=null and map.sort =='account.desc'">
+			order by account desc
+		</when>
+		<when test="map.sort !=null and map.sort =='account.asc'">
+			order by account asc
+		</when>
+		<otherwise>
+			
+		</otherwise>
+		</choose>
+		
+	</select>
+	
+	<insert id="insert" parameterType="com.zc.schedule.system.user.entity.User" >
+		insert into sys_user(account,telephone,del_flag,PASSWORD,NAME,GENDER,CREATE_TIME)
+		values(#{row.account,jdbcType=VARCHAR},#{row.telephone,jdbcType=VARCHAR},0,'123456',#{row.account,jdbcType=VARCHAR},1,sysdate)
+	</insert>
+	
+	<update id="update" parameterType="Map" >
+		update sys_user set 
+			account=#{row.account} ,
+			telephone=#{row.telephone},
+			del_flag=#{row.delFlag}
+		where user_id=#{row.userId}
+	</update>
+	
+	<delete id="delete" parameterType="Map" >
+		delete from sys_user
+		where user_id=#{row.userId}
+	</delete>
+	
+</mapper>

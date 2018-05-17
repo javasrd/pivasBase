@@ -1,0 +1,27 @@
+@CHARSET "UTF-8";
+
+.wraper {
+	position: relative;
+	display:block;
+} 
+div.wraper ul {
+	padding:0px;
+	margin:0px;
+	list-style:none outside none; 
+}
+.list { 
+	width: 160px;
+	max-height: 200px; 
+	overflow: auto; 
+	position: absolute; 
+	border: 1px solid #A9A9A9; 
+	display: none; 
+	background: none repeat scroll 0 0 #FFFFFF;
+	z-index:10000000;
+	float:left;
+} 
+.list ul li { 
+	padding-left: 5px; 
+	padding-top: 2px; 
+	padding-bottom: 2px;
+} 

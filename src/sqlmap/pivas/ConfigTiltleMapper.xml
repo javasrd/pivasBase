@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zc.pivas.titileshow.dao.ConfigTitleDAO" >
+	<resultMap id="configTitleMap" type="com.zc.pivas.titileshow.bean.ConfigTitleBean" >
+		<id column="CONF_ID" property="confId" jdbcType="BIGINT" />
+		<result column="CONF_NAME" property="confName" jdbcType="VARCHAR" />
+		<result column="CONF_TYPE" property="confType" jdbcType="INTEGER" />
+		<result column="USE_BY" property="useBy" jdbcType="VARCHAR" />
+		<result column="CREATE_TIME" property="createTime" jdbcType="VARCHAR" />
+		<result column="RESERVE1" property="reserve1" jdbcType="VARCHAR" />
+		<result column="RESERVE2" property="reserve2" jdbcType="VARCHAR" />
+		<result column="RESERVE3" property="reserve3" jdbcType="VARCHAR" />
+	</resultMap>
+	
+	<resultMap id="configTitleSubMap" type="com.zc.pivas.titileshow.bean.ConfigTitleSubBean" >
+		<result column="CONF_ID" property="confId" jdbcType="BIGINT" />
+		<result column="FIELD" property="field" jdbcType="VARCHAR" />
+		<result column="PRIORITY" property="priority" jdbcType="INTEGER" />
+		<result column="RESERVE1" property="reserve1" jdbcType="VARCHAR" />
+		<result column="RESERVE2" property="reserve2" jdbcType="VARCHAR" />
+		<result column="RESERVE3" property="reserve3" jdbcType="VARCHAR" />
+	</resultMap>
+	
+	<sql id="getShowTilteListSql">
+		SELECT 
+			maintab.CONF_ID as ,
+			maintab.CONF_NAME,
+			maintab.CONF_TYPE,
+			maintab.USE_BY,
+			to_char(maintab.CREATE_TIME,'yyyy-mm-dd') CREATE_TIME
+		from SRVS_SHOWDRUGLIST_MAIN maintab
+		<where>
+  		    1=1 
+			<if test="configTitle != null">
+				<if test="configTitle.confNames != null ">
+				and 
+					<foreach item="name" index="index" collection="configTitle.confNames"  open="(" separator="or" close=")" >  
+						maintab.CONF_NAME like  '%'||#{name,jdbcType=VARCHAR}||'%' escape '\'             
+					</foreach>
+				</if>
+				<if test="configTitle.confType != null and '' neq configTitle.confType">
+					and maintab.CONF_TYPE = #{configTitle.confType}
+				</if>
+			</if>
+		  </where>
+ 	</sql>
+  
+  	<select id="getShowTilteList" resultMap="configTitleMap">
+  		<include refid="common.jqueryPageHead" />
+  		<include refid="getShowTilteListSql"/>
+  		<include refid="common.jqueryPageBottom" />
+  	</select>
+  
+	<select id="getConfigTitleTotal" resultType="int">
+		select count(1) from (
+			<include refid="getShowTilteListSql"/>
+		) t1
+	</select>
+  
+  	<select id="displayTitleDetail" resultMap="configTitleSubMap">
+  		select 
+  			subtab.conf_id,
+  			subtab.field,
+  			subtab.priority
+		from SRVS_SHOWDRUGLIST subtab
+		<if test="configId != null and '' neq configId">
+			where subtab.conf_id=#{configId}
+		</if>
+		order by subtab.priority
+  	</select>
+  	
+  	
+  	<select id="getConfigTitleForUPdate" resultMap="configTitleMap">
+  		SELECT
+	  		CONF_ID,
+  			CONF_NAME,
+			CONF_TYPE,
+			USE_BY,
+			CREATE_TIME
+		FROM SRVS_SHOWDRUGLIST_MAIN
+		WHERE 
+			CONF_NAME = #{configTitle.confName}
+			AND CONF_TYPE= #{configTitle.confType}
+    </select>
+    
+    <insert id="addConfigTitle" parameterType="com.zc.pivas.titileshow.bean.ConfigTitleBean">
+    	<selectKey resultType="java.lang.Long" order="BEFORE" keyProperty="confId">
+			select SQ_SRVS_SHOWDRUGLIST_MAIN.NEXTVAL as confId from DUAL
+  		</selectKey>
+	  	INSERT INTO SRVS_SHOWDRUGLIST_MAIN (
+	  		CONF_ID,
+			CONF_NAME,
+			CONF_TYPE,
+			USE_BY,
+			CREATE_TIME
+		)VALUES(
+			#{confId},
+			#{confName},
+			#{confType},
+			#{useBy},
+			sysdate
+		)
+	</insert>
+	
+	<update id="updateConfigTitle">
+  		UPDATE SRVS_SHOWDRUGLIST_MAIN SET
+  			CONF_NAME = #{titleBean.confName},
+			CONF_TYPE = #{titleBean.confType},
+			USE_BY = #{titleBean.useBy}
+		WHERE CONF_ID = #{titleBean.confId}
+  	</update>
+	
+	<delete id="delConfigTitle">
+  		DELETE FROM SRVS_SHOWDRUGLIST_MAIN
+		WHERE CONF_ID = #{confId}
+	</delete>
+	
+	<delete id="delConfigTitleSub">
+  		DELETE FROM SRVS_SHOWDRUGLIST
+		WHERE CONF_ID = #{confId}
+	</delete>
+	
+	 <insert id="addConfigTitleSub" >
+	  	INSERT INTO SRVS_SHOWDRUGLIST (
+	  		CONF_ID,
+			FIELD,
+			PRIORITY
+		)VALUES(
+			#{subBean.confId},
+			#{subBean.field},
+			#{subBean.priority}
+		)
+	</insert>
+	
+	<select id="getALlConfigTitle"  resultType="com.zc.pivas.titileshow.bean.ConfigTitleBean">
+		select 
+			maintb.CONF_ID as confId,
+			maintb.CONF_NAME as confName,
+			maintb.CONF_TYPE as confType,
+			maintb.USE_BY as useBy  
+		from SRVS_SHOWDRUGLIST_main maintb
+		where 
+			maintb.CONF_TYPE=#{confType}
+			and instr(maintb.USE_BY,#{userName})>0
+		order by maintb.CONF_ID desc
+	</select>
+	
+	<select id="getAllAccounts" resultType="String">
+		select LISTAGG(drugList.use_by, ',')  within group(order by drugList.use_by) from SRVS_SHOWDRUGLIST_main drugList
+	</select>
+	
+	<select id="getExitAccounts" resultType="String">
+		select 
+			account 
+		from sys_user 
+		where del_flag = 0
+			and USER_TYPE =1
+			<if test="map.accounts != null ">
+				and account not in 
+				<foreach item="account" index="index" collection="map.accounts"  open="(" separator="," close=")" >  
+					#{account}
+				</foreach>
+			</if>
+		order by account
+	</select>
+</mapper>

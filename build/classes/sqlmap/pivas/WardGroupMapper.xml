@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zc.pivas.wardgroup.dao.WardGroupDao" >
+	
+	<!-- 查询病区信息 -->
+  	<sql id="getGroupListInfo" >
+		select * from SRVS_GROUP
+		where enabled = 1 and levelnum = 1 and state = 1
+		order by ordernum
+  	</sql>
+  	
+  	<select id="getGroupList" resultType="com.zc.pivas.wardgroup.bean.WardGroupBean">
+  		<include refid="common.jqueryPageHead" />
+  		<include refid="getGroupListInfo"/>
+  		<include refid="common.jqueryPageBottom" />
+  	</select>
+	
+	<select id="getGroupListTotal" resultType="Int">
+  		select count(*) from SRVS_GROUP
+		where enabled = 1 and levelnum = 1 and state = 1
+  	</select>
+	
+	
+	<select id="getSubGroupName" resultType="com.zc.pivas.wardgroup.bean.WardGroupBean">
+  		select to_char(count(*)) as wardgroup
+		from SRVS_GROUP g
+		where enabled = 1 and levelnum = 2 and state = 0
+		and parentid = #{id}
+		union
+		select nvl(listagg( deptname,',') within group (order by deptname,id),'empty')  as wardgroup
+		from SRVS_GROUP g
+		where enabled = 1 and levelnum = 2 and state = 0
+		and parentid = #{id}
+		 <![CDATA[and rownum <= 3 ]]>
+  	</select>
+  	
+  	<select id="getWardList" resultType="com.zc.pivas.wardgroup.bean.WardGroupBean">
+  		<if test="id != null and '' neq id">
+  		select t.id,t.deptcode,t.deptname,'true' as state from SRVS_GROUP t
+		where enabled = 1
+		and levelnum = 2
+		and state = 0
+		and parentid = #{id}
+		union all
+  		</if>
+		select t.id,t.deptcode,t.deptname,'false' as state from SRVS_GROUP t
+		where enabled = 1
+		and levelnum = 1
+		and state = 0
+		order by state desc,deptname,id
+  	</select>
+  	
+	<select id="checkParam" resultType="Integer">
+  		select count(*) from SRVS_GROUP
+  		<where>
+  		<if test="type != null and type neq '' and type == 'name' ">
+  			deptname = #{value}
+        </if>
+        <if test="type != null and type neq '' and type == 'order' ">
+        	and ordernum = #{value}
+        </if>
+  		</where>
+  	</select>
+  	
+  	 <insert id="saveGroup" parameterType="com.zc.pivas.wardgroup.bean.WardGroupBean">
+       <selectKey resultType="String" order="AFTER" keyProperty="id">
+            select SQ_SRVS_GROUP.currval from dual
+       </selectKey>
+		insert into SRVS_GROUP
+		(
+		deptcode,
+		deptname,
+		enabled,
+		state,
+		levelnum,
+		ordernum
+		)
+		values(
+		'-1',
+		#{deptname},
+		'1',
+		1,
+		1,
+		#{ordernum}
+		)
+    </insert>
+  	
+  	<update id="saveSubWard" >
+        update SRVS_GROUP set parentid=#{parentid},levelnum=2
+        where id in
+		<foreach collection="ids" item="id" separator=","
+			open="(" close=")">
+			#{id}
+		</foreach>
+    </update>
+  	
+  	
+  	<update id="delSubWard" >
+        update SRVS_GROUP set parentid=null,levelnum=1
+        where parentid in
+		<foreach collection="ids" item="id" separator=","
+			open="(" close=")">
+			#{id}
+		</foreach>
+    </update>
+  	
+  	<delete id="delWardGroup" >
+        delete from SRVS_GROUP where id in
+		<foreach collection="ids" item="id" separator=","
+			open="(" close=")">
+			#{id}
+		</foreach>
+    </delete>
+    
+    <update id="updateWardGroup" >
+        update SRVS_GROUP set ordernum=#{order}
+        where id = #{id}
+    </update>
+    
+    <update id="updateSubWardById" >
+        update SRVS_GROUP set parentid=null,levelnum=1
+        where parentid = #{parentid}
+    </update>
+    
+    
+</mapper>

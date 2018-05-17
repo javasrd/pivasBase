@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:cache="http://www.springframework.org/schema/cache" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xsi:schemaLocation="
+	http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.1.xsd
+	http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.1.xsd
+	http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.1.xsd
+	http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache.xsd"
+	default-lazy-init="true">
+	
+	<!-- 缓存 -->
+	<cache:annotation-driven />
+	<bean id="cacheManager" class="org.springframework.cache.ehcache.EhCacheCacheManager" p:cache-manager-ref="ehCacheManager"/>
+	<!-- EhCache library setup -->
+	<bean id="ehCacheManager" class="org.springframework.cache.ehcache.EhCacheManagerFactoryBean" p:config-location="classpath:ehcache.xml"/>
+	
+	<cache:advice id="userServiceAdvice" cache-manager="cacheManager">
+		<cache:caching>
+			<cache:cache-evict method="addRoleByUser" all-entries="true" cache="shiro.authorizationCache"/>
+			<cache:cache-evict method="deleteUserById" all-entries="true" cache="shiro.authorizationCache"/>
+		</cache:caching>
+	</cache:advice>
+	
+	<cache:advice id="roleServiceAdvice" cache-manager="cacheManager">
+		<cache:caching>
+			<cache:cache-evict method="delRole" all-entries="true" cache="shiro.authorizationCache"/>
+		</cache:caching>
+	</cache:advice>
+	
+	<cache:advice id="priServiceAdvice" cache-manager="cacheManager">
+		<cache:caching>
+			<cache:cache-evict method="addRolePrivilegeBatch" all-entries="true" cache="shiro.authorizationCache"/>
+		</cache:caching>
+	</cache:advice>
+	
+	<cache:advice id="errorTypeServiceAdvice" cache-manager="cacheManager">
+		<cache:caching>
+			<cache:cache-evict method="addErrorType" all-entries="true" cache="shiro.authorizationCache"/>
+			<cache:cache-evict method="updateErrorType" all-entries="true" cache="shiro.authorizationCache"/>
+			<cache:cache-evict method="delErrorType" all-entries="true" cache="shiro.authorizationCache"/>
+		</cache:caching>
+	</cache:advice>
+	
+	<cache:advice id="checkTypeServiceAdvice" cache-manager="cacheManager">
+		<cache:caching>
+			<cache:cache-evict method="addCheckType" all-entries="true" cache="shiro.authorizationCache"/>
+			<cache:cache-evict method="updateCheckType" all-entries="true" cache="shiro.authorizationCache"/>
+			<cache:cache-evict method="delCheckType" all-entries="true" cache="shiro.authorizationCache"/>
+		</cache:caching>
+	</cache:advice>
+	
+	<cache:advice id="measureUnitServiceAdvice" cache-manager="cacheManager">
+		<cache:caching>
+			<cache:cache-evict method="addMeasureUnit" all-entries="true" cache="shiro.authorizationCache"/>
+			<cache:cache-evict method="updateMeasureUnit" all-entries="true" cache="shiro.authorizationCache"/>
+			<cache:cache-evict method="delMeasureUnit" all-entries="true" cache="shiro.authorizationCache"/>
+		</cache:caching>
+	</cache:advice>
+	
+	<cache:advice id="configFeeServiceAdvice" cache-manager="cacheManager">
+		<cache:caching>
+			<cache:cache-evict method="addCondfigFee" all-entries="true" cache="shiro.authorizationCache"/>
+			<cache:cache-evict method="updateCondfigFee" all-entries="true" cache="shiro.authorizationCache"/>
+			<cache:cache-evict method="delCondfigFee" all-entries="true" cache="shiro.authorizationCache"/>
+		</cache:caching>
+	</cache:advice>
+	
+	<cache:advice id="configFeeRuleServiceAdvice" cache-manager="cacheManager">
+		<cache:caching>
+			<cache:cache-evict method="addCondfigFeeRule" all-entries="true" cache="shiro.authorizationCache"/>
+			<cache:cache-evict method="updateCondfigFeeRule" all-entries="true" cache="shiro.authorizationCache"/>
+			<cache:cache-evict method="delCondfigFeeRule" all-entries="true" cache="shiro.authorizationCache"/>
+		</cache:caching>
+	</cache:advice>
+	
+	<cache:advice id="configFeeDetailServiceAdvice" cache-manager="cacheManager">
+		<cache:caching>
+			<cache:cache-evict method="addCondfigFeeDetail" all-entries="true" cache="shiro.authorizationCache"/>
+			<cache:cache-evict method="updateCondfigFeeDetail" all-entries="true" cache="shiro.authorizationCache"/>
+			<cache:cache-evict method="delCondfigFeeDetail" all-entries="true" cache="shiro.authorizationCache"/>
+		</cache:caching>
+	</cache:advice>
+	
+	<cache:advice id="synSettingServiceAdvice" cache-manager="cacheManager">
+		<cache:caching>
+			<cache:cache-evict method="addSynSetting" all-entries="true" cache="shiro.authorizationCache"/>
+			<cache:cache-evict method="delSynSetting" all-entries="true" cache="shiro.authorizationCache"/>
+			<cache:cache-evict method="updateSynSetting" all-entries="true" cache="shiro.authorizationCache"/>
+		</cache:caching>
+	</cache:advice>
+	
+	<cache:advice id="patientServiceAdvice" cache-manager="cacheManager">
+		<cache:caching>
+			<cache:cache-evict method="addPatient" all-entries="true" cache="shiro.authorizationCache"/>
+			<cache:cache-evict method="updatePatient" all-entries="true" cache="shiro.authorizationCache"/>
+		</cache:caching>
+	</cache:advice>
+	
+	<cache:advice id="inpatientAreaServiceAdvice" cache-manager="cacheManager">
+		<cache:caching>
+			<cache:cache-evict method="addInpatientArea" all-entries="true" cache="shiro.authorizationCache"/>
+			<cache:cache-evict method="updateInpatientArea" all-entries="true" cache="shiro.authorizationCache"/>
+		</cache:caching>
+	</cache:advice>
+	
+	<aop:config>
+		<aop:advisor advice-ref="inpatientAreaServiceAdvice" pointcut="execution(* com.zc.pivas.inpatientarea.service.impl.InpatientAreaServiceImpl.*(..))" />
+		<aop:advisor advice-ref="patientServiceAdvice" pointcut="execution(* com.zc.pivas.patient.service.impl.PatientServiceImpl.*(..))" />
+		<aop:advisor advice-ref="userServiceAdvice" pointcut="execution(* com.zc.base.sys.modules.user.service.impl.UserServiceImpl.*(..))" />
+		<aop:advisor advice-ref="roleServiceAdvice" pointcut="execution(* com.zc.base.sys.modules.user.service.impl.RoleServiceImpl.*(..))" />
+		<aop:advisor advice-ref="priServiceAdvice" pointcut="execution(* com.zc.base.sys.modules.user.service.impl.PriServiceImpl.*(..))" />
+		<aop:advisor advice-ref="errorTypeServiceAdvice" pointcut="execution(* com.zc.pivas.checktype.service.impl.ErrorTypeServiceImpl.*(..))" />
+		<aop:advisor advice-ref="checkTypeServiceAdvice" pointcut="execution(* com.zc.pivas.checktype.service.impl.CheckTypeServiceImpl.*(..))" />
+		<aop:advisor advice-ref="measureUnitServiceAdvice" pointcut="execution(* com.zc.pivas.measureunit.service.impl.MeasureUnitServiceImpl.*(..))" />
+		<aop:advisor advice-ref="configFeeServiceAdvice" pointcut="execution(* com.zc.pivas.configfee.service.impl.ConfigFeeServiceImpl.*(..))" />
+		<aop:advisor advice-ref="configFeeRuleServiceAdvice" pointcut="execution(* com.zc.pivas.configfee.service.impl.ConfigFeeRuleServiceImpl.*(..))" />
+		<aop:advisor advice-ref="configFeeDetailServiceAdvice" pointcut="execution(* com.zc.pivas.configfee.service.impl.ConfigFeeDetailServiceImpl.*(..))" />
+		<aop:advisor advice-ref="synSettingServiceAdvice" pointcut="execution(* com.zc.pivas.synset.service.impl.SynSettingServiceImpl.*(..))" />
+	</aop:config>
+</beans>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">      
+
+<mapper namespace="com.zc.schedule.product.scheduleRule.dao.CountDao">
+	
+	<select id="getWorkCountInfo" resultType="com.zc.schedule.product.scheduleRule.entity.CountBean" >
+		select workid as "workId", workname as "workName", count as "count"
+			from sche_work
+		where status = 1
+		and workstatus = 1
+		and worktype in ( 0, 1)
+		order by creationtime desc
+	</select>
+	
+	<!-- 更新每日次数 -->
+	<update id="updateCount" parameterType="com.zc.schedule.product.scheduleRule.entity.CountBean" >
+		update sche_work set
+			count = #{count} 
+		where workid = #{workId}
+	</update>
+
+</mapper>

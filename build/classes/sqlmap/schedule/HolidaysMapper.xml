@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zc.schedule.product.holidays.dao.HolidaysDao">
+	
+	<select id="getForPage" resultType="com.zc.schedule.product.holidays.entity.Holidays">
+		select ID,
+			NAME,
+			STARTDATE startDate,
+			ENDDATE endDate
+		from sche_holiday
+		where 1 = 1
+		<if test="params.k != null and null neq params.k">
+			and NAME like '%'||#{params.k}||'%'
+		</if>
+		order by STARTDATE
+	</select>
+	
+	<select id="checkDate" resultType="int">
+		select 1 from sche_holiday
+		where ((STARTDATE &lt;= #{h.startDate} and ENDDATE &gt;= #{h.startDate})
+			or (STARTDATE &lt;= #{h.endDate} and ENDDATE &gt;= #{h.endDate})
+			or (STARTDATE &gt;= #{h.startDate} and ENDDATE &lt;= #{h.endDate}))
+		<if test="h.id != null and '' neq h.id">
+			and ID &lt;&gt; #{h.id}
+		</if>
+			and ROWNUM = 1
+	</select>
+	
+	<select id="checkName" resultType="int">
+		select 1 from sche_holiday
+		where NAME = #{h.name}
+		<if test="h.id != null and '' neq h.id">
+			and ID &lt;&gt; #{h.id}
+		</if>
+	</select>
+	
+	<insert id="save">
+		insert into sche_holiday
+			(NAME, STARTDATE, ENDDATE)
+		values
+			(#{h.name}, #{h.startDate}, #{h.endDate})
+	</insert>
+	
+	<update id="update">
+		update sche_holiday
+		set NAME = #{h.name},
+			STARTDATE = #{h.startDate},
+			ENDDATE = #{h.endDate}
+		where ID = #{h.id}
+	</update>
+	
+	<select id="getById" resultType="com.zc.schedule.product.holidays.entity.Holidays">
+		select ID,
+			NAME,
+			STARTDATE startDate,
+			ENDDATE endDate
+		from sche_holiday
+		where ID = #{id}
+	</select>
+	
+	<delete id="delById">
+		delete from sche_holiday
+		where ID = #{id}
+	</delete>
+</mapper>

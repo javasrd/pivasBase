@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zc.pivas.checktype.dao.ErrorTypeDAO" >
+	<resultMap id="ErrorTypeMap" type="com.zc.pivas.checktype.bean.ErrorTypeBean" >
+		<id column="gid" property="gid" jdbcType="VARCHAR" />
+		<result column="trialname" property="name" jdbcType="VARCHAR" />
+		<result column="triallevel" property="level" jdbcType="INTEGER" />
+		<result column="reserve0" property="reserve0" jdbcType="VARCHAR" />
+		<result column="reserve1" property="reserve1" jdbcType="VARCHAR" />
+		<result column="trialcolor" property="color" jdbcType="VARCHAR" />
+	</resultMap>
+	
+	<sql id="getErrorTypeSql">
+  		SELECT
+  			gid,
+			trialname,
+			triallevel,
+			trialcolor
+		FROM
+			SRVS_TRIAL_ERRORTYPE
+			
+			<where>
+  		    1=1 
+			<if test="errorType != null">
+				<if test="errorType.name != null and '' neq errorType.name ">
+					and trialname like #{errorType.name}
+				</if>
+			</if>
+		  </where>
+ 	</sql>
+  
+  <select id="getErrorTypeList" resultMap="ErrorTypeMap">
+  	<include refid="common.jqueryPageHead" />
+  	<include refid="getErrorTypeSql"/>
+  	<include refid="common.jqueryPageBottom" />
+  </select>
+  
+  <select id="getErrorTypeTotal" resultType="int">
+  	select count(1) from (
+  		<include refid="getErrorTypeSql"/>
+  	) t1
+  </select>
+  
+  <select id="getErrorType" resultMap="ErrorTypeMap">
+	  	SELECT
+  			gid,
+			trialname,
+			triallevel,
+			trialcolor
+		FROM
+			SRVS_TRIAL_ERRORTYPE
+			<where>
+			1=1
+			<if test="errorType != null">
+				<if test="errorType.name != null and '' neq errorType.name ">
+					and trialname = #{errorType.name}
+				</if>
+				
+				<if test="errorType.gid != null and '' neq errorType.gid ">
+					and gid = #{errorType.gid}
+				</if>
+			</if>
+			</where>
+  </select>
+  
+  <select id="getErrorTypeForUPdate" resultMap="ErrorTypeMap">
+	  	SELECT
+  			gid,
+			trialname,
+			triallevel,
+			trialcolor
+		FROM
+			SRVS_TRIAL_ERRORTYPE
+			<where>
+			1=1
+			<if test="errorType != null">
+				<if test="errorType.name != null and '' neq errorType.name ">
+					and trialname = #{errorType.name}
+				</if>
+				
+				<if test="errorType.gid != null and '' neq errorType.gid ">
+					<![CDATA[ and gid <> #{errorType.gid} ]]>
+				</if>
+			</if>
+			</where>
+  </select>
+  
+  <insert id="addErrorType" parameterType="com.zc.pivas.checktype.bean.ErrorTypeBean">
+	  	INSERT INTO SRVS_TRIAL_ERRORTYPE (
+		trialname,
+		triallevel,
+		trialcolor
+	)
+	VALUES
+		(
+			#{name},
+			#{level},
+			#{color}
+		)
+</insert>
+
+<update id="updateErrorType" parameterType="com.zc.pivas.checktype.bean.ErrorTypeBean">
+  	update SRVS_TRIAL_ERRORTYPE set
+		trialname = #{name},
+		triallevel = #{level},
+		trialcolor = #{color}
+		where gid = #{gid}
+  </update>
+  
+  <delete id="delErrorType" parameterType="com.zc.pivas.checktype.bean.ErrorTypeBean">
+  	delete from SRVS_TRIAL_ERRORTYPE
+		where gid = #{gid}
+  </delete>
+  
+  <select id="checkErrorTypeUsed" parameterType="String" resultType="int">
+  	SELECT count(*) FROM SRVS_DOCTOR_ADVICE_main t
+		<where>
+			1=1 and t.yzshbtglx = #{gid}
+				
+		</where> 
+  </select>
+</mapper>

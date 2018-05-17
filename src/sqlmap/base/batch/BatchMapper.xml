@@ -1,0 +1,345 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zc.base.sc.modules.batch.repository.BatchDao" >
+
+  <resultMap id="BaseResultMap" type="com.zc.base.sc.modules.batch.entity.Batch" >
+    <id column="ID_" property="id" jdbcType="BIGINT" />
+    <result column="NUM_" property="num" jdbcType="VARCHAR" />
+    <result column="NAME_" property="name" jdbcType="VARCHAR" />
+    <result column="IS_EMPTY_BATCH_" property="isEmptyBatch" jdbcType="INTEGER" />
+    <result column="START_TIME_" property="startTime" jdbcType="VARCHAR" />
+    <result column="END_TIME_" property="endTime" jdbcType="VARCHAR" />
+    <result column="IS_SECEND_ADVICE_" property="isSecendAdvice" jdbcType="INTEGER" />
+    <result column="COLOR_" property="color" jdbcType="VARCHAR" />
+    <result column="ENABLED_" property="enabled" jdbcType="INTEGER" />
+    <result column="IS0P" property="is0P" jdbcType="INTEGER" />
+    <result column="ORDER_NUM" property="orderNum" jdbcType="INTEGER" />
+    <result column="TIMETYPE" property="timeType" jdbcType="VARCHAR" />
+    <result column="RESERVE1_" property="reserve1" jdbcType="VARCHAR" />
+    <result column="RESERVE2_" property="reserve2" jdbcType="VARCHAR" />
+    <result column="RESERVE3_" property="reserve3" jdbcType="VARCHAR" />
+    <result column="ISFORCE" property="isForce" jdbcType="INTEGER" />
+    <result column="ISVOLUME" property="isVolume" jdbcType="INTEGER" />
+    
+  </resultMap>
+  
+  <sql id="Base_Column_List" >
+    ID_, NUM_, NAME_, IS_EMPTY_BATCH_, START_TIME_, END_TIME_, IS_SECEND_ADVICE_, COLOR_, 
+    ENABLED_,IS0P,TIMETYPE, RESERVE1_, RESERVE2_, RESERVE3_,ORDER_NUM,ISFORCE,ISVOLUME
+  </sql>
+  
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="Long" >
+    select 
+    <include refid="Base_Column_List" />
+    from srvs_batch
+    where ID_ = #{id,jdbcType=BIGINT}
+  </select>
+  
+  <delete id="deleteByPrimaryKey" parameterType="Long" >
+    delete from srvs_batch
+    where ID_ = #{id,jdbcType=BIGINT}
+  </delete>
+  
+  <insert id="insert" parameterType="com.zc.base.sc.modules.batch.entity.Batch" >
+  	<selectKey resultType="java.lang.Long" order="AFTER" keyProperty="id">
+		select sq_srvs_batch.CURRVAL as id from DUAL
+	</selectKey>
+    insert into srvs_batch (ID_, NUM_, NAME_,
+      IS_EMPTY_BATCH_, START_TIME_, END_TIME_, 
+      IS_SECEND_ADVICE_, COLOR_, ENABLED_, IS0P,TIMETYPE,
+      RESERVE1_, RESERVE2_, RESERVE3_,ORDER_NUM,ISFORCE,ISVOLUME
+      )
+    values (#{id,jdbcType=BIGINT}, #{num,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR}, 
+      #{isEmptyBatch,jdbcType=INTEGER}, #{startTime,jdbcType=VARCHAR}, #{endTime,jdbcType=VARCHAR}, 
+      #{isSecendAdvice,jdbcType=INTEGER}, #{color,jdbcType=VARCHAR}, #{enabled,jdbcType=INTEGER}, #{is0P,jdbcType=INTEGER}, #{timeType,jdbcType=VARCHAR},
+      #{reserve1,jdbcType=VARCHAR}, #{reserve2,jdbcType=VARCHAR}, #{reserve3,jdbcType=VARCHAR}, #{orderNum,jdbcType=VARCHAR},
+      #{isForce,jdbcType=INTEGER},#{isVolume,jdbcType=INTEGER}
+      )
+  </insert>
+  
+  <insert id="insertSelective" parameterType="com.zc.base.sc.modules.batch.entity.Batch" >
+  	<selectKey resultType="java.lang.Long" order="AFTER" keyProperty="id">
+		select sq_srvs_batch.CURRVAL as id from DUAL
+	</selectKey>
+    insert into srvs_batch
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        ID_,
+      </if>
+      <if test="num != null" >
+        NUM_,
+      </if>
+      <if test="name != null" >
+        NAME_,
+      </if>
+      <if test="isEmptyBatch != null" >
+        IS_EMPTY_BATCH_,
+      </if>
+      <if test="startTime != null" >
+        START_TIME_,
+      </if>
+      <if test="endTime != null" >
+        END_TIME_,
+      </if>
+      <if test="isSecendAdvice != null" >
+        IS_SECEND_ADVICE_,
+      </if>
+      <if test="color != null" >
+        COLOR_,
+      </if>
+      <if test="enabled != null" >
+        ENABLED_,
+      </if>
+      <if test="is0P != null" >
+        IS0P,
+      </if>
+      <if test="timeType != null" >
+        TIMETYPE,
+      </if>
+      <if test="reserve1 != null" >
+        RESERVE1_,
+      </if>
+      <if test="reserve2 != null" >
+        RESERVE2_,
+      </if>
+      <if test="reserve3 != null" >
+        RESERVE3_,
+      </if>
+      <if test="orderNum != null" >
+        ORDER_NUM,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="num != null" >
+        #{num,jdbcType=VARCHAR},
+      </if>
+      <if test="name != null" >
+        #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="isEmptyBatch != null" >
+        #{isEmptyBatch,jdbcType=INTEGER},
+      </if>
+      <if test="startTime != null" >
+        #{startTime,jdbcType=VARCHAR},
+      </if>
+      <if test="endTime != null" >
+        #{endTime,jdbcType=VARCHAR},
+      </if>
+      <if test="isSecendAdvice != null" >
+        #{isSecendAdvice,jdbcType=INTEGER},
+      </if>
+      <if test="color != null" >
+        #{color,jdbcType=VARCHAR},
+      </if>
+      <if test="enabled != null" >
+        #{enabled,jdbcType=INTEGER},
+      </if>
+      <if test="is0P != null" >
+        #{is0P,jdbcType=INTEGER},
+      </if>
+      <if test="timeType != null" >
+        #{timeType,jdbcType=VARCHAR},
+      </if>
+      <if test="reserve1 != null" >
+        #{reserve1,jdbcType=VARCHAR},
+      </if>
+      <if test="reserve2 != null" >
+        #{reserve2,jdbcType=VARCHAR},
+      </if>
+      <if test="reserve3 != null" >
+        #{reserve3,jdbcType=VARCHAR},
+      </if>
+       <if test="orderNum != null" >
+        #{orderNum,jdbcType=INTEGER},
+      </if>
+    </trim>
+  </insert>
+  
+  <update id="updateByPrimaryKeySelective" parameterType="com.zc.base.sc.modules.batch.entity.Batch" >
+    update srvs_batch
+    <set >
+      <if test="num != null" >
+        NUM_ = #{num,jdbcType=VARCHAR},
+      </if>
+      <if test="name != null" >
+        NAME_ = #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="isEmptyBatch != null" >
+        IS_EMPTY_BATCH_ = #{isEmptyBatch,jdbcType=INTEGER},
+      </if>
+      <if test="startTime != null" >
+        START_TIME_ = #{startTime,jdbcType=VARCHAR},
+      </if>
+      <if test="endTime != null" >
+        END_TIME_ = #{endTime,jdbcType=VARCHAR},
+      </if>
+      <if test="isSecendAdvice != null" >
+        IS_SECEND_ADVICE_ = #{isSecendAdvice,jdbcType=INTEGER},
+      </if>
+      <if test="color != null" >
+        COLOR_ = #{color,jdbcType=VARCHAR},
+      </if>
+      <if test="enabled != null" >
+        ENABLED_ = #{enabled,jdbcType=INTEGER},
+      </if>
+      <if test="is0P != null" >
+        IS0P = #{is0P,jdbcType=INTEGER},
+      </if>
+      <if test="timeType != null" >
+        TIMETYPE = #{timeType,jdbcType=VARCHAR},
+      </if>
+      <if test="reserve1 != null" >
+        RESERVE1_ = #{reserve1,jdbcType=VARCHAR},
+      </if>
+      <if test="reserve2 != null" >
+        RESERVE2_ = #{reserve2,jdbcType=VARCHAR},
+      </if>
+      <if test="reserve3 != null" >
+        RESERVE3_ = #{reserve3,jdbcType=VARCHAR},
+      </if>
+      <if test="orderNum != null" >
+        ORDER_NUM = #{orderNum,jdbcType=INTEGER},
+      </if>
+      <if test="isForce != null" >
+        ISFORCE = #{isForce,jdbcType=INTEGER},
+      </if>
+      <if test="isVolume != null" >
+        ISVOLUME = #{isVolume,jdbcType=INTEGER},
+      </if>
+    </set>
+    where ID_ = #{id,jdbcType=BIGINT}
+  </update>
+  
+  <update id="updateByPrimaryKey" parameterType="com.zc.base.sc.modules.batch.entity.Batch" >
+    update srvs_batch
+    set NUM_ = #{num,jdbcType=VARCHAR},
+      NAME_ = #{name,jdbcType=VARCHAR},
+      IS_EMPTY_BATCH_ = #{isEmptyBatch,jdbcType=INTEGER},
+      START_TIME_ = #{startTime,jdbcType=VARCHAR},
+      END_TIME_ = #{endTime,jdbcType=VARCHAR},
+      IS_SECEND_ADVICE_ = #{isSecendAdvice,jdbcType=INTEGER},
+      COLOR_ = #{color,jdbcType=VARCHAR},
+      ENABLED_ = #{enabled,jdbcType=INTEGER},
+      IS0P = #{is0P,jdbcType=INTEGER},
+      TIMETYPE = #{timeType,jdbcType=VARCHAR},
+      ORDER_NUM = #{orderNum,jdbcType=INTEGER},
+      RESERVE1_ = #{reserve1,jdbcType=VARCHAR},
+      RESERVE2_ = #{reserve2,jdbcType=VARCHAR},
+      RESERVE3_ = #{reserve3,jdbcType=VARCHAR}
+    where ID_ = #{id,jdbcType=BIGINT}
+  </update>
+  
+  <!-- 按条件查询批次 -->
+  <select id="queryByPaging" resultMap="BaseResultMap">
+	  <include refid="common.jqueryPageHead" />
+	  	select
+	  		<include refid="Base_Column_List"/>
+	  	<include refid="Base_Where_Sql"/>
+	  	order by ORDER_NUM 
+	  <include refid="common.jqueryPageBottom" />
+  </select>
+  <sql id="Base_Where_Sql">
+  	from
+  		srvs_batch
+	<where>
+		1=1
+		<if test="condition != null">
+			<if test="condition.num != null  ">
+				<if test="condition.num   == 0">
+				and  IS_EMPTY_BATCH_ = 1 and num_ not like '%T%'
+				</if>
+			  	<if test="condition.num  == -1">
+				and num_ like '%'||'T-'||'%' escape '\'
+				</if>
+			</if>
+			
+			<if test="condition.names != null and '' neq condition.names">
+				and 
+				<foreach item="name" index="index" collection="condition.names"  open="(" separator="or" close=")" >  
+					name_ like  '%'||#{name,jdbcType=VARCHAR}||'%'  escape '\'            
+				</foreach>
+			</if>
+			
+			<if test="condition.isEmptyBatch != null" >
+			  AND is_empty_batch_ = #{condition.isEmptyBatch,jdbcType=INTEGER}
+			</if>
+			<if test="condition.startTime != null and condition.startTime != ''" >
+			  AND start_time_ = #{condition.startTime,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.endTime != null and condition.endTime != ''" >
+			  AND end_time_ = #{condition.endTime,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.isSecendAdvice != null" >
+			  AND is_secend_advice_ = #{condition.isSecendAdvice,jdbcType=INTEGER}
+			</if>
+			<if test="condition.color != null and condition.color != ''" >
+			  AND color_ = #{condition.color,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.enabled != null" >
+			  AND enabled_ = #{condition.enabled,jdbcType=INTEGER}
+			</if>
+			<if test="condition.reserve1 != null" >
+			  AND reserve1_ = #{condition.reserve1,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.reserve2 != null" >
+			  AND reserve2_ = #{condition.reserve2,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.reserve3 != null" >
+			  AND reserve3_ = #{condition.reserve3,jdbcType=VARCHAR}
+			</if>
+		</if>
+	</where>  
+  </sql>
+  <!-- 按批次总数 -->
+  <select id="getTotalCount" resultType="int">
+  	select 
+  		count(1)
+  	<include refid="Base_Where_Sql"/>
+  </select>
+  
+  <!-- 批次是否关联一般规则 -->
+  <select id="batchRefRule" resultType="int">
+  	select 
+  		count(1)
+  	from
+  		SRVS_RULE_REF_BATCH
+  	where 
+  		batch_id_ = #{batchId}
+  </select>
+  
+  <select id="queryBatchAllList" resultMap="BaseResultMap">
+  	   select 
+        <include refid="Base_Column_List" />
+      from srvs_batch where 1 = 1 order by ORDER_NUM,NUM_
+  </select>
+  
+  <select id="queryBatchByVolume" resultMap="BaseResultMap">
+  	   select 
+        <include refid="Base_Column_List" />
+      from srvs_batch where isvolume = 1  order by ORDER_NUM,NUM_
+  </select>
+  
+  <select id="queryBatchByForce" resultMap="BaseResultMap">
+  	   select 
+        <include refid="Base_Column_List" />
+      from srvs_batch where isforce = 1  order by ORDER_NUM,NUM_
+  </select>
+  
+  
+  <select id="queryBatchAllListForYDStatistic" resultMap="BaseResultMap">
+  	   select 
+        <include refid="Base_Column_List" />
+      from srvs_batch where id_ in (select zxbc from  SRVS_PRESCRIPTION) order by id_
+  </select>
+  
+  <select id="queryBatchRepeat" resultType="int">
+  	select count(1) from srvs_batch where NUM_ = #{num} and NAME_ = #{name}
+  	<if test="id != null">
+  	and id_ != #{id}
+  	</if>
+  </select>
+  
+</mapper>

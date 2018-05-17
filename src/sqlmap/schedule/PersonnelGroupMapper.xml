@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper
+	namespace="com.zc.schedule.product.personnelgroup.dao.PersonnelGroupDao">
+
+	<resultMap id="GroupInfoMap"
+		type="com.zc.schedule.product.personnelgroup.entity.GroupInfo">
+
+		<id column="GROUPID" property="groupId" />
+		<result column="GROUPNAME" property="groupName" />
+	</resultMap>
+
+	<select id="getGroups"
+		resultType="com.zc.schedule.product.personnelgroup.entity.GroupInfo">
+		select pg.GROUPID groupId, pg.GROUPNAME groupName
+		from
+		sche_user_group pg
+		where pg.GROUPID in (select g.GROUPID from
+		sche_group g where g.VALIDITY_START = #{startDate})
+		order by
+		pg.SORT
+	</select>
+
+	<select id="getGroupInfos"
+		resultType="com.zc.schedule.product.personnelgroup.entity.GroupInfo">
+		select GROUPID groupId,
+		USER_ID userId,
+		USER_NAME userName,
+		VALIDITY_START validityStart,
+		VALIDITY_END validityEnd,
+		SORT sort
+		from sche_group
+		where VALIDITY_START = #{startDate}
+	</select>
+
+	<select id="getAllGroups"
+		resultType="com.zc.schedule.product.personnelgroup.entity.GroupInfo">
+		select pg.GROUPID groupId, pg.GROUPNAME groupName
+		from
+		sche_user_group pg
+		where pg.TYPE = 1
+		order by pg.SORT
+	</select>
+
+	<select id="getLatestValidityDate" resultType="map">
+		select *
+		from (select VALIDITY_START, VALIDITY_END
+		from sche_group
+		where VALIDITY_START &lt; #{startDate}
+		order by VALIDITY_START desc)
+		where rownum = 1
+	</select>
+
+	<select id="getDefaultPersonnels"
+		resultType="com.zc.schedule.product.personnel.entity.Personnel">
+		select p.USER_ID userId, p.USER_NAME userName
+		from sche_user p
+		where p.PARTAKE = '1'
+		and p.DELTYPE = '0'
+		<if test="null neq startDate">
+			and not exists (select 1 from sche_group g where
+			g.VALIDITY_START = #{startDate} and g.USER_ID = p.USER_ID)
+		</if>
+		order by p.USER_ID
+	</select>
+
+	<select id="getPersonnels"
+		resultType="com.zc.schedule.product.personnel.entity.Personnel">
+		select p.USER_ID userId, p.USER_NAME userName
+		from
+		sche_user p, sche_group g
+		where p.USER_ID = g.USER_ID
+		and g.VALIDITY_START = #{startDate}
+		and g.GROUPID = #{groupId}
+		order by g.SORT
+	</select>
+
+	<select id="getGroupCount" resultType="int">
+		select count(1)
+		from sche_user_group pg
+		where pg.GROUPNAME = #{groupName}
+		and pg.GROUPID in (select g.GROUPID from sche_group g where
+		g.VALIDITY_START = #{startDate})
+		<if test="groupId != null and groupId > 0">
+			and pg.GROUPID &lt;&gt; #{groupId}
+		</if>
+	</select>
+
+	<insert id="saveGroup"
+		parameterType="com.zc.schedule.product.personnelgroup.entity.GroupInfo">
+		<selectKey keyProperty="groupId" order="BEFORE" resultType="java.lang.Long">
+			select sq_group.nextval from dual
+		</selectKey>
+		insert into sche_user_group
+		(GROUPID, GROUPNAME, CREATIONTIME, CREATER, SORT)
+		values
+		(#{groupId}, #{groupName}, sysdate, #{creater}, (select max(g.SORT)+1 from
+		sche_user_group g))
+	</insert>
+
+	<insert id="saveGroupInfo">
+		insert into sche_group
+		(GROUPID, VALIDITY_START, VALIDITY_END, SORT)
+		values
+		(#{group.groupId}, #{group.validityStart}, #{group.validityEnd}, (select max(g.SORT)+1
+		from sche_group g where g.VALIDITY_START =
+		#{group.validityStart}))
+	</insert>
+
+	<insert id="saveGroupInfo2">
+		insert into sche_group
+		(GROUPID, USER_ID, USER_NAME, VALIDITY_START, VALIDITY_END, SORT)
+		values
+		(#{group.groupId}, #{group.userId, jdbcType=INTEGER},
+		#{group.userName, jdbcType=VARCHAR}, #{group.validityStart},
+		#{group.validityEnd}, #{group.sort, jdbcType=INTEGER})
+	</insert>
+
+	<insert id="saveGroupInfo3">
+		insert into sche_group
+		(GROUPID, USER_ID, USER_NAME, VALIDITY_START, VALIDITY_END, SORT)
+		values
+		(#{group.groupId}, #{group.userId, jdbcType=INTEGER}, (select
+		USER_NAME from sche_user p where p.USER_ID =
+		#{group.userId}), #{group.validityStart}, #{group.validityEnd},
+		#{group.sort, jdbcType=INTEGER})
+	</insert>
+
+	<update id="updateGroupSort">
+		update sche_user_group
+		set SORT = #{sort}
+		where GROUPID = #{groupId}
+	</update>
+
+	<delete id="removeAll">
+		delete from sche_group
+		where VALIDITY_START =
+		#{startDate}
+	</delete>
+
+	<update id="updateGroupName">
+		update sche_user_group
+		set GROUPNAME =
+		#{groupName}
+		where GROUPID = #{groupId}
+	</update>
+
+	<delete id="deleteGroupInfoByGroupIdAndStartDate">
+		delete from sche_group
+		where VALIDITY_START =
+		#{startDate}
+		and GROUPID = #{groupId}
+	</delete>
+
+	<delete id="delGroupByGroupId">
+		delete from sche_user_group
+		where GROUPID =
+		#{groupId}
+		and not exists (select 1 from sche_group where GROUPID =
+		#{groupId})
+	</delete>
+
+	<select id="getScheduleDataByStartDate"
+		resultType="com.zc.schedule.product.manager.entity.ScheduleBean">
+		select ID id, GROUPID groupId, USER_ID user_id
+		from
+		sche_record
+		where STARTDATE = #{startDate}
+	</select>
+
+	<delete id="delScheduleDataByStartDate">
+		delete from sche_record
+		where STARTDATE =
+		#{startDate}
+	</delete>
+
+	<delete id="delScheduleData">
+		delete from sche_record
+		where STARTDATE =
+		#{startDate}
+		and USER_ID = #{userId}
+	</delete>
+
+	<update id="updateScheduleData">
+		update sche_record
+		set GROUPID = #{groupId}
+		where
+		STARTDATE = #{startDate}
+		and USER_ID = #{userId}
+	</update>
+
+	<select id="getById"
+		resultType="com.zc.schedule.product.personnelgroup.entity.GroupInfo">
+		select pg.GROUPID groupId, pg.GROUPNAME groupName
+		from
+		sche_user_group pg
+		where pg.GROUPID = #{groupId}
+	</select>
+	
+	<delete id="delWorkRefDataByGroupId">
+		delete from sche_group_work where GROUPID = #{groupId}
+	</delete>
+</mapper>

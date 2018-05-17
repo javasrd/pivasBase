@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zc.pivas.statistics.repository.AllocationWorkDAO">
+	<select id="getBatchList" resultType="com.zc.base.sc.modules.batch.entity.Batch">
+		select 
+			bat.id_ as "id", 
+			bat.num_ as "num", 
+			bat.name_ as "name"
+		from srvs_batch bat
+		where 
+			bat.is_empty_batch_ = 0
+		   	and bat.enabled_ = 1
+		order by bat.id_
+	</select>
+	
+	<select id="getWorkList" resultType="com.zc.pivas.statistics.bean.allocationWork.AllocationSQLBean">
+	
+		select tab.doctor_name as "workName",
+		       tab.medicCateName,
+		       count(tab.medicCateName) as "medicCount",
+		       sum(tab.workload) as "workload"
+		  from (select CASE
+		                 WHEN '抗生素' in
+		                      (SELECT cat.category_name
+		                         FROM SRVS_MEDICAMENTS med
+		                         left join SRVS_MEDICAMENTS_category cat
+		                           on cat.category_id = med.category_id
+		                        where med.medicaments_code in
+		                              (SELECT *
+		                                 FROM TABLE(CAST(fn_split(ydm.CHARGE_CODE, '@@') AS
+		                                                 ty_str_split)))) THEN
+		                  'antibiotic'
+		                 WHEN '化疗' in
+		                      (SELECT cat.category_name
+		                         FROM SRVS_MEDICAMENTS med
+		                         left join SRVS_MEDICAMENTS_category cat
+		                           on cat.category_id = med.category_id
+		                        where med.medicaments_code in
+		                              (SELECT *
+		                                 FROM TABLE(CAST(fn_split(ydm.CHARGE_CODE, '@@') AS
+		                                                 ty_str_split)))) THEN
+		                  'chemotherapy'
+		                 WHEN exists (select t.transfusion
+		                         from SRVS_PRESCRIPTION_main t
+		                        where t.transfusion >= 850
+		                          and t.pidsj = ydm.pidsj) THEN
+		                  'nutrition'
+		                 ELSE
+		                  'general'
+		               END medicCateName,
+		               ydm.doctor_name,
+		               (select sum(med.difficulty_degree * ceil(yd.quantity))
+		                  from SRVS_PRESCRIPTION yd
+		                  left join SRVS_MEDICAMENTS med
+		                    on yd.charge_code = med.medicaments_code
+		                 where yd.pidsj = ydm.pidsj) workload
+		          from SRVS_PRESCRIPTION_main ydm
+		         <where>
+		         	1=1
+		         	<if test="param.startTime != null and param.startTime != '' and param.endTime != null and param.endTime != ''">
+		         		and ydm.yyrq &gt;= to_date(#{param.startTime}||' 00:00:00','yyyy-MM-DD hh24:mi:ss') 
+						and ydm.yyrq &lt;= to_date(#{param.endTime}||' 23:59:59','yyyy-MM-DD hh24:mi:ss')
+					</if>
+					
+					<if test="param.startMonth != null and param.startMonth != ''">
+		         		and to_char(ydm.yyrq, 'yyyy-mm') = #{param.startMonth}
+					</if>
+					<if test="param.batchArray != null">
+		         		and ydm.zxbc in
+		         		<foreach collection="param.batchArray" item="batch" separator="," open="(" close=")">
+							#{batch}
+						</foreach>
+					</if>
+		         </where> 
+		         ) tab
+		 group by tab.doctor_name, tab.medicCateName
+
+	</select>
+</mapper>

@@ -1,0 +1,763 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zc.pivas.excuteRecord.dao.SynYdRecordDAO">
+	
+	<update id="synData" parameterType="com.zc.pivas.excuteRecord.bean.ExcuteRecordBean">
+
+		merge into
+		SRVS_PRESCRIPTION_RECORD t1
+		using (
+		select
+		#{drugListID} as DrugListID
+		from dual )
+		t2
+		ON
+		(
+		t1.DrugListID = t2.DrugListID 
+		)
+		WHEN
+		MATCHED THEN
+		UPDATE SET
+		t1.DRUGFREQ = #{drugFreq},
+		t1.DRUGCODE = #{drugCode},
+		t1.DRUGNAME = #{drugName},
+		t1.QUANTITY = #{quantity},
+		t1.QUANTITYUNIT = #{quantityUnit},
+		t1.OCCDT = #{occDT},
+		t1.CHARGEDT = #{chargeDT},
+		t1.INFUSIONDATE = #{infusionDate},
+		t1.BEGINDT = #{begindt},
+		t1.ENDDT = #{enddt},
+		t1.BATCH_ID = #{batchID},
+		t1.AMOUNT = #{useCount},
+		t1.STATE = #{state},
+		t1.synDate = sysdate
+		where 
+		t1.drugListID = #{drugListID} 
+
+		WHEN
+		NOT
+		MATCHED THEN
+		INSERT
+		(
+		<if test="recipeID !=null">
+		t1.RECIPEID,
+		</if>
+		
+		<if test="groupNo !=null">
+		t1.GROUPNO,
+		</if>
+		
+		<if test="drugListID !=null">
+		t1.DRUGLISTID,
+		</if>
+		
+		<if test="drugFreq !=null">
+		t1.DRUGFREQ,
+		</if>
+		
+		<if test="drugCode !=null">
+		t1.DRUGCODE,
+		</if>
+		
+		<if test="drugName !=null">
+		t1.DRUGNAME,
+		</if>
+		
+		<if test="quantity !=null">
+		t1.QUANTITY,
+		</if>
+		
+		<if test="quantityUnit !=null">
+		t1.QUANTITYUNIT,
+		</if>
+		
+		<if test="schedule !=null">
+		t1.SCHEDULE,
+		</if>
+		
+		<if test="occDT !=null">
+		t1.OCCDT,
+		</if>
+		
+		<if test="chargeDT !=null">
+		t1.CHARGEDT,
+		</if>
+		
+		<if test="infusionDate !=null">
+		t1.INFUSIONDATE,
+		</if>
+		
+		<if test="labelNo !=null">
+		t1.LABELNO,
+		</if>
+		
+		<if test="begindt !=null">
+		t1.BEGINDT,
+		</if>
+		
+		t1.BATCH_ID,
+		t1.AMOUNT,
+		
+		<if test="state !=null">
+		t1.STATE,
+		</if> 
+		
+		<if test="enddt !=null">
+		t1.ENDDT
+		</if>
+		
+		
+		)
+		VALUES
+		(
+		
+		<if test="recipeID !=null">
+		#{recipeID},
+		</if>
+		
+		<if test="groupNo !=null">
+		#{groupNo},
+		</if>
+		
+		<if test="drugListID !=null">
+		#{drugListID},
+		</if>
+		
+		<if test="drugFreq !=null">
+		#{drugFreq},
+		</if>
+		
+		<if test="drugCode !=null">
+		#{drugCode},
+		</if>
+		
+		<if test="drugName !=null">
+		#{drugName},
+		</if>
+		
+		<if test="quantity !=null">
+		#{quantity},
+		</if>
+		
+		<if test="quantityUnit !=null">
+		#{quantityUnit},
+		</if>
+		
+		<if test="schedule !=null">
+		#{schedule},
+		</if>
+		
+		<if test="occDT !=null">
+		#{occDT},
+		</if>
+		
+		<if test="chargeDT !=null">
+		#{chargeDT},
+		</if>
+		
+		<if test="infusionDate !=null">
+		#{infusionDate},
+		</if>
+		
+		<if test="labelNo !=null">
+		#{labelNo},
+		</if>
+		
+		<if test="begindt !=null">
+		#{begindt},
+		</if>
+		
+		#{batchID},
+		 #{useCount},
+		
+		<if test="state !=null">
+		#{state},
+		</if>
+		
+		<if test="enddt !=null">
+		#{enddt}
+		</if>
+		)
+	</update>
+
+	<select id="getBatchID" resultType="String">
+  	   select id_ from srvs_batch
+  	    	<![CDATA[ where to_date(to_char(sysdate,'yyyy-MM-DD ') ||  #{qry.useTime} || ':00','yyyy-MM-DD hh24:mi:ss') >= to_date(to_char(sysdate,'yyyy-MM-DD ') || start_time_ || ':00','yyyy-MM-DD hh24:mi:ss')]]>
+        	<![CDATA[  and to_date(to_char(sysdate,'yyyy-MM-DD ') ||  #{qry.useTime} || ':00','yyyy-MM-DD hh24:mi:ss') <= to_date(to_char(sysdate,'yyyy-MM-DD ') || end_time_ || ':00','yyyy-MM-DD hh24:mi:ss')]]>
+       and enabled_  = 1 and is_empty_batch_ = 0
+  	</select>
+  	
+  	
+  	<select id="getRecordAllDay" resultType="com.zc.pivas.excuteRecord.bean.ExcuteRecordBean">
+  	
+  	select
+	recipeid as "recipeID",
+	groupno as "groupNo",
+	druglistid as "drugListID",
+	drugfreq as "drugFreq",
+	drugcode as "drugCode",
+	drugname as "drugName",
+	quantity as "quantity",
+	quantityunit as "quantityUnit",
+	schedule as "schedule",
+	occdt as "occDT",
+	chargedt as "chargeDT",
+	infusiondate as "infusionDate",
+	labelno as "labelNo",
+	begindt,
+	enddt,
+	syndate as "synDate",
+	batch_id as "batchID",
+	amount as "useCount"
+  	from SRVS_PRESCRIPTION_RECORD  where 1=1
+  	and substr(occdt,0,10) = #{dayDate}
+  	and groupno = #{parentNo}
+  	and state = 0
+  	order by schedule,drugcode
+  	
+  	</select>
+  	
+  	<select id="getRecordSplit" resultType="com.zc.pivas.excuteRecord.bean.ExcuteRecordBean">
+  	
+  	select ydr.groupno,ydr.state from SRVS_PRESCRIPTION_RECORD ydr
+    where 1=1
+    and ydr.groupno = #{parentNo}
+    and substr(ydr.occdt,0,10) = #{dayDate}
+    and ydr.state = 0
+    group by ydr.groupno,ydr.schedule,ydr.state
+    order by ydr.groupno,ydr.schedule
+  	
+  	</select>
+  	
+  	<select id="getRecordSplitExistYy" resultType="com.zc.pivas.excuteRecord.bean.ExcuteRecordBean">
+  	select groupno,schedule,batch_id as "batchID",occdt as "occDT"
+	from SRVS_PRESCRIPTION_RECORD  where 1=1
+	and substr(occdt,0,10) = #{dayDate}
+	and groupno = #{parentNo}
+	and state = 0
+	group by groupno,schedule,batch_id,occdt
+	order by schedule
+  	</select>
+  	
+  	<select id="getExcuteRecordBean" resultType="com.zc.pivas.excuteRecord.bean.ExcuteRecordBean">
+  	select
+	recipeid as "recipeID",
+	groupno as "groupNo",
+	druglistid as "drugListID",
+	drugfreq as "drugFreq",
+	drugcode as "drugCode",
+	drugname as "drugName",
+	quantity as "quantity",
+	quantityunit as "quantityUnit",
+	schedule as "schedule",
+	occdt as "occDT",
+	chargedt as "chargeDT",
+	infusiondate as "infusionDate",
+	labelno as "labelNo",
+	begindt,
+	enddt,
+	syndate as "synDate",
+	batch_id as "batchID",
+	amount as "useCount"
+  	from SRVS_PRESCRIPTION_RECORD  where 1=1
+  	and recipeid = #{actOrderNo}
+  	and groupno = #{parentNo}
+  	
+  	</select>
+  	
+  	<select id="getRecordByPC" resultType="com.zc.pivas.excuteRecord.bean.ExcuteRecordBean">
+  	select
+	recipeid as "recipeID",
+	groupno as "groupNo",
+	druglistid as "drugListID",
+	drugfreq as "drugFreq",
+	drugcode as "drugCode",
+	drugname as "drugName",
+	quantity as "quantity",
+	quantityunit as "quantityUnit",
+	schedule as "schedule",
+	occdt as "occDT",
+	chargedt as "chargeDT",
+	infusiondate as "infusionDate",
+	labelno as "labelNo",
+	begindt,
+	enddt,
+	syndate as "synDate",
+	batch_id as "batchID",
+	amount as "useCount",
+	bedno as "bedNo",	
+	state 
+  	from SRVS_PRESCRIPTION_RECORD  where 1=1
+  	and substr(occdt,0,10) = #{dayDate}
+  	and groupno = #{parentNo}
+  	and state = 0
+  	and batch_id = #{pcID}
+  	
+  	</select>
+  	
+  	<select id="getRecordYyDetail" resultType="com.zc.pivas.excuteRecord.bean.ExcuteRecordBean">
+  	select groupno,drugcode,drugname,quantity,quantityunit,bedno,patname
+  	from SRVS_PRESCRIPTION_RECORD
+  	where 1=1
+  	and substr(occdt,0,10) = #{dayDate}
+  	and groupno = #{parentNo}
+ 	and state = 0
+  	group by groupno,drugcode,drugname,quantity,quantityunit,bedno,patname
+  	order by drugcode
+  	</select>
+  	
+  	<select id="getRecordForCheck" resultType="com.zc.pivas.excuteRecord.bean.ExcuteRecordBean">
+  	select
+	recipeid as "recipeID",
+	groupno as "groupNo",
+	druglistid as "drugListID",
+	drugfreq as "drugFreq",
+	drugcode as "drugCode",
+	drugname as "drugName",
+	quantity as "quantity",
+	quantityunit as "quantityUnit",
+	schedule as "schedule",
+	occdt as "occDT",
+	chargedt as "chargeDT",
+	infusiondate as "infusionDate",
+	labelno as "labelNo",
+	begindt,
+	enddt,
+	syndate as "synDate",
+	batch_id as "batchID",
+	amount as "useCount",
+	state 
+  	from SRVS_PRESCRIPTION_RECORD  where 1=1
+  	and substr(occdt,0,10) = #{dayDate}
+  	and groupno = #{parentNo}
+  	and batch_id = #{pcID}
+  	
+  	</select>
+  	
+  	<select id="getExcuteRecordBeanByPC" resultType="com.zc.pivas.excuteRecord.bean.ExcuteRecordBean">
+  	select
+	recipeid as "recipeID",
+	groupno as "groupNo",
+	druglistid as "drugListID",
+	drugfreq as "drugFreq",
+	drugcode as "drugCode",
+	drugname as "drugName",
+	quantity as "quantity",
+	quantityunit as "quantityUnit",
+	schedule as "schedule",
+	occdt as "occDT",
+	chargedt as "chargeDT",
+	infusiondate as "infusionDate",
+	labelno as "labelNo",
+	begindt,
+	enddt,
+	syndate as "synDate",
+	batch_id as "batchID",
+	amount as "useCount",
+	bedno,
+	patname
+  	from SRVS_PRESCRIPTION_RECORD  where 1=1
+  	and recipeid = #{actOrderNo}
+  	and groupno = #{parentNo}
+  	and batch_id = #{pcid}
+  	and occdt like '%' || to_char(#{yyrq}, 'yyyy-MM-DD') || '%'
+  	
+  	</select>
+  	
+  	<select id="checkYdRefund" resultType="com.zc.pivas.excuteRecord.bean.ExcuteRecordBean">
+  		select LISTAGG(recipeid, '@@') within group(order by recipeid) as "recipeID",
+       groupno as "groupNo",
+       druglistid as "drugListID",
+       drugfreq as "drugFreq",
+       LISTAGG(drugcode, '@@') within group(order by recipeid) as "drugCode",
+       LISTAGG(drugName, '@@') within group(order by recipeid) as "drugName",
+       LISTAGG(quantity, '@@') within group(order by recipeid) as "quantity",
+       LISTAGG(quantityunit, '@@') within group(order by recipeid) as "quantityUnit",
+       chargedt as "chargeDT",
+       infusiondate as "infusionDate",
+       labelno as "labelNo",
+       begindt,
+       enddt,
+       batch_id as "batchID",
+       amount as "useCount",
+       state,
+       occdt,
+       yyrq,
+       bedno,
+        patname,
+       wardname,
+       errortype,
+       wardcode
+  from (select recipeid,groupno,druglistid,drugfreq,drugcode,
+               ydr.drugName,ydr.quantity ,quantityunit,occdt,chargedt, infusiondate,
+               labelno,begindt,enddt,batch_id,amount,state,occdt as "occdt",substr(occdt, 0, 10) as yyrq,t.wardname as wardname,t.yzshbtglx as errortype,t.ward_code as wardcode,ydr.bedno as bedno,ydr.patname as patname
+          from SRVS_PRESCRIPTION_RECORD ydr
+          left join SRVS_DOCTOR_ADVICE_main t on t.parent_no = ydr.groupno
+         where 1 = 1and to_date(occdt,'yyyy-MM-DD hh24:mi:ss') between #{qry.yyrqStart,jdbcType=DATE}  and #{qry.yyrqEnd,jdbcType=DATE}  and t.yzshzt = 2)
+ group by yyrq,occdt,groupno, druglistid,drugfreq, wardname,wardcode, bedno, patname,errortype,chargedt, infusiondate,labelno,begindt,enddt,batch_id,amount,state
+ order by wardname,bedno,yyrq
+  	</select>
+  	
+  	
+  	<update id="insertYdRefund" parameterType="com.zc.pivas.excuteRecord.bean.ExcuteRecordBean">
+		merge into
+		SRVS_PRESCRIPTION_REFUND t1
+		using (
+		select
+		#{drugListID} as DrugListID
+		from dual )
+		t2
+		ON
+		(
+		t1.DrugListID = t2.DrugListID 
+		)
+		WHEN
+		MATCHED THEN
+		UPDATE SET
+		
+		<if test="recipeID !=null">
+		t1.RECIPEID = #{recipeID},
+		</if>
+		
+		<if test="drugCode !=null">
+		t1.DRUGCODE = #{drugCode},
+		</if>
+		
+		<if test="drugName !=null">
+		t1.DRUGNAME = #{drugName},
+		</if>
+		
+		<if test="quantity !=null">
+		t1.QUANTITY = #{quantity},
+		</if>
+		
+		<if test="quantityUnit !=null">
+		t1.QUANTITYUNIT = #{quantityUnit},
+		</if>
+		
+		t1.STATE = #{state}
+		where 
+		t1.drugListID = #{drugListID} 
+		WHEN
+		NOT
+		MATCHED THEN
+		INSERT
+		(
+		<if test="recipeID !=null">
+		t1.RECIPEID
+		</if>
+		
+		<if test="groupNo !=null">
+		,t1.GROUPNO
+		</if>
+		
+		<if test="drugListID !=null">
+		,t1.DRUGLISTID
+		</if>
+		
+		<if test="drugFreq !=null">
+		,t1.DRUGFREQ
+		</if>
+		
+		<if test="drugCode !=null">
+		,t1.DRUGCODE
+		</if>
+		
+		<if test="drugName !=null">
+		,t1.DRUGNAME
+		</if>
+		
+		<if test="quantity !=null">
+		,t1.QUANTITY
+		</if>
+		
+		<if test="quantityUnit !=null">
+		,t1.QUANTITYUNIT
+		</if>
+		
+		<if test="occDT !=null">
+		,t1.OCCDT
+		</if>
+		
+		<if test="chargeDT !=null">
+		,t1.CHARGEDT
+		</if>
+		
+		<if test="infusionDate !=null">
+		,t1.INFUSIONDATE
+		</if>
+		
+		<if test="labelNo !=null">
+		,t1.LABELNO
+		</if>
+		
+		<if test="begindt !=null">
+		,t1.BEGINDT
+		</if>
+		
+		<if test="batchID !=null">
+		,t1.BATCH_ID
+		</if>
+		
+		<if test="useCount !=null">
+		,t1.AMOUNT
+		</if>
+		
+		<if test="state !=null">
+		,t1.STATE
+		</if> 
+		
+		<if test="bedNo !=null">
+		,t1.BEDNO
+		</if> 
+		
+		<if test="patName !=null">
+		,t1.PATNAME
+		</if> 
+		
+		<if test="wardCode !=null">
+		,t1.WARDCODE
+		</if> 
+		
+		<if test="wardName !=null">
+		,t1.WARDNAME
+		</if> 
+		
+		<if test="enddt !=null">
+		,t1.ENDDT
+		</if>
+		
+		<if test="errorType !=null">
+		,t1.errorType
+		</if>
+		)
+		VALUES
+		(
+		
+		<if test="recipeID !=null">
+		#{recipeID}
+		</if>
+		
+		<if test="groupNo !=null">
+		,#{groupNo}
+		</if>
+		
+		<if test="drugListID !=null">
+		,#{drugListID}
+		</if>
+		
+		<if test="drugFreq !=null">
+		,#{drugFreq}
+		</if>
+		
+		<if test="drugCode !=null">
+		,#{drugCode}
+		</if>
+		
+		<if test="drugName !=null">
+		,#{drugName}
+		</if>
+		
+		<if test="quantity !=null">
+		,#{quantity}
+		</if>
+		
+		<if test="quantityUnit !=null">
+		,#{quantityUnit}
+		</if>
+		
+		<if test="occDT !=null">
+		,#{occDT}
+		</if>
+		
+		<if test="chargeDT !=null">
+		,#{chargeDT}
+		</if>
+		
+		<if test="infusionDate !=null">
+		,#{infusionDate}
+		</if>
+		
+		<if test="labelNo !=null">
+		,#{labelNo}
+		</if>
+		
+		<if test="begindt !=null">
+		,#{begindt}
+		</if>
+		
+		<if test="batchID !=null">
+		,#{batchID}
+		</if>
+		
+		<if test="useCount !=null">
+		,#{useCount}
+		</if>
+		
+		<if test="state !=null">
+		,#{state}
+		</if>
+		
+		<if test="bedNo !=null">
+		,#{bedNo}
+		</if> 
+		
+		<if test="patName !=null">
+		,#{patName}
+		</if> 
+		
+		<if test="wardCode !=null">
+		,#{wardCode}
+		</if> 
+		
+		<if test="wardName !=null">
+		,#{wardName}
+		</if> 
+		
+		<if test="enddt !=null">
+		,#{enddt}
+		</if>
+		
+		<if test="errorType !=null">
+		,#{errorType}
+		</if>
+		)
+	</update>
+	
+	<select id="queryYdrefundList" resultType="com.zc.pivas.excuteRecord.bean.ExcuteRecordBean">
+	
+	<include refid="common.jqueryPageHead" />
+  	select
+  	id,
+  	 recipeid  as "recipeID",
+       groupno as "groupNo",
+       druglistid as "drugListID",
+       drugfreq as "drugFreq",
+       drugcode as "drugCode",
+       drugName as "drugName",
+       quantity as "quantity",
+       quantityunit as "quantityUnit",
+       chargedt as "chargeDT",
+       infusiondate as "infusionDate",
+       labelno as "labelNo",
+       begindt,
+       enddt,
+       batch_id as "batchID",
+       amount as "useCount",
+       state,
+       occdt,
+       bedno,
+        patname,
+       wardname,
+       wardcode,
+       t.TRIALNAME as errorTypeName,
+       <![CDATA[ case when processState <>  '0' then '已处理']]>
+         else '未处理' end as processState
+  	from SRVS_PRESCRIPTION_REFUND
+  	left join SRVS_TRIAL_ERRORTYPE t on t.gid = errorType
+  	
+  	<where>
+  	1=1 
+  		<if test="qry.parentNoS !=null and qry.parentNoS != ''">
+  			and (
+			<foreach collection="qry.parentNoS" item="parentNo"
+				separator="or">
+				groupno like '%'||#{parentNo,jdbcType=VARCHAR}||'%' escape '\'
+			</foreach>
+			)
+  		</if>
+  		<if test="qry.patnameS !=null and qry.leftWithPati !=null">
+			and (
+			<foreach collection="qry.patnameS" item="patname" separator="or">
+				patname like '%'||#{patname,jdbcType=VARCHAR}||'%' escape '\'
+			</foreach>
+			)
+		</if>
+		<if test="qry.bednoS !=null">
+			and (
+			<foreach collection="qry.bednoS" item="bedno" separator="or">
+				bedno like '%'||#{bedno,jdbcType=VARCHAR}||'%' escape '\'
+			</foreach>
+			)
+		</if>
+		
+		<if test="qry.wardNameS !=null">
+			and (
+			<foreach collection="qry.wardNameS" item="wardName"
+				separator="or">
+				wardname like '%'||#{wardName,jdbcType=VARCHAR}||'%' escape '\'
+			</foreach>
+			)
+		</if>
+		
+		<if test="qry.areaN !=null and qry.areaN !=''and qry.areaN.size>0">
+			and wardcode in
+			<foreach collection="qry.areaN" item="areaId" separator=","
+				open="(" close=")">
+				#{areaId,jdbcType=VARCHAR}
+			</foreach>
+		</if>
+		
+		and to_date(occdt,'yyyy-MM-DD hh24:mi:ss') between #{qry.yyrqStart,jdbcType=DATE}  and #{qry.yyrqEnd,jdbcType=DATE}
+  	</where>
+  	order by wardname,bedno
+  	<include refid="common.jqueryPageBottom" />
+  	
+  	
+  	</select>
+  	
+  	<select id="queryYdrefundTotal" resultType="int">
+  	select count(*)
+  	from SRVS_PRESCRIPTION_REFUND
+  	
+  	<where>
+  	1=1 
+  		<if test="qry.parentNoS !=null and qry.parentNoS != ''and qry.parentNoS.size>0">
+  			and (
+			<foreach collection="qry.parentNoS" item="parentNo"
+				separator="or">
+				groupno like '%'||#{parentNo,jdbcType=VARCHAR}||'%' escape '\'
+			</foreach>
+			)
+  		</if>
+  		<if test="qry.patnameS !=null and qry.leftWithPati !=null and qry.leftWithPati.size>0">
+			and (
+			<foreach collection="qry.patnameS" item="patname" separator="or">
+				patname like '%'||#{patname,jdbcType=VARCHAR}||'%' escape '\'
+			</foreach>
+			)
+		</if>
+		<if test="qry.bednoS !=null and qry.bednoS.size>0">
+			and (
+			<foreach collection="qry.bednoS" item="bedno" separator="or">
+				bedno like '%'||#{bedno,jdbcType=VARCHAR}||'%' escape '\'
+			</foreach>
+			)
+		</if>
+		
+		<if test="qry.wardNameS !=null and qry.wardNameS.size>0">
+			and (
+			<foreach collection="qry.wardNameS" item="wardName"
+				separator="or">
+				wardname like '%'||#{wardName,jdbcType=VARCHAR}||'%' escape '\'
+			</foreach>
+			)
+		</if>
+		
+		<if test="qry.areaN !=null and qry.areaN !=''and qry.areaN.size>0">
+			and wardcode in
+			<foreach collection="qry.areaN" item="areaId" separator=","
+				open="(" close=")">
+				#{areaId,jdbcType=VARCHAR}
+			</foreach>
+		</if>
+		
+		and to_date(occdt,'yyyy-MM-DD hh24:mi:ss') between #{qry.yyrqStart,jdbcType=DATE}  and #{qry.yyrqEnd,jdbcType=DATE}
+  	</where>
+  	</select>
+  	
+  	<update id="processYdRefund" parameterType="com.zc.pivas.excuteRecord.bean.ExcuteRecordBean">
+  		update SRVS_PRESCRIPTION_REFUND set processState = 1 where id = #{id}
+  	</update>
+</mapper>

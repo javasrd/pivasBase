@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zc.pivas.medicaments.repository.DrugOpenAmountDao">
+	<resultMap id="BaseResultMap" type="com.zc.pivas.medicaments.entity.DrugOpenAmount">
+		<id column="id" property="id" jdbcType="BIGINT" />
+		<result column="name" property="name" jdbcType="VARCHAR" />
+		<result column="code" property="code" jdbcType="VARCHAR" />
+		<result column="place_code" property="place_code" jdbcType="VARCHAR" />
+		<result column="place" property="place" jdbcType="VARCHAR" />
+		<result column="AMOUNT" property="amount" jdbcType="VARCHAR" />
+		<result column="AMOUNTPLAN" property="amountPlan" jdbcType="VARCHAR" />
+		<result column="OPENCONFIRMDATE" property="openConfirmDate" jdbcType="VARCHAR" />
+		<result column="OPENDATE" property="openDate" jdbcType="VARCHAR" />
+		<result column="OPERATOR" property="operator" jdbcType="VARCHAR" />
+	</resultMap>
+	
+	<sql id="Base_Column_List">
+		t1.id, 
+		t1.name,
+		t1.code,
+		t1.PLACE_CODE, 
+		t1.PLACE,
+		t1.AMOUNT, 
+		t1.AMOUNTPLAN,
+		t1.OPENCONFIRMDATE,
+		t1.OPENDATE,
+		t1.OPERATOR
+	</sql>
+
+	<select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="Long">
+		select
+		<include refid="Base_Column_List" />
+		from SRVS_DRUGOPEN_AMOUNT t1 where id = #{id,jdbcType=BIGINT}
+	</select>
+
+	<delete id="deleteByPrimaryKey" parameterType="Long">
+		delete from SRVS_DRUGOPEN_AMOUNT where id = #{id,jdbcType=BIGINT}
+	</delete>
+
+	<insert id="insert" parameterType="com.zc.pivas.medicaments.entity.DrugOpenAmount">
+		insert into SRVS_DRUGOPEN_AMOUNT (
+		name, 
+		code,
+		PLACE_CODE,
+		PLACE, 
+		AMOUNT,
+		OPENCONFIRMDATE,
+		OPENDATE,
+		OPERATOR
+		)
+		values
+		(
+		#{name,jdbcType=VARCHAR},
+		#{code,jdbcType=VARCHAR},
+		#{place_code,jdbcType=VARCHAR},
+		#{place,jdbcType=VARCHAR},
+		#{amount,jdbcType=VARCHAR},
+		#{openConfirmDate,jdbcType=VARCHAR},
+		#{openDate,jdbcType=VARCHAR},
+		#{operator,jdbcType=VARCHAR}
+		)
+	</insert>
+
+	<update id="updateByPrimaryKey" parameterType="com.zc.pivas.medicaments.entity.DrugOpenAmount">
+		update SRVS_DRUGOPEN_AMOUNT
+		<set>
+			<if test="openDate != null">
+				openDate = #{openDate,jdbcType=VARCHAR}
+			</if>
+			
+			<if test="amount != null">
+				,amount = #{amount,jdbcType=VARCHAR}
+			</if>
+			
+			<if test="operator != null">
+				,operator = #{operator,jdbcType=VARCHAR}
+			</if>
+			
+			
+		</set>
+		where 1=1 and id = #{id,jdbcType=BIGINT}
+	</update>
+
+	<select id="queryByPaging" resultMap="BaseResultMap">
+		<include refid="common.jqueryPageHead" />
+		select
+		<include refid="Base_Column_List" />
+		
+		<include refid="Base_Where_Sql" />
+
+		and instr(name, '片') = 0
+		and instr(name, '口服液') = 0
+		and instr(name, '滴眼液') = 0
+		and instr(name, '颗粒') = 0
+		and instr(name, '散') = 0
+		and instr(name, '剂') = 0
+
+		<include refid="common.jqueryPageBottom" />
+	</select>
+	
+	<sql id="Base_Where_Sql">
+		from
+		SRVS_DRUGOPEN_AMOUNT t1
+		
+		<if test="condition.suchamas != null and '' neq condition.suchamas">
+			left JOIN SRVS_MEDICAMENTS t2 ON t2.MEDICAMENTS_CODE = t1.CODE
+		</if>
+		
+		<where>
+			1=1
+			<if test="condition != null">
+
+				<if test="condition.openConfirmDate != null and '' neq condition.openConfirmDate">
+					and OPENCONFIRMDATE like '%'||#{condition.openConfirmDate}||'%' escape '\'
+				</if>
+				
+				<if test="condition.names != null and '' neq condition.names">
+					and
+					<foreach item="name" index="index" collection="condition.names" open="(" separator="or" close=")">
+						name like '%'||#{name}||'%' escape '\'
+					</foreach>
+				</if>
+				
+				<if test="condition.codes != null and '' neq condition.codes">
+					and
+					<foreach item="code" index="index" collection="condition.codes" open="(" separator="or" close=")">
+						code like '%'||#{code}||'%' escape '\'
+					</foreach>
+				</if>
+				
+				<if test="condition.places != null and '' neq condition.places">
+					and
+					<foreach item="place" index="index" collection="condition.places" open="(" separator="or" close=")">
+						place like '%'||#{place}||'%' escape '\'
+					</foreach>
+				</if>
+				
+				<if test="condition.operators != null and '' neq condition.operators">
+					and
+					<foreach item="operator" index="index" collection="condition.operators" open="(" separator="or" close=")">
+						operator like '%'||#{operator}||'%' escape '\'
+					</foreach>
+				</if>
+				
+				<if test="condition.suchamas != null and '' neq condition.suchamas">
+					and
+					<foreach item="suchama" index="index" collection="condition.suchamas" open="(" separator="or" close=")">
+						t2.MEDICAMENTS_SUCHAMA like '%'||#{suchama}||'%' escape '\'
+					</foreach>
+				</if>
+
+			</if>
+		</where>
+	</sql>
+	<!-- 用药频次总数 -->
+	<select id="getTotalCount" resultType="int">
+		select
+		count(1)
+		<include refid="Base_Where_Sql" />
+		and instr(name, '片') = 0
+		and instr(name, '口服液') = 0
+		and instr(name, '滴眼液') = 0
+		and instr(name, '颗粒') = 0
+		and instr(name, '散') = 0
+		and instr(name, '剂') = 0
+	</select>
+
+	<select id="queryAllByCondition" resultMap="BaseResultMap">
+		select * from SRVS_DRUGOPEN_AMOUNT
+		<include refid="Base_Where_Sql" />
+		and instr(name, '片') = 0
+		and instr(name, '口服液') = 0
+		and instr(name, '滴眼液') = 0
+		and instr(name, '颗粒') = 0
+		and instr(name, '散') = 0
+		and instr(name, '剂') = 0
+		
+		order  by amount desc
+	</select>
+
+	<update id="synData" parameterType="com.zc.pivas.medicaments.entity.DrugOpenAmount">
+		merge into SRVS_DRUGOPEN_AMOUNT t1
+		using (
+		select #{code,jdbcType=VARCHAR} as code,#{openConfirmDate,jdbcType=VARCHAR} as openConfirmDate from dual )
+		t2
+		ON
+		(
+		t1.code = t2.code and t1.openConfirmDate = t2.openConfirmDate
+		)
+		WHEN MATCHED THEN UPDATE SET
+		t1.OPERATETIME = sysdate
+		where t1.code = #{code,jdbcType=VARCHAR} and t1.openConfirmDate = #{openConfirmDate,jdbcType=VARCHAR}
+		
+		WHEN NOT MATCHED THEN
+		INSERT
+		(
+		t1.name, 
+		t1.code,
+		t1.PLACE_CODE,
+		t1.PLACE, 
+		t1.AMOUNT,
+		t1.AMOUNTPLAN,
+		t1.OPENCONFIRMDATE,
+		t1.OPERATETIME
+		)
+		VALUES
+		(
+		#{name,jdbcType=VARCHAR},
+		#{code,jdbcType=VARCHAR},
+		#{place_code,jdbcType=VARCHAR},
+		#{place,jdbcType=VARCHAR},
+		#{amount,jdbcType=VARCHAR},
+		#{amountPlan,jdbcType=VARCHAR},
+		#{openConfirmDate,jdbcType=VARCHAR},
+		sysdate
+		)
+	</update>
+</mapper>

@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zc.pivas.checktype.dao.CheckTypeDAO" >
+	<resultMap id="CheckTypeMap" type="com.zc.pivas.checktype.bean.CheckTypeBean" >
+		<id column="gid" property="gid" jdbcType="VARCHAR" />
+		<result column="orderid" property="orderID" jdbcType="VARCHAR" />
+		<result column="checkname" property="checkName" jdbcType="VARCHAR" />
+		<result column="isshow" property="isShow" jdbcType="INTEGER" />
+		<result property="isShowResult" jdbcType="VARCHAR" />
+		<result column="ischarge" property="isCharge" jdbcType="INTEGER" />
+		<result property="iisChargeResult" jdbcType="VARCHAR" />
+		<result column="iseffect" property="isEffect" jdbcType="INTEGER" />
+		<result property="isEffectResult" jdbcType="VARCHAR" />
+		<result column="checktype" property="checkType" jdbcType="INTEGER" />
+		<result column="isstock" property="isStock" jdbcType="INTEGER" />
+        <result property="isStockResult" jdbcType="VARCHAR" />
+		<result column="reserve0" property="reserve0" jdbcType="VARCHAR" />
+		<result column="reserve1" property="reserve1" jdbcType="VARCHAR" />
+		<result column="reserve2" property="reserve2" jdbcType="VARCHAR" />
+	</resultMap>
+	
+	<sql id="getCheckTypeSql">
+  		
+		SELECT  * FROM SRVS_CHECKTYPE
+			<where>
+  		    1=1 
+			<if test="checkType != null">
+				<if test="checkType.orderID != null and '' neq checkType.orderID ">
+					and orderid like #{checkType.orderID}
+				</if>
+				
+				<if test="checkType.checkName != null and '' neq checkType.checkName ">
+					and checkname like #{checkType.checkName}
+				</if>
+			</if>
+		  </where>
+ 	</sql>
+  
+  	<select id="getCheckTypeList" resultMap="CheckTypeMap">
+  		<include refid="common.jqueryPageHead" />
+  		<include refid="getCheckTypeSql"/>
+  		<include refid="common.jqueryPageBottom" />
+  	</select>
+  
+  	<select id="getCheckTypeTotal" resultType="int">
+  		select count(1) from (
+  			<include refid="getCheckTypeSql"/>
+  		) t1
+  	</select>
+  
+  	<select id="getCheckType" resultMap="CheckTypeMap">
+	  	SELECT
+  			gid,
+			orderid,
+			checkname,
+			isshow,
+			ischarge,
+			iseffect,
+       		checktype,
+       		isstock
+		FROM
+			SRVS_CHECKTYPE
+			<where>
+  		    1=1 
+			<if test="checkType != null">
+			   <if test="checkType.gid != null and '' neq checkType.gid ">
+					and gid = #{checkType.gid}
+				</if>
+				<if test="checkType.orderID != null and '' neq checkType.orderID ">
+					and orderid = #{checkType.orderID}
+				</if>
+				
+				<if test="checkType.checkName != null and '' neq checkType.checkName ">
+					and checkname = #{checkType.checkName}
+				</if>
+				
+				<if test="checkType.checkType != null ">
+					and checktype = #{checkType.checkType}
+				</if>
+				
+				<if test="checkType.isEffect != null ">
+					and isEffect = #{checkType.isEffect}
+				</if>
+			</if>
+			</where>
+  	</select>
+  	
+  	<select id="checkOrderIDIsExist" resultMap="CheckTypeMap">
+	  	SELECT
+  			gid,
+			orderid,
+			checkname,
+			isshow,
+			ischarge,
+			iseffect,
+       		checktype,
+       		isstock
+		FROM
+			SRVS_CHECKTYPE
+			<where>
+  		    1=1 
+			<if test="checkType != null">
+				<if test="checkType.orderID != null and '' neq checkType.orderID ">
+					 and orderid = #{checkType.orderID}  
+				</if>
+				
+				<if test="checkType.gid != null and '' neq checkType.gid ">
+					<![CDATA[ and gid <> #{checkType.gid} ]]>
+				</if>
+			</if>
+			</where>
+  	</select>
+  	
+  	<select id="checkNameIsExist" resultMap="CheckTypeMap">
+	  	SELECT
+  			gid,
+			orderid,
+			checkname,
+			isshow,
+			ischarge,
+			iseffect,
+       		checktype,
+       		isstock
+		FROM
+			SRVS_CHECKTYPE
+			<where>
+  		    1=1 
+			<if test="checkType != null">
+				
+				<if test="checkType.checkName != null and '' neq checkType.checkName ">
+					 and checkname = #{checkType.checkName}
+				</if>
+				
+				<if test="checkType.gid != null and '' neq checkType.gid ">
+					<![CDATA[ and gid <> #{checkType.gid} ]]>
+				</if>
+			</if>
+			</where>
+  	</select>
+  	
+  	<select id="checkTypeIsExitst" resultMap="CheckTypeMap">
+	  	SELECT
+  			gid,
+			orderid,
+			checkname,
+			isshow,
+			ischarge,
+			iseffect,
+       		checktype,
+       		isstock
+		FROM
+			SRVS_CHECKTYPE
+			<where>
+  		    1=1 
+			<if test="checkType != null">
+				and checktype = #{checkType.checkType}
+				
+				<if test="checkType.gid != null and '' neq checkType.gid ">
+					<![CDATA[ and gid <> #{checkType.gid} ]]>
+				</if>
+			</if>
+			</where>
+  	</select>
+  
+  	<insert id="addCheckType" parameterType="com.zc.pivas.checktype.bean.CheckTypeBean">
+	  	INSERT INTO SRVS_CHECKTYPE (
+			orderid,
+			checkname,
+			isshow,
+			ischarge,
+			iseffect,
+       		checktype,
+       		isstock
+		)
+		VALUES
+		(
+			#{orderID},
+			#{checkName},
+			#{isShow},
+			#{isCharge},
+			#{isEffect},
+			#{checkType},
+			#{isStock}
+		)
+	</insert>
+
+	<update id="updateCheckType" parameterType="com.zc.pivas.checktype.bean.CheckTypeBean">
+  		update SRVS_CHECKTYPE set
+			orderid = #{orderID},
+			checkname = #{checkName},
+			isshow = #{isShow},
+			ischarge = #{isCharge},
+			iseffect = #{isEffect},
+			checktype = #{checkType},
+			isstock = #{isStock}
+			where gid = #{gid}
+  	</update>
+  
+  	<delete id="delCheckType" parameterType="com.zc.pivas.checktype.bean.CheckTypeBean">
+  		delete from SRVS_CHECKTYPE
+			where gid = #{gid}
+	</delete>
+	
+	 <select id="queryCheckTypeAllList" resultMap="CheckTypeMap">
+	  	SELECT
+  			gid,
+			orderid,
+			checkname,
+			isshow,
+			ischarge,
+			iseffect,
+       		checktype,
+       		isstock
+		FROM
+			SRVS_CHECKTYPE
+		where ISEFFECT = 0 
+		<if test="checkType != null and '' neq checkType ">
+			and checkType = #{checkType,jdbcType=INTEGER}
+		</if>
+		order by checktype desc,orderid desc
+  	</select>
+
+</mapper>

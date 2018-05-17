@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zc.base.sc.modules.generalRule.repository.RuleRefBatchDao" >
+
+  <resultMap id="BaseResultMap" type="com.zc.base.sc.modules.generalRule.entity.RuleRefBatch" >
+    <result column="RULE_ID_" property="ruleId" jdbcType="BIGINT" />
+    <result column="SERIAL_NUMBER_" property="serialNumber" jdbcType="INTEGER" />
+    <result column="BATCH_ID_" property="batchId" jdbcType="BIGINT" />
+    <result column="IS_FIXED_BATCH_" property="isFixedBatch" jdbcType="INTEGER" />
+  </resultMap>
+  
+  <delete id="deleteByRuleId" parameterType="Long">
+  	delete from SRVS_RULE_REF_BATCH where RULE_ID_ = #{ruleId,jdbcType=BIGINT}
+  </delete>
+  
+  <insert id="insert" parameterType="com.zc.base.sc.modules.generalRule.entity.RuleRefBatch" >
+    insert into SRVS_RULE_REF_BATCH (RULE_ID_, SERIAL_NUMBER_,
+      BATCH_ID_, IS_FIXED_BATCH_)
+    values (#{ruleId,jdbcType=BIGINT}, #{serialNumber,jdbcType=DECIMAL}, 
+      #{batchId,jdbcType=BIGINT}, #{isFixedBatch,jdbcType=DECIMAL})
+  </insert>
+  
+  <select id="selectByRuleId" resultMap="BaseResultMap" parameterType="Long">
+  	select * from SRVS_RULE_REF_BATCH where RULE_ID_ = #{ruleId,jdbcType=BIGINT}
+  </select>
+  
+  
+</mapper>

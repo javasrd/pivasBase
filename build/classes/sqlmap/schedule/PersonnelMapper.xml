@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zc.schedule.product.personnel.dao.PersonnelDao">
+
+	<select id="getPersonnels" resultType="com.zc.schedule.product.personnel.entity.Personnel">
+		select USER_ID userId, 
+				USER_NAME userName, 
+				PARTAKE, 
+				EMAIL, 
+				TELLPHONE, 
+				ACCOUNT_STATUS accountStatus
+		from sche_user
+		where DELTYPE = '0'
+		<if test="params.userName != null and '' neq params.userName">
+			and USER_NAME like '%'||#{params.userName	}||'%'
+		</if>
+		order by CREATIONTIME desc, USER_ID desc
+	</select>
+	
+	<insert id="save">
+		insert into sche_user
+			(USER_NAME, PARTAKE, EMAIL, TELLPHONE, CREATIONTIME, CREATER)
+		values
+			(#{p.userName}, #{p.partake}, #{p.email}, #{p.tellphone}, sysdate, #{p.creater})
+	</insert>
+	
+	<update id="update">
+		update sche_user
+		set USER_NAME = #{p.userName},
+			PARTAKE = #{p.partake},
+			EMAIL = #{p.email},
+			TELLPHONE = #{p.tellphone}
+		where USER_ID = #{p.userId}
+	</update>
+	
+	<select id="getById" resultType="com.zc.schedule.product.personnel.entity.Personnel">
+		select USER_ID userId, 
+				USER_NAME userName, 
+				PARTAKE, 
+				EMAIL, 
+				TELLPHONE
+		from sche_user
+		where USER_ID = #{userId}
+	</select>
+	
+	<delete id="delById">
+		update sche_user set DELTYPE = '1' where USER_ID = #{userId}
+	</delete>
+	
+	<update id="changePartake">
+		update sche_user
+		set PARTAKE = #{partake}
+		where USER_ID = #{userId}
+	</update>
+	
+	<delete id="delGroupInfoForUserDel">
+		delete from sche_group
+		where USER_ID = #{userId}
+			<![CDATA[ and VALIDITY_START >= #{startDate} ]]>
+	</delete>
+	
+	<delete id="delDataForUserDel">
+		delete from sche_record_week
+		where USER_ID = #{userId}
+			and WORKDATE > #{startDate}
+	</delete>
+	
+	<select id="getWorkDateForUserDel" resultType="string">
+		select WORKDATE
+		from sche_record_week
+		where USER_ID = #{userId}
+			and WORKDATE > #{startDate}
+	</select>
+	
+	<select id="getByTellphone" resultType="com.zc.schedule.product.personnel.entity.Personnel">
+		select USER_ID userId, 
+				USER_NAME userName, 
+				PARTAKE, 
+				EMAIL, 
+				TELLPHONE
+		from sche_user
+		where TELLPHONE = #{tellphone}
+	</select>
+	
+	<select id="getLaterStartDates" resultType="string">
+		select VALIDITY_START
+		from sche_group
+		<![CDATA[ where VALIDITY_START >= #{startDate} ]]>
+	</select>
+	
+	<update id="updateGroupInfoForUserDel">
+		update sche_group
+		set USER_ID = null, 
+		USER_NAME = null
+		where USER_ID = #{userId}
+			and VALIDITY_START = #{startDate}
+	</update>
+	
+	<select id="getGroupInfoCount" resultType="int">
+		select count(1) 
+		from sche_group
+		where USER_ID = #{userId}
+			and VALIDITY_START = #{startDate}
+	</select>
+	
+	<!-- 判断是否是节假日 -->
+	<select id="getCountForWorkDateIsHoliday" resultType="int">
+		select count(1) from sche_holiday
+	  	 <![CDATA[where startdate <= #{workDate} ]]>
+	  	 <![CDATA[and enddate >= #{workDate} ]]>
+	</select>
+	
+	<!-- 修改节假日工作次数 -->
+	<update id="updateWorkDateIsHolidayCount">
+		<!-- update sche_holiday_work
+		set TIMES = ((select TIMES from sche_holiday_work where USER_ID = #{userId}) - #{count}),
+			UPDATEDATA = TO_CHAR(sysdate,'yyyy-MM-dd')
+		where USER_ID = #{userId} -->
+		<![CDATA[
+		update sche_holiday_work
+   		set TIMES = decode(sign((select TIMES
+                                   from sche_holiday_work
+                                  where USER_ID = #{userId}) - #{count}),
+                           1,
+                           sign((select TIMES
+                                   from sche_holiday_work
+                                  where USER_ID =  #{userId}) - #{count}),
+                           0),
+       UPDATEDATA = TO_CHAR(sysdate, 'yyyy-MM-dd')
+       where USER_ID =  #{userId}
+        ]]>
+	</update>
+	
+	<!-- 根据当前用户获取分组Id -->
+	<select id="getGroupIdByUserId" resultType="com.zc.schedule.product.manager.entity.ScheduleBean">
+		select i.groupid as groupId,g.groupname as groupName,i.validity_start,i.validity_end from sche_group i,sche_user_group g
+		where i.validity_start = #{validity_start}
+		and i.validity_end = #{validity_end}
+		and g.groupid = i.groupid
+		and g.type = '1'
+		and i.user_id = #{userId}
+		group by i.groupid,g.groupname,i.validity_start,i.validity_end
+		order by i.groupid,g.groupname,i.validity_start,i.validity_end asc
+	</select>
+	
+	<!-- 更新当前用户的一周总信息 -->
+	<update id="updateScheduleDataByUserId" parameterType="com.zc.schedule.product.manager.entity.ManagerBean">
+		update sche_record
+		   set week_owetime = #{week_owetime,jdbcType=VARCHAR}, total_owetime = #{total_owetime,jdbcType=VARCHAR}, total_time = #{total_time,jdbcType=VARCHAR}
+		 where user_id = #{user_id}
+		   and startdate = #{startDate}
+		   and enddate = #{endDate}
+	</update>
+	
+	<!-- 删除当前用户的一周总信息（当天之后的时间段） -->
+	<delete id="deleteScheduleDataByUserId">
+	<![CDATA[
+		delete sche_record where user_id = #{userId}
+		and startdate > #{validity_start}
+	 ]]>
+	</delete>
+	
+	<!-- 获得此日的工作的类型 -->
+	<select id="getWorkTypeByUserId"  resultType="string">
+		select w.worktype
+	  from sche_record_week dw, sche_work w
+	 where dw.workid = w.workid
+	   and dw.user_id = #{userId} 
+	   and dw.workdate = #{validity_start}
+	</select>
+</mapper>

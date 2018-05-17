@@ -1,0 +1,226 @@
+@charset "utf-8";
+/*能源管理、用能计费中使用的公共CSS*/
+.wrap{ width:1254px; margin:0px auto; overflow:hidden}
+.wrap1{ width:1335px; margin:0px auto;}
+.top_one{ width:100%; height:24px; background-color:#333333;}
+.top_ul li{ float:left; margin-right:20px; display:inline; line-height:24px}
+.top_ul li a{ color:#fff;}
+
+/*置灰input有readonly属性时加入这个可以让用感觉不可编辑*/
+.gray{background-color: rgb(243, 243, 243);}
+
+
+/* 查询区域  begin*/
+.search_main{ 
+	/* width:98.5%;  padding: 5px 10px;*/
+	background:#f3f3f3; overflow: hidden; 
+	/* border: 1px solid #D8D8D8; */
+}
+.search_main label, .search_condition label{
+	float:left; font-size:14px; color:#333; 
+	height: 28px; min-width: 75px; line-height:13px; text-align: right;
+	margin-left:8px; margin-right:5px;
+	padding-top: 12px;
+}
+.search_main .search_condition input,.search_main .search_condition select{
+	width: 187px; border:1px solid #ccc; line-height:25px;
+}
+.search_main .search_condition select{width:176px;}
+
+.search_condition{float: left;width: 100%;}/*条件Div样式*/
+.search_row{margin-top:8px; min-height: 40px}/*行Div样式*/
+.search_row span{float:none;}
+.search_emptyRow{/* height: 16px; */}
+.search_column{float:left;/* width: 290px; */ min-width: 270px; min-height: 40px; margin-top: 5px;} /*列Div样式*/
+.search_column div{float:left; margin-left: 5px;}
+.search_column input,.search_column select{
+	float:left; height: 32px; padding-top: 3px;
+}
+/* .search_column span.ui-combobox input{
+	-moz-border-radius-topright: 0px; -webkit-border-top-right-radius: 0px; -khtml-border-top-right-radius: 0px; border-top-right-radius: 0px;
+	-moz-border-radius-bottomright: 0px; -webkit-border-bottom-right-radius: 0px; -khtml-border-bottom-right-radius: 0px; border-bottom-right-radius: 0px; 
+} */
+.search_column span.ui-combobox a{height: 35px;width:35px; position: relative;}
+/*按钮父Div样式*/
+.search_main div.btns{
+	float:left; 
+	height:35px; 
+	width: 100%;
+	margin: 15px 0px 15px 0px; 
+	border-top-style: solid;
+	border-top-width: 1px;
+	border-top-color: #d9d9d9;
+	padding-top: 10px;
+	padding-left: 15px;
+}
+.search_main div.btns2{
+	float:left; 
+	width: 100%;
+	border-top-style: solid;
+	border-top-width: 1px;
+	border-top-color: #d9d9d9;
+	padding-top: 10px;
+	padding-left: 15px;
+}
+.search_main div.nowrap{
+	margin-top: 3px; border-top-style: none; width: auto;
+}
+
+/*定义使用search_main时查询、重置按钮的样式*/
+.search_main div.btns input[type="button"]{
+	 border:none; padding: 0; text-align:center;
+}
+/* 查询区域  end*/
+
+/*大操作按钮begin*/
+.chaxun, .chongzhi, .xinzeng, .daochu, .daoru, .baocun{
+	font-size:16px; font-weight:bold; color:#fff; cursor: pointer; text-align: center; padding: 0;
+}
+/*定义单独使用查询、重置按钮的样式*/
+.chaxun, .chongzhi{
+	width:89px; height:35px;
+}
+.xinzeng, .daochu, .daoru{
+	width:110px; height:35px;
+}
+/*查询*/
+.chaxun{background:url(../billing/images/search_btn.png) no-repeat; }
+/*重置*/
+.chongzhi{background: url(../billing/images/chongzhi.png) no-repeat; margin-left: 10px; color: #666;}
+/*新增 */
+.xinzeng{background:url(../billing/images/btn5.png) no-repeat; width:99px;}
+/*导出*/
+.daochu{background:url(../billing/images/btn2.png) no-repeat;}
+/*导入 按钮*/
+.daoru{background:url(../billing/images/btn2.png) no-repeat;}
+/*保存*/
+.baocun{background:url(../billing/images/baocun.png) no-repeat; width:66px; height:30px;}
+/*返回*/
+.fanhui{background:url(../billing/images/fanhui.png) no-repeat; width: 25px; height: 31px; display: block; cursor:pointer;}
+
+/*大操作按钮end*/
+
+/*小操作按钮 begin*/
+.meterbtn,.modifybtn,.addbtn,.delbtn,.delbtn1,
+.jiaofei,.jiaofeijilu,.resetPwdBtn,.unlockBtn,
+.connectBtn,.exportBtn,.printBtn,.refreshBtn,
+.findBtn,.joinNetBtn{
+	cursor:pointer;height: 25px;width: 25px;display: inline-block;;float: left;margin-left: 3px;
+}
+
+/*小操作按钮 end*/
+
+.baocun_div{float:right; padding-top:10px}
+.fanhui_div{ float:left; margin-right:10px; display:inline}
+.bc_nn{ float:left}
+
+/*首页快捷方式 begin*/
+.youlan{ width:90px; float:left; background-color:#35b7dc}
+.y_top{ background:url(../billing/images/home/y_top.png) no-repeat; width:90px; height:4px;}
+.y_mid{ width:90px; height:533px}
+.y_mid ul li{ padding:5px 0 5px 0}
+.y_mid ul li.line{background:url(../billing/images/home/y_ulbtn.png) no-repeat bottom;}
+.y_mid ul li div{width: 70px; height: 70px; margin:10px 0 0 10px; color: white;font-size: 13px;text-align: center;}
+.y_mid ul li div img{width: 43px; display: block;margin: 0 0 0 13px;}
+.y_mid ul li div span{color: white;font-size: 13px;text-align: center;}
+.y_mid ul li div.cur{ background:url(../billing/images/home/xz_cur.png) no-repeat; cursor:pointer;}
+/*首页快捷方式 end*/
+
+/*建筑树公共样式 begin*/
+.archTree{background: #002940;margin-left: 5px;}
+.archTree div input{width:158px;border:1px solid #d8d8d8;height:23px;line-height:23px;padding-left:3px;}
+.archTree div span{margin-right: 10px;}
+.archTree div span input{float: left;}
+.archTree div span.ui-combobox a{height: 23px;position: relative;}
+.archTree div.top{color: white;/* height: 25px; */padding: 6px;}
+.archTree div.top div.btns{margin: 4px 0px; height: 18px;}
+.archTree div.top div.btns div.serach{float:left; margin: 0 0px 0 0px; width:143px;}
+.archTree div.top div.btns div.reset{float:left; margin: 0 0px 0 10px; width:105px;}
+
+/*建筑树公共样式 end*/
+
+/*中间层样式 begin*/
+.centerDevice{width: 150px; background: #98DBFA;padding-top: 8px;}
+.centerDevice > div{color: #0378ae; font-size: 12px; cursor: pointer;font-weight: bold;padding-top: 3px;padding-left: 6px;margin-bottom: 4px;}
+.centerDevice > div.selected{color: #00587e;}
+.centerDevice > div.unselected{color: #0378ae;}
+/* .centerDevice > div.selected,.centerDevice > div.unselected{
+text-shadow: -1px 1px 1px #505050;filter:glow(color=#505050,strength=1);
+} */
+/*中间层样式 end*/
+
+/*导入弹出层按钮样式 begin*/
+.myinput2 {height: 25px; line-height: 25px; width: 150px; border: 1px solid #d8d8d8;}
+.myfile {margin-left: -270px; height: 20px; width: 67px; cursor: pointer; filter: alpha(opacity = 0); -moz-opacity: 0; opacity: 0;}
+.btn {
+	height: 23px; margin-left: 10px; color: #FFFFFF; line-height: 24px; cursor: pointer; text-align: center;
+	min-width: 70px; line-height: 24px; text-align: center; padding-left: 8px; width:78px;
+}
+.Import_btn {background:url(../../common/images/ImportBtn_ico.png) no-repeat 8px center #459ff3;}
+.Import_btn:hover {background:url(../../common/images/ImportBtn_ico.png) no-repeat 8px center #53a83f;}
+.download_btn {background:url(../../common/images/DownloadBtn_ico.png) no-repeat 4px center #459ff3;}
+.download_btn:hover {background:url(../../common/images/DownloadBtn_ico.png) no-repeat 4px center #53a83f;}
+.Read_btn {background:url(../../common/images/ReadBtn_ico.png) no-repeat 8px center #459ff3;}
+.Read_btn:hover {background:url(../../common/images/ReadBtn_ico.png) no-repeat 8px center #53a83f;}
+.Read_btn01 {background-color: #459ff3;}
+.Read_btn02 {background-color: #53a83f;}
+/*导入弹出层按钮样式 end*/
+
+
+#payTable .titleLeft{
+	font-weight: bold;font-size: 13px;float: right;
+}
+#payTable .titleLeft2{
+	font-weight: bold;font-size: 18px;float: none;
+}
+
+#payTable .titleMoney{
+	font-weight: bold;font-size: 50px;float: none;color: red;
+}
+
+#payTable input{
+	width: 150px;height:28px;margin-left: 5px;background-color: RGB(248,252,254);
+}
+#payTable select{
+	width: 152px;height:30px;margin-left: 5px;background-color: RGB(248,252,254);
+}
+
+#payTable .payLineImg80{
+	width:5px;min-width:5px;max-width:5px;background-image: url('../../common/images/payLine80.png');
+}
+#payTable .payLineImg120{
+	width:5px;min-width:5px;max-width:5px;background-image: url('../../common/images/payLine120.png');
+}
+
+#payTable .payLine80{
+	min-width:5px;width:5px;max-width:5px;background-image: url('../../common/images/payLine80.png');
+}
+#payTable .payLine120{
+	min-width:5px;width:5px;max-width:5px;background-image: url('../../common/images/payLine120.png');
+}
+.exportDivClass{
+	height: 28px;background-image: url('../../common/images/excel.png');background-repeat:no-repeat;
+}
+.exportDivClass2{
+	background-position: right;
+	height: 28px;background-image: url('../../common/images/excel.png');background-repeat:no-repeat;
+}
+.exportClass{
+	margin-top: 5px;
+  	float: left;
+  	margin-left: 31px;
+  	font-size: larger;
+}
+.exportClass2{
+	margin-top: 5px;
+	float: right;
+	margin-right: 29px;
+  	font-size: larger;
+}
+.btDetail{
+	cursor: pointer;
+	background: url(../../common/images/BtnBackground.png) no-repeat 4px center #459ff3;
+color: white;
+width: 45px;
+height: 20px;
+}

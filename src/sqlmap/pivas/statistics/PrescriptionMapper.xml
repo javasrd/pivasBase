@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zc.pivas.statistics.repository.PrescriptionDao">
+
+
+	<select id="queryBatchStatusList"
+		resultType="com.zc.pivas.statistics.bean.prescription.PrescriptionStatusBean">
+		SELECT
+		COUNT(*) AS ststsCount,
+		bat.name_ as batchNAME,
+		YD.YDZXZT as statusKey,
+		YD.ZXBC as zxbc
+
+		<choose>
+			<when test="medicSingle.compareResult != null and '' neq medicSingle.compareResult and medicSingle.compareResult == 0">FROM SRVS_PRESCRIPTION_MAIN_his YD, srvs_batch bat</when>
+			<otherwise>FROM SRVS_PRESCRIPTION_MAIN YD, srvs_batch bat</otherwise>
+		</choose>
+
+		WHERE YD.ZXBC = bat.id_
+		<if test="medicSingle != null">
+			<if
+				test="medicSingle.searchTime != null and '' neq medicSingle.searchTime ">
+				and to_char(YD.YYRQ,'yyyy-mm-dd') like #{medicSingle.searchTime} ||'%'
+			</if>
+			
+			<if test="medicSingle.singleState != null and '' neq medicSingle.singleState">
+				and yd.ydzxzt = #{medicSingle.singleState}
+			</if>
+
+			<if test="medicSingle.searchBatchs != null and '' neq medicSingle.searchBatchs ">
+				and YD.ZXBC in
+				<foreach item="batch" index="index" collection="medicSingle.searchBatchs"
+					open="(" separator="," close=")">
+					#{batch,jdbcType=INTEGER}
+				</foreach>
+
+			</if>
+		</if>
+		GROUP BY YD.ZXBC, YD.YDZXZT,bat.name_
+		ORDER BY YD.ZXBC
+	</select>
+
+	<select id="queryBatchPieList" resultType="com.zc.pivas.statistics.bean.prescription.YDBatchPieBean">
+		SELECT
+		COUNT(YD.YDZXZT) AS value,
+		bat.name_ as name,
+		YD.ZXBC as zxbc
+		
+		<choose>
+			<when test="medicSingle.compareResult != null and '' neq medicSingle.compareResult and medicSingle.compareResult == 0">FROM SRVS_PRESCRIPTION_MAIN_his YD, srvs_batch bat</when>
+			<otherwise>FROM SRVS_PRESCRIPTION_MAIN YD, srvs_batch bat</otherwise>
+		</choose>
+		
+		WHERE YD.ZXBC = bat.id_
+		<if test="medicSingle != null">
+			<if
+				test="medicSingle.searchTime != null and '' neq medicSingle.searchTime ">
+				and to_char(YD.YYRQ,'yyyy-mm-dd') like #{medicSingle.searchTime} ||'%'
+			</if>
+			
+			<if test="medicSingle.singleState != null and '' neq medicSingle.singleState">
+				and yd.ydzxzt = #{medicSingle.singleState}
+			</if>
+
+			<if test="medicSingle.searchBatchs != null and '' neq medicSingle.searchBatchs ">
+				and YD.ZXBC in
+				<foreach item="batch" index="index" collection="medicSingle.searchBatchs"
+					open="(" separator="," close=")">
+					#{batch,jdbcType=INTEGER}
+				</foreach>
+
+			</if>
+		</if>
+		GROUP BY YD.ZXBC, bat.name_
+		ORDER BY YD.ZXBC
+	</select>
+
+	<select id="queryBatchStatusListByID"
+		resultType="com.zc.pivas.statistics.bean.prescription.PrescriptionStatusBean">
+		SELECT
+		COUNT(YD.YDZXZT) AS ststsCount,
+		bat.name_ as batchNAME,
+		YD.YDZXZT as statusKey,
+		YD.ZXBC as zxbc
+		
+		<choose>
+			<when test="medicSingle.compareResult != null and '' neq medicSingle.compareResult and medicSingle.compareResult == 0">FROM SRVS_PRESCRIPTION_MAIN_HIS YD, srvs_batch bat</when>
+			<otherwise>FROM SRVS_PRESCRIPTION_MAIN YD, srvs_batch bat</otherwise>
+		</choose>
+		
+		WHERE  YD.ZXBC = bat.id_ and YD.ZXBC =
+		#{medicSingle.batchID}
+		<if test="medicSingle.searchTime != null and '' neq medicSingle.searchTime ">
+				and to_char(YD.YYRQ,'yyyy-mm-dd') like #{medicSingle.searchTime} ||'%'
+		</if>
+		
+		<if test="medicSingle.singleState != null and '' neq medicSingle.singleState">
+				and yd.ydzxzt = #{medicSingle.singleState}
+		</if>
+		GROUP BY YD.ZXBC, YD.YDZXZT,bat.name_
+		ORDER BY YD.ZXBC
+	</select>
+
+	<select id="queryDeptStatusList"
+		resultType="com.zc.pivas.statistics.bean.prescription.PrescriptionStatusBean">
+		SELECT
+		COUNT(YD.YDZXZT) AS ststsCount,
+		YD.WARDNAME as deptName,
+		YD.YDZXZT as statusKey
+		
+		<choose>
+			<when test="medicSingle.compareResult != null and '' neq medicSingle.compareResult and medicSingle.compareResult == 0">FROM SRVS_PRESCRIPTION_MAIN_HIS YD</when>
+			<otherwise>FROM SRVS_PRESCRIPTION_MAIN YD</otherwise>
+		</choose>
+		
+		WHERE 1 = 1
+		<if test="medicSingle != null">
+			<if test="medicSingle.searchTime != null and '' neq medicSingle.searchTime ">
+				and to_char(YD.YYRQ,'yyyy-mm-dd') like #{medicSingle.searchTime} ||'%'
+			</if>
+			
+			<if test="medicSingle.singleState != null and '' neq medicSingle.singleState">
+				and yd.ydzxzt = #{medicSingle.singleState}
+			</if>
+
+			<if test="medicSingle.searchDeptNames != null and '' neq medicSingle.searchDeptNames ">
+				and YD.WARDNAME in
+				<foreach item="deptName" index="index" collection="medicSingle.searchDeptNames"
+					open="(" separator="," close=")">
+					#{deptName,jdbcType=VARCHAR}
+				</foreach>
+
+			</if>
+		</if>
+		GROUP BY YD.WARDNAME,YD.YDZXZT
+		ORDER BY YD.WARDNAME
+	</select>
+
+	<select id="queryDeptPieList" resultType="com.zc.pivas.statistics.bean.prescription.YDDeptPieBean">
+		SELECT
+		COUNT(YD.YDZXZT) AS value,
+		YD.WARDNAME as name
+		<choose>
+			<when test="medicSingle.compareResult != null and '' neq medicSingle.compareResult and medicSingle.compareResult == 0">FROM SRVS_PRESCRIPTION_MAIN_HIS YD</when>
+			<otherwise>FROM SRVS_PRESCRIPTION_MAIN YD</otherwise>
+		</choose>
+		
+		WHERE 1 = 1
+		<if test="medicSingle != null">
+			<if
+				test="medicSingle.searchTime != null and '' neq medicSingle.searchTime ">
+				and to_char(YD.YYRQ,'yyyy-mm-dd') like #{medicSingle.searchTime} ||'%'
+			</if>
+			
+			<if test="medicSingle.singleState != null and '' neq medicSingle.singleState">
+				and yd.ydzxzt = #{medicSingle.singleState}
+			</if>
+
+			<if test="medicSingle.searchDeptNames != null and '' neq medicSingle.searchDeptNames ">
+				and YD.WARDNAME in
+				<foreach item="deptName" index="index" collection="medicSingle.searchDeptNames"
+					open="(" separator="," close=")">
+					#{deptName,jdbcType=VARCHAR}
+				</foreach>
+
+			</if>
+		</if>
+		GROUP BY YD.WARDNAME
+		ORDER BY YD.WARDNAME
+	</select>
+
+	<select id="queryDeptStatusListByName"
+		resultType="com.zc.pivas.statistics.bean.prescription.PrescriptionStatusBean">
+		SELECT
+		COUNT(YD.YDZXZT) AS ststsCount,
+		YD.YDZXZT as statusKey,
+		YD.WARDNAME as deptName
+		
+		<choose>
+			<when test="medicSingle.compareResult != null and '' neq medicSingle.compareResult and medicSingle.compareResult == 0">FROM SRVS_PRESCRIPTION_MAIN_HIS YD</when>
+			<otherwise>FROM SRVS_PRESCRIPTION_MAIN YD</otherwise>
+		</choose>
+		WHERE YD.WARDNAME = #{medicSingle.deptName}
+		<if test="medicSingle.searchTime != null and '' neq medicSingle.searchTime ">
+				and to_char(YD.YYRQ,'yyyy-mm-dd') like #{medicSingle.searchTime} ||'%'
+		</if>
+		
+		<if test="medicSingle.singleState != null and '' neq medicSingle.singleState">
+				and yd.ydzxzt = #{medicSingle.singleState}
+		</if>
+		GROUP BY YD.YDZXZT,YD.WARDNAME
+		ORDER BY YD.WARDNAME
+	</select>
+
+</mapper>

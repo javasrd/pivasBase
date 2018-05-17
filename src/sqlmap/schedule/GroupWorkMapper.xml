@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">      
+
+<mapper namespace="com.zc.schedule.product.scheduleRule.dao.GroupDao">
+	
+	<!-- 获得分组的信息 -->
+	<select id="getGroupInfo" resultType="com.zc.schedule.product.scheduleRule.entity.GroupBean" >
+	    select 
+	    	pg.groupid as "groupId", 
+	    	pg.groupname as "groupName"
+	      from sche_user_group pg
+	     where pg.type = 1
+	     order by pg.creationtime desc
+	</select>
+	
+	<!-- 获得分组与班次的关联信息 -->
+	<select id="getWorkInfo" resultType="com.zc.schedule.product.scheduleRule.entity.GroupBean">
+		SELECT b.workid,
+		       b.workname,
+		       CASE
+		         when EXISTS (SELECT null
+		                 from sche_group_work a
+		                where a.workid = b.workid
+		                     
+		                  and a.groupid = #{groupId}
+		               
+		               ) then
+		          1
+		         else
+		          0
+		       END as isUse
+		  from sche_work b
+		 where b.status = 1
+		   and worktype in ( 0, 1)
+	</select>
+	
+	<!-- 新增分组与班次的关系 -->
+	<insert id="addGroupWork" parameterType="com.zc.schedule.product.scheduleRule.entity.GroupBean" >
+		insert into sche_group_work(groupid,workid) values(#{groupId}, #{workId})
+	</insert>
+	
+	<!-- 删除分组与班次的关系 -->
+	<delete id="deleteGroupWork" parameterType="com.zc.schedule.product.scheduleRule.entity.GroupBean">
+		delete from sche_group_work where groupid = #{groupId}
+	</delete>
+	
+</mapper>

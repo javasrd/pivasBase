@@ -1,0 +1,318 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zc.schedule.product.manager.dao.ManagerDao" >
+	
+	<!-- 获取人员信息 -->
+	<select id="getUser"  resultType="com.zc.schedule.product.manager.entity.UserMonthBean">
+    	select user_id,user_name from sche_user
+    	order by user_id asc
+	</select>
+	
+ 	<!-- 查询岗位信息 -->
+  	<select id="getPostList" resultType="com.zc.schedule.product.scheduleSettings.entity.PostBean">
+	  	select postid as postId,postname as postName,enabled
+	  	from sche_position
+	  	where enabled = '1'
+  	</select>
+    <!-- 获取备注 -->
+ 	<select id="getRemarkStr" parameterType="String" resultType="String">
+	  	select remark
+	  	from sche_note
+	  	where startdate = #{startDate} and enddate = #{endDate}
+  	</select>
+  	<!-- 添加备注 -->
+  	<insert id="addRemark" parameterType="String">
+    	insert into sche_note
+		(
+			remark,startdate,enddate
+		)
+		values
+		(
+			#{remark},#{startDate},#{endDate}
+		)
+	</insert>
+	<!-- 更新备注 -->
+	<update id="updateRemark" parameterType="String">  
+    	update sche_note
+    	<trim prefix="SET" suffixOverrides=",">  
+        	<if test="remark != null">  
+            	remark= #{remark}
+        	</if>  
+    	</trim>  
+    	where startdate = #{startDate} and enddate = #{endDate}
+	</update>
+	<!-- 判断是否有备注 -->
+	<select id="getCountRemark"  parameterType="String" resultType="int">
+        select count(*) from sche_note
+	  	where startdate = #{startDate} and enddate = #{endDate}
+	</select>
+	
+	<!-- 获取有效期内的分组 -->
+	<select id="getGroupList"  resultType="com.zc.schedule.product.manager.entity.ScheduleBean">
+        
+		select i.groupid as groupId,g.groupname as groupName,i.validity_start,i.validity_end from sche_group i,sche_user_group g
+		where i.validity_start = #{validity_start}
+		and i.validity_end = #{validity_end}
+		and g.groupid = i.groupid
+		and g.type = '1'
+		and i.user_id is not null
+		group by i.groupid,g.groupname,i.validity_start,i.validity_end
+		order by i.groupid,g.groupname,i.validity_start,i.validity_end asc
+        
+	</select>
+	
+	<!-- 获取分组中的人员信息 -->
+	<select id="getGroupInfoList"  resultType="com.zc.schedule.product.manager.entity.GroupInfoBean">
+		select i.groupid as groupId,g.groupname as groupName,i.user_id,i.user_name,i.validity_start,i.validity_end,i.sort 
+		from sche_group i,sche_user_group g
+    	where i.groupid = #{groupId}
+    	and i.validity_start = #{validity_start}
+    	and i.validity_end = #{validity_end}
+    	and i.groupid = g.groupid
+    	and i.user_id is not null
+    	order by i.sort asc
+        
+	</select>
+	
+	<!-- 获取人员排班信息信息 -->
+	<select id="getManagerData"  resultType="com.zc.schedule.product.manager.entity.ManagerBean">
+		select d.id,d.groupid as groupId,g.groupname as groupName,d.user_id,d.user_name,d.postid as postId,d.week_owetime,
+			   d.total_owetime,d.total_time,d.startdate as startDate,d.enddate as endDate,p.postname as postName
+		from sche_record d left join sche_position p on d.postid = p.postid,sche_user_group g
+		where d.groupid = #{groupId}
+		and d.user_id = #{user_id}
+		and g.groupid = d.groupid
+		and d.startdate= #{validity_start}
+		and d.enddate = #{validity_end}
+        
+	</select>
+	<!-- 获取上周人员排班信息信息 -->
+	<select id="getLastManagerData"  resultType="com.zc.schedule.product.manager.entity.ManagerBean">
+		select d.id,d.groupid as groupId,g.groupname as groupName,d.user_id,d.user_name,d.postid as postId,d.week_owetime,
+			   d.total_owetime,d.total_time,d.startdate as startDate,d.enddate as endDate,p.postname as postName
+		from sche_record d left join sche_position p on d.postid = p.postid,sche_user_group g
+		where d.user_id = #{user_id}
+		and g.groupid = d.groupid
+		and d.startdate= #{validity_start}
+		and d.enddate = #{validity_end}
+        
+	</select>
+	
+	
+	<!-- 获取人员一周内每天的排班数据 -->
+	<select id="getWeekManagerData"  resultType="com.zc.schedule.product.manager.entity.WeekDataBean">
+		select d.id,d.user_id,d.weektype as weekType,d.workid as workId,d.sort,d.workdate as workDate,
+			   w.workname as workName,w.totaltime as totalTime,w.workcolour as workColour,w.worktype as workType
+		from sche_record_week d left join sche_work w on d.workid = w.workid
+		where d.id = #{id}
+		and d.workdate = #{date}
+		order by d.weektype,d.sort asc
+        
+	</select>
+	
+	<select id="getWeekManagerDataByUser"  resultType="com.zc.schedule.product.manager.entity.WeekDataBean">
+		select d.id,d.user_id,d.weektype as weekType,d.workid as workId,d.sort,d.workdate as workDate,
+			   w.workname as workName,w.totaltime as totalTime,w.workcolour as workColour,w.worktype as workType
+		from sche_record_week d left join sche_work w on d.workid = w.workid
+		where d.user_id = #{id}
+		and d.workdate = #{date}
+		order by d.weektype,d.sort asc
+        
+	</select>
+	
+	
+	<!-- 获取人员上周每天的排班数据 -->
+	<select id="getLastWeekManagerData"  resultType="String">
+
+		select listagg(w.workname,',') within group (order by d.weektype,d.sort) as workName
+		from sche_record_week d left join sche_work w on d.workid = w.workid
+		where d.id = #{id}
+		and d.workdate = #{date}
+        
+	</select>
+	
+	<!-- 获取班次数据 -->
+	<select id="getWorkList"  resultType="com.zc.schedule.product.manager.entity.WorkBean">
+		select workid as workId,workname as workName,definetype as defineType,worktype as workType,
+			   totaltime as totalTime,time_interval,workcolour as workColour,workstatus as workStatus,
+	           status,count,creationtime as creationTime,creater,copyid
+		from sche_work
+		where workstatus = '1'
+		and status = '1'
+		order by worktype asc
+	</select>
+	
+	<!-- 删除排班数据 -->
+	<delete id="deleteScheduleData" >
+  		delete from sche_record t where t.startdate = #{startDate} and t.enddate = #{endDate}
+  	</delete>
+  	<!-- 删除排班班次数据 -->
+  	<delete id="deleteScheduleDataWeek" >
+  		delete from sche_record_week t where t.workdate between #{startDate} and #{endDate}
+  	</delete>
+    <!-- 保存排班数据    -->
+  	<insert id="saveSchedule" >
+  	 	<selectKey keyProperty="id" resultType="Long" order="AFTER">    
+           select SQ_SCHE_RECORD.currval as id from DUAL
+        </selectKey>  
+    	insert into sche_record
+		(
+			groupid, user_id, user_name, postid, week_owetime, total_owetime, total_time, startdate, enddate
+		)
+		values
+		(
+			#{groupId},#{user_id},#{user_name},#{postId,jdbcType=INTEGER},#{week_owetime,jdbcType=VARCHAR},#{total_owetime,jdbcType=VARCHAR},#{total_time,jdbcType=VARCHAR},#{startDate},#{endDate}
+		)
+	</insert>
+  	
+  	<insert id="saveScheduleWeekData" parameterType="java.util.List">
+    	insert into sche_record_week
+		(
+			id,user_id,weektype,workid,sort,workdate
+		)
+    	<foreach collection="list" item="item" index="index"  separator="union all">  
+        select #{item.id},#{item.user_id},#{item.weekType},#{item.workId,jdbcType=INTEGER},#{item.sort,jdbcType=INTEGER},#{item.workDate} from dual  
+        </foreach>  
+	</insert> 
+	
+	<!-- 判断是否是节假日 -->
+	<select id="isHoliday"  parameterType="String" resultType="int">
+        select count(*) from sche_holiday
+	  	 <![CDATA[where startdate <= #{date} ]]>
+	  	 <![CDATA[and enddate >= #{date} ]]>
+	  	
+	</select>
+	
+	
+	<!-- 获取分组指定班次 -->
+	<select id="getGroupWorkList"  resultType="com.zc.schedule.product.manager.entity.WorkBean">
+		select gw.workid as workId,w.workname as workName,w.definetype as defineType,w.worktype as workType,
+				w.totaltime as totalTime,w.time_interval,w.workcolour as workColour,w.workstatus as workStatus,
+				w.status,decode(w.count,0,-1,w.count)as count,w.creationtime as creationTime,w.creater,w.copyid
+		from sche_group_work gw,sche_work w
+		where gw.groupid = #{groupId}
+		and gw.workid = w.workid
+		and w.workstatus = '1'
+		and w.status = '1'
+		order by gw.workid,w.worktype asc
+	</select>
+	
+	<!-- 获取正常休班次  -->
+	<select id="getRestWork"  resultType="com.zc.schedule.product.manager.entity.WorkBean">
+		select workid as workId,workname as workName,definetype as defineType,worktype as workType,
+			   totaltime as totalTime,time_interval,workcolour as workColour,workstatus as workStatus,
+	           status,count,creationtime as creationTime,creater,copyid
+		from sche_work
+		where workstatus = '1'
+		and status = '1'
+		and worktype = '2'
+		order by worktype asc
+	</select>
+  	
+  	<!-- 获取班次数据 -->
+	<select id="getWorkTypeList"  resultType="com.zc.schedule.product.manager.entity.WorkBean">
+		select workid as workId,workname as workName,definetype as defineType,worktype as workType,
+			   totaltime as totalTime,time_interval,workcolour as workColour,workstatus as workStatus,
+	           status,decode(count,0,-1,count)as count,creationtime as creationTime,creater,copyid
+		from sche_work
+		where workstatus = '1'
+		and status = '1'
+		and worktype in (0,1)
+		order by worktype asc
+	</select>
+  	
+  	<!-- 获取节假日工作次数多的人员-->
+  	<select id="getUserHolidayWorkCount"  resultType="int">
+		select user_id from (
+		select p.user_id,nvl(w.times,0) times from sche_holiday_work w
+    	right join (
+    				select user_id from sche_user
+    				where user_id in 
+    				<foreach collection="list" item="items" index="index"  open="(" separator="," close=")">  
+     					#{items.user_id}  
+  					</foreach>
+    	) p on  p.user_id = w.user_id 
+    	order by times asc
+    	)
+		<![CDATA[where rownum <= #{num}]]>
+	</select>
+	<!-- 获取一周工作工时 -->
+	<select id="getWeekManagerDataTime"  resultType="float">
+		select nvl(sum(w.totaltime),0)
+    	from sche_record_week d left join sche_work w on d.workid = w.workid
+    	where d.id = #{id}
+    	and d.workdate = #{date}
+    	and w.worktype in (0,1)
+	</select>
+	<!-- 更新人员节假日工作计数 -->
+	<update id="updateHolidayWork">  
+    	update sche_holiday_work
+    	<trim prefix="SET" suffixOverrides=",">  
+        	<if test="type == 'add' ">  
+            	times = to_number(times + 1),
+        	</if>  
+        	<if test="type == 'sub' ">  
+            	times = to_number(decode(sign(times-1),-1,0,0,0,1,times-1)),
+        	</if>
+        	<if test="date != null and '' neq date">  
+            	updatedata = #{date}
+        	</if> 
+    	</trim>  
+    	where user_id = #{id}
+	</update>
+	
+	<!-- 是否存在该人员的节假日计数 -->
+	<select id="getUserHolidayWorkTimes"  resultType="int">
+        select count(*) from sche_holiday_work
+	  	where user_id = #{id}
+	</select>
+  	
+  	<!-- 添加人员的节假日结束 -->
+  	<insert id="addUserHolidayWorkTime" >
+    	insert into sche_holiday_work
+		(
+			user_id,user_name,times,updatedata
+
+		)values
+		(                
+			#{id},#{name},0,#{date}
+		)
+	</insert> 
+	
+	<!-- 是否存在 -->
+	<select id="existSheduleData"  resultType="com.zc.schedule.product.manager.entity.ManagerBean">
+        select * from sche_record t
+		where user_id = #{id}
+		and startdate = #{date}
+		and total_owetime is not null
+		
+	</select>
+  	
+  	<!-- 更新累计欠休-->
+	<update id="updateTotlalOwnTime">  
+    	update sche_record
+    	<trim prefix="SET" suffixOverrides=",">
+            total_owetime = #{change,jdbcType=VARCHAR}
+    	</trim>  
+    	where user_id = #{id}
+    	and startdate = #{date}
+	</update>
+	
+	<!-- 获取日班次数据 -->
+  	<select id="getDayWorkList"  resultType="com.zc.schedule.product.manager.entity.WorkBean">
+        select s.* from sche_record_week w,sche_work s
+		where w.id = #{id}
+		and w.workdate = #{date}
+		and w.workid = s.workid
+		order by w.sort
+	</select>
+	
+	<!-- 获取日班次数据 -->
+  	<select id="getDayWorkListByUser"  resultType="com.zc.schedule.product.manager.entity.WorkBean">
+        select s.* from sche_record_week w,sche_work s
+		where w.user_id = #{id}
+		and w.workdate = #{date}
+		and w.workid = s.workid
+		order by w.sort
+	</select>
+</mapper>

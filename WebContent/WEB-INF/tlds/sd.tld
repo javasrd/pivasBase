@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<taglib xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-jsptaglibrary_2_1.xsd"
+	version="2.1">
+
+	<description>自定义字典标签</description>
+	<tlib-version>1.1</tlib-version>
+	<short-name>sd</short-name>
+	<tag>
+		<description>
+        	select数据字典标签，支持bam_dictionary和sm_dictionary，根据提示填入相关属性，该标签渲染为select combobox选择框
+    	</description>
+		<name>select</name>
+		<tag-class>com.zc.base.sys.common.tag.tag.SelectTag</tag-class>
+		<body-content>JSP</body-content>
+		<attribute>
+			<description>
+        		id :标签id属性， 和html属性相同
+        	</description>
+			<name>id</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+		<attribute>
+			<description>
+        		tableName：字典来源，表名（可选值：sm_dictionary,bam_dictionary），必填
+        	</description>
+			<name>tableName</name>
+			<required>true</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+
+		<attribute>
+			<description>
+        		required :是否必填项，true:必填，false:非必填(会增加defaultOption选项)，必填
+        	</description>
+			<name>required</name>
+			<required>true</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+		<attribute>
+			<description>
+        		defaultOption :required=false时默认option显示名称，非必填
+       	 	</description>
+			<name>defaultOption</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+		<attribute>
+			<description>
+        		parentId :tableName=‘bam_dictionary’时为必填项，否则查询所有字典值(谨慎操作)！
+        	</description>
+			<name>parentId</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+		<attribute>
+			<description>
+        		categoryName :tableName=‘sm_dictionary’时为必填项，否则查询对应模块所有字典值(谨慎操作)！
+        	</description>
+			<name>categoryName</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+		<attribute>
+			<description>
+        		defaultValue :默认值，非必填
+        	</description>
+			<name>defaultValue</name>
+			<required>false</required>
+			<rtexprvalue>false</rtexprvalue>
+		</attribute>
+		<attribute>
+			<description>
+        		clazz :class属性，和html class属性用法相同，非必填
+        	</description>
+			<name>clazz</name>
+			<required>false</required>
+			<rtexprvalue>false</rtexprvalue>
+		</attribute>
+		<attribute>
+			<description>
+        		style :样式，和html style属性用法相同，非必填
+        	</description>
+			<name>style</name>
+			<required>false</required>
+			<rtexprvalue>false</rtexprvalue>
+		</attribute>
+		<attribute>
+			<description>
+        		beginNo :开始数，按顺序从数据字典中获取，指定第几个开始获取
+        	</description>
+			<name>beginNo</name>
+			<required>false</required>
+			<rtexprvalue>false</rtexprvalue>
+		</attribute>
+		
+		<attribute>
+			<description>
+        		endNo :开始数，按顺序从数据字典中获取，指定第几个为最后获取的
+        	</description>
+			<name>endNo</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+		
+		<attribute>
+			<description>
+        		onchange :改变选择项时的触发事件
+        	</description>
+			<name>onchange</name>
+			<required>false</required>
+			<rtexprvalue>false</rtexprvalue>
+		</attribute>
+		
+		<attribute>
+			<description>
+        		name :标签name属性
+        	</description>
+			<name>name</name>
+			<required>false</required>
+			<rtexprvalue>false</rtexprvalue>
+		</attribute>
+		
+		<attribute>
+			<description>
+        		width :标签width属性
+        	</description>
+			<name>width</name>
+			<required>false</required>
+			<rtexprvalue>false</rtexprvalue>
+		</attribute>
+		<attribute>
+			<description>
+        		attrs :标签的属性，可设置select的title,disabled等等其它属性
+        	</description>
+			<name>attrs</name>
+			<required>false</required>
+			<rtexprvalue>false</rtexprvalue>
+		</attribute>
+	</tag>
+	
+	<tag>
+		<description>
+        	查询对应属性的单位( name , type, closed)
+    	</description>
+		<name>unit</name>
+		<tag-class>com.zc.base.sys.common.tag.UnitTag</tag-class>
+		<body-content>JSP</body-content>
+		<attribute>
+			<description>
+        		UnitRatioEnum中所对应的枚举类型，必填
+        	</description>
+			<name>name</name>
+			<required>true</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+		<attribute>
+			<description>
+        		设备类型(0：电表 1：中水表 2：冷水表 3：热水表 4：直饮水表 5：能量表 6:计量设备,7:公共单位 )，必填
+        	</description>
+			<name>type</name>
+			<required>true</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+		<attribute>
+			<description>
+        		是否使用括号将单位包起来(true默认, false)，非必填
+        	</description>
+			<name>closed</name>
+			<required>false</required>
+			<rtexprvalue>false</rtexprvalue>
+		</attribute>
+	</tag>
+	
+	<tag>
+		<description>
+        	国际化标签(code国际化编码, unit单位编码, type单位类型, closed是否用括号)
+    	</description>
+		<name>i18n</name>
+		<tag-class>com.zc.base.sys.common.tag.tag.I18NTag</tag-class>
+		<body-content>JSP</body-content>
+		<attribute>
+			<description>
+        		国际化文件所对应的Key,必填
+        	</description>
+			<name>code</name>
+			<required>true</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+		<attribute>
+			<description>
+        		单位所对应的Key(UnitRatioEnum中所对应的枚举类型),填写了unit时必须填写type
+        	</description>
+			<name>unit</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+		<attribute>
+			<description>
+        		设备类型(0：电表 1：中水表 2：冷水表 3：热水表 4：直饮水表 5：能量表 6:计量设备,7:公共单位 ),填写了unit时必须填写type
+        	</description>
+			<name>type</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+		<attribute>
+			<description>
+        		是否使用括号将单位包起来(true默认, false),非必填
+        	</description>
+			<name>closed</name>
+			<required>false</required>
+			<rtexprvalue>false</rtexprvalue>
+		</attribute>
+		<attribute>
+			<description>
+        		前台国际化 占位符，多个值使用","来分隔
+        	</description>
+			<name>placeHolder</name>
+			<required>false</required>
+			<rtexprvalue>false</rtexprvalue>
+		</attribute>
+		<attribute>
+			<description>
+        		jqueryui :标签width属性
+        	</description>
+			<name>jqueryui</name>
+			<required>false</required>
+			<rtexprvalue>false</rtexprvalue>
+		</attribute>
+	</tag>
+
+
+</taglib>

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zc.pivas.app.dao.AppUserLoginDao" >
+    <resultMap id="AppUserLoginMap" type="com.zc.pivas.app.bean.AppUserLoginBean" >
+        <id column="ID" property="ID" jdbcType="BIGINT" />
+        <id column="USER_ID" property="user_id" jdbcType="BIGINT" />
+        <result column="LOGIN_DATE" property="login_date" jdbcType="TIMESTAMP" />
+        <result column="IP_ADDR" property="ip_addr" jdbcType="VARCHAR" />
+        <result column="PORT" property="port" jdbcType="INTEGER" />
+    </resultMap>
+    
+    <select id="QueryAppUserLoginInfo" resultMap="AppUserLoginMap">
+    select ID,SYS_APP_USER_LOGIN.USER_ID,LOGIN_DATE,IP_ADDR,PORT FROM SYS_APP_USER_LOGIN,SYS_USER
+    WHERE  SYS_USER.ACCOUNT = #{useraccount} AND  SYS_USER.USER_ID = SYS_APP_USER_LOGIN.USER_ID
+    </select>
+    
+    <insert id="InsertAppUser">
+    INSERT INTO SYS_APP_USER_LOGIN(USER_ID,LOGIN_DATE,IP_ADDR,PORT) VALUES
+    (#{bean.user_id},#{bean.login_date},#{bean.ip_addr},#{bean.port})
+    </insert>
+    
+    <update id="UpdateAppUser">
+    UPDATE SYS_APP_USER_LOGIN SET
+    USER_ID=#{bean.user_id},
+    LOGIN_DATE=#{bean.login_date},
+    IP_ADDR=#{bean.ip_addr},
+    PORT=#{bean.port}
+    </update>
+    
+    <delete id="DeleteAppUser">
+       DELETE FROM SYS_APP_USER_LOGIN
+      where exists(select * from SYS_APP_USER_LOGIN,SYS_USER where SYS_USER.User_Id = SYS_APP_USER_LOGIN.User_Id
+      AND SYS_USER.ACCOUNT=#{useraccount})
+    </delete>
+</mapper>

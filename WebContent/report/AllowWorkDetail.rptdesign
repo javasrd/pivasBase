@@ -1,0 +1,964 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<report xmlns="http://www.eclipse.org/birt/2005/design" version="3.2.23" id="1">
+    <property name="createdBy">MyEclipse Report Designer Version 10.0</property>
+    <list-property name="userProperties">
+        <structure>
+            <property name="name">Data Cube.Data Set.x</property>
+            <property name="type">integer</property>
+            <property name="isVisible">false</property>
+        </structure>
+        <structure>
+            <property name="name">Data Cube.Data Set.y</property>
+            <property name="type">integer</property>
+            <property name="isVisible">false</property>
+        </structure>
+    </list-property>
+    <property name="Data Cube.Data Set.x">135</property>
+    <property name="Data Cube.Data Set.y">80</property>
+    <simple-property-list name="includeResource">
+        <value>report/message</value>
+        <value>report/message_en_US</value>
+    </simple-property-list>
+    <property name="units">in</property>
+    <property name="iconFile">/templates/blank_report.gif</property>
+    <property name="layoutPreference">fixed layout</property>
+    <property name="bidiLayoutOrientation">ltr</property>
+    <property name="imageDPI">96</property>
+    <list-property name="libraries">
+        <structure>
+            <property name="fileName">pivasDataSource.rptlibrary</property>
+            <property name="namespace">pivasDataSource</property>
+        </structure>
+    </list-property>
+    <parameters>
+        <scalar-parameter name="searchTime" id="592">
+            <property name="valueType">static</property>
+            <property name="isRequired">false</property>
+            <property name="dataType">string</property>
+            <property name="distinct">true</property>
+            <list-property name="selectionList"/>
+            <property name="paramType">simple</property>
+            <property name="controlType">text-box</property>
+            <structure name="format">
+                <property name="category">Unformatted</property>
+            </structure>
+        </scalar-parameter>
+        <scalar-parameter name="title" id="598">
+            <property name="valueType">static</property>
+            <property name="isRequired">true</property>
+            <property name="dataType">string</property>
+            <property name="distinct">true</property>
+            <list-property name="selectionList"/>
+            <property name="paramType">simple</property>
+            <property name="controlType">text-box</property>
+            <structure name="format">
+                <property name="category">Unformatted</property>
+            </structure>
+        </scalar-parameter>
+        <scalar-parameter name="user" id="600">
+            <property name="valueType">static</property>
+            <property name="dataType">string</property>
+            <property name="distinct">true</property>
+            <list-property name="selectionList"/>
+            <property name="paramType">simple</property>
+            <property name="controlType">text-box</property>
+            <structure name="format">
+                <property name="category">Unformatted</property>
+            </structure>
+        </scalar-parameter>
+        <scalar-parameter name="pzCode" id="879">
+            <property name="valueType">static</property>
+            <property name="dataType">string</property>
+            <property name="distinct">true</property>
+            <simple-property-list name="defaultValue">
+                <value type="constant">""</value>
+            </simple-property-list>
+            <list-property name="selectionList"/>
+            <property name="paramType">simple</property>
+            <property name="controlType">text-box</property>
+            <structure name="format">
+                <property name="category">Unformatted</property>
+            </structure>
+        </scalar-parameter>
+    </parameters>
+    <data-sources>
+        <oda-data-source extensionID="org.eclipse.birt.report.data.oda.jdbc.dbprofile" name="ds" id="8"
+ extends="pivasDataSource.Data Source">
+            <method name="beforeOpen"><![CDATA[var resourceFolder = reportContext.getDesignHandle().getResourceFolder();
+this.setExtensionProperty("jarList", resourceFolder+"/WEB-INF/lib/ojdbc-11.2.0.jar");]]></method>
+        </oda-data-source>
+    </data-sources>
+    <data-sets>
+        <oda-data-set extensionID="org.eclipse.birt.report.data.oda.jdbc.dbprofile.sqbDataSet" name="Data Set" id="702">
+            <list-property name="columnHints">
+                <structure>
+                    <property name="columnName">DRUGCODE</property>
+                    <property name="analysis">dimension</property>
+                    <text-property name="displayName">DRUGCODE</text-property>
+                    <text-property name="heading">DRUGCODE</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">DRUGNAME</property>
+                    <property name="analysis">dimension</property>
+                    <text-property name="displayName">DRUGNAME</text-property>
+                    <text-property name="heading">DRUGNAME</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">DIFFICULTYDEGREE</property>
+                    <property name="analysis">dimension</property>
+                    <text-property name="displayName">DIFFICULTYDEGREE</text-property>
+                    <text-property name="heading">DIFFICULTYDEGREE</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">COUNT1</property>
+                    <property name="analysis">measure</property>
+                    <text-property name="displayName">COUNT1</text-property>
+                    <text-property name="heading">COUNT1</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">WARDCODE</property>
+                    <property name="analysis">dimension</property>
+                    <text-property name="displayName">WARDCODE</text-property>
+                    <text-property name="heading">WARDCODE</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">WARDNAME</property>
+                    <property name="analysis">dimension</property>
+                    <text-property name="displayName">WARDNAME</text-property>
+                    <text-property name="heading">WARDNAME</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">TITLE</property>
+                    <property name="analysis">dimension</property>
+                    <text-property name="displayName">TITLE</text-property>
+                    <text-property name="heading">TITLE</text-property>
+                </structure>
+            </list-property>
+            <list-property name="parameters"/>
+            <structure name="cachedMetaData">
+                <list-property name="resultSet">
+                    <structure>
+                        <property name="position">1</property>
+                        <property name="name">DRUGCODE</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">2</property>
+                        <property name="name">DRUGNAME</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">3</property>
+                        <property name="name">DIFFICULTYDEGREE</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">4</property>
+                        <property name="name">COUNT1</property>
+                        <property name="dataType">decimal</property>
+                    </structure>
+                    <structure>
+                        <property name="position">5</property>
+                        <property name="name">WARDCODE</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">6</property>
+                        <property name="name">WARDNAME</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">7</property>
+                        <property name="name">TITLE</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                </list-property>
+            </structure>
+            <method name="beforeOpen"><![CDATA[
+var searchTime = this.params["searchTime"].value;
+var pzCode = this.params["pzCode"].value;
+
+this.queryText +=" and yd.ydzxzt = 0 and yd.zxbc in (select id_ from srvs_batch where is_empty_batch_ = 0 )";
+
+if (searchTime != null &amp;&amp; searchTime != "")
+{
+	this.queryText += " and to_char(yd.PZRQ,'yyyy-mm-dd') like '" + searchTime +  "%'";
+}
+
+if (pzCode != null &amp;&amp; pzCode != "")
+{
+     this.queryText += " and yd.PZCODE = '" + pzCode +  "'";
+}
+
+this.queryText += " GROUP BY YD.WARD_CODE, YD.WARDNAME, DRUG.DIFFICULTY_DEGREE,DRUG.MEDICAMENTS_CODE, DRUG.MEDICAMENTS_NAME";
+this.queryText += " ORDER BY DIFFICULTYDEGREE DESC";
+]]></method>
+            <property name="dataSource">ds</property>
+            <list-property name="resultSet">
+                <structure>
+                    <property name="position">1</property>
+                    <property name="name">DRUGCODE</property>
+                    <property name="nativeName">DRUGCODE</property>
+                    <property name="dataType">string</property>
+                    <property name="nativeDataType">12</property>
+                </structure>
+                <structure>
+                    <property name="position">2</property>
+                    <property name="name">DRUGNAME</property>
+                    <property name="nativeName">DRUGNAME</property>
+                    <property name="dataType">string</property>
+                    <property name="nativeDataType">12</property>
+                </structure>
+                <structure>
+                    <property name="position">3</property>
+                    <property name="name">DIFFICULTYDEGREE</property>
+                    <property name="nativeName">DIFFICULTYDEGREE</property>
+                    <property name="dataType">string</property>
+                    <property name="nativeDataType">12</property>
+                </structure>
+                <structure>
+                    <property name="position">4</property>
+                    <property name="name">COUNT1</property>
+                    <property name="nativeName">COUNT1</property>
+                    <property name="dataType">decimal</property>
+                    <property name="nativeDataType">2</property>
+                </structure>
+                <structure>
+                    <property name="position">5</property>
+                    <property name="name">WARDCODE</property>
+                    <property name="nativeName">WARDCODE</property>
+                    <property name="dataType">string</property>
+                    <property name="nativeDataType">12</property>
+                </structure>
+                <structure>
+                    <property name="position">6</property>
+                    <property name="name">WARDNAME</property>
+                    <property name="nativeName">WARDNAME</property>
+                    <property name="dataType">string</property>
+                    <property name="nativeDataType">12</property>
+                </structure>
+                <structure>
+                    <property name="position">7</property>
+                    <property name="name">TITLE</property>
+                    <property name="nativeName">TITLE</property>
+                    <property name="dataType">string</property>
+                    <property name="nativeDataType">12</property>
+                </structure>
+            </list-property>
+            <xml-property name="queryText"><![CDATA[SELECT CASE WHEN DRUG.DIFFICULTY_DEGREE = '1' THEN '0' ELSE DRUG.MEDICAMENTS_CODE END AS DRUGCODE,
+  CASE WHEN DRUG.DIFFICULTY_DEGREE = '1' THEN '其它' ELSE DRUG.MEDICAMENTS_NAME END AS DRUGNAME,
+  DRUG.DIFFICULTY_DEGREE AS DIFFICULTYDEGREE, COUNT(1) AS COUNT1,
+  YD.WARD_CODE AS WARDCODE, YD.WARDNAME, '1' AS TITLE
+  FROM
+       SRVS_PRESCRIPTION YD LEFT OUTER JOIN SRVS_MEDICAMENTS DRUG ON DRUG.MEDICAMENTS_CODE = YD.CHARGE_CODE
+  WHERE 1 = 1 
+  
+]]></xml-property>
+            <structure name="designerState">
+                <property name="version">1.0</property>
+                <property name="stateContentAsString">&lt;?xml version="1.0" encoding="UTF-8"?>&#13;
+&lt;SQLQueryBuilder editorInputType="SQLBuilderStorageEditorInput" name="Data Set" version="1.0">&#13;
+&lt;SQLStatement>SELECT CASE WHEN DRUG.DIFFICULTY_DEGREE = &amp;apos;1&amp;apos; THEN &amp;apos;0&amp;apos; ELSE DRUG.MEDICAMENTS_CODE END AS DRUGCODE,&amp;#x0A;  CASE WHEN DRUG.DIFFICULTY_DEGREE = &amp;apos;1&amp;apos; THEN &amp;apos;鍏朵粬&amp;apos; ELSE DRUG.MEDICAMENTS_NAME END AS DRUGNAME,&amp;#x0A;  DRUG.DIFFICULTY_DEGREE AS DIFFICULTYDEGREE, COUNT(1) AS COUNT1,&amp;#x0A;  YD.WARD_CODE AS WARDCODE, YD.WARDNAME, &amp;apos;1&amp;apos; AS TITLE&amp;#x0A;  FROM&amp;#x0A;       SRVS_PRESCRIPTION YD LEFT OUTER JOIN SRVS_MEDICAMENTS DRUG ON DRUG.MEDICAMENTS_CODE = YD.CHARGE_CODE &amp;#x0A;  WHERE 1 = 1&amp;#x0A;&lt;/SQLStatement>&#13;
+&lt;connInfo>Undefined:Transient.org.eclipse.datatools.enablement.oracle.connectionProfile:pivas:pivas&lt;/connInfo>&#13;
+&lt;omitSchemaInfo>false:true:&lt;/omitSchemaInfo>&#13;
+&lt;editorInputUsageOptions>useWindowState=true&lt;/editorInputUsageOptions>&#13;
+&lt;windowState height="653" version="1.0" width="1196">&#13;
+&lt;control height="201" isHideable="true" isVisible="true" name="SQLSourceViewer" width="1169"/>&#13;
+&lt;control height="211" isHideable="true" isVisible="true" name="DesignViewer" width="1182"/>&#13;
+&lt;control height="203" isHideable="true" isVisible="true" name="GraphControl" width="1174"/>&#13;
+&lt;control height="207" isHideable="true" isVisible="false" name="OutlineViewer" width="176"/>&#13;
+&lt;/windowState>&#13;
+&lt;/SQLQueryBuilder></property>
+            </structure>
+            <xml-property name="designerValues"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<model:DesignValues xmlns:design="http://www.eclipse.org/datatools/connectivity/oda/design" xmlns:model="http://www.eclipse.org/birt/report/model/adapter/odaModel">
+  <Version>2.0</Version>
+  <design:ResultSets derivedMetaData="true">
+    <design:resultSetDefinitions>
+      <design:resultSetColumns>
+        <design:resultColumnDefinitions>
+          <design:attributes>
+            <design:identifier>
+              <design:name>DRUGCODE</design:name>
+              <design:position>1</design:position>
+            </design:identifier>
+            <design:nativeDataTypeCode>12</design:nativeDataTypeCode>
+            <design:precision>32</design:precision>
+            <design:scale>0</design:scale>
+            <design:nullability>Nullable</design:nullability>
+            <design:uiHints>
+              <design:displayName>DRUGCODE</design:displayName>
+            </design:uiHints>
+          </design:attributes>
+          <design:usageHints>
+            <design:label>DRUGCODE</design:label>
+            <design:formattingHints>
+              <design:displaySize>32</design:displaySize>
+            </design:formattingHints>
+          </design:usageHints>
+        </design:resultColumnDefinitions>
+        <design:resultColumnDefinitions>
+          <design:attributes>
+            <design:identifier>
+              <design:name>DRUGNAME</design:name>
+              <design:position>2</design:position>
+            </design:identifier>
+            <design:nativeDataTypeCode>12</design:nativeDataTypeCode>
+            <design:precision>256</design:precision>
+            <design:scale>0</design:scale>
+            <design:nullability>Nullable</design:nullability>
+            <design:uiHints>
+              <design:displayName>DRUGNAME</design:displayName>
+            </design:uiHints>
+          </design:attributes>
+          <design:usageHints>
+            <design:label>DRUGNAME</design:label>
+            <design:formattingHints>
+              <design:displaySize>256</design:displaySize>
+            </design:formattingHints>
+          </design:usageHints>
+        </design:resultColumnDefinitions>
+        <design:resultColumnDefinitions>
+          <design:attributes>
+            <design:identifier>
+              <design:name>DIFFICULTYDEGREE</design:name>
+              <design:position>3</design:position>
+            </design:identifier>
+            <design:nativeDataTypeCode>12</design:nativeDataTypeCode>
+            <design:precision>32</design:precision>
+            <design:scale>0</design:scale>
+            <design:nullability>Nullable</design:nullability>
+            <design:uiHints>
+              <design:displayName>DIFFICULTYDEGREE</design:displayName>
+            </design:uiHints>
+          </design:attributes>
+          <design:usageHints>
+            <design:label>DIFFICULTYDEGREE</design:label>
+            <design:formattingHints>
+              <design:displaySize>32</design:displaySize>
+            </design:formattingHints>
+          </design:usageHints>
+        </design:resultColumnDefinitions>
+        <design:resultColumnDefinitions>
+          <design:attributes>
+            <design:identifier>
+              <design:name>COUNT1</design:name>
+              <design:position>4</design:position>
+            </design:identifier>
+            <design:nativeDataTypeCode>2</design:nativeDataTypeCode>
+            <design:precision>0</design:precision>
+            <design:scale>0</design:scale>
+            <design:nullability>Nullable</design:nullability>
+            <design:uiHints>
+              <design:displayName>COUNT1</design:displayName>
+            </design:uiHints>
+          </design:attributes>
+          <design:usageHints>
+            <design:label>COUNT1</design:label>
+            <design:formattingHints>
+              <design:displaySize>22</design:displaySize>
+            </design:formattingHints>
+          </design:usageHints>
+        </design:resultColumnDefinitions>
+        <design:resultColumnDefinitions>
+          <design:attributes>
+            <design:identifier>
+              <design:name>WARDCODE</design:name>
+              <design:position>5</design:position>
+            </design:identifier>
+            <design:nativeDataTypeCode>12</design:nativeDataTypeCode>
+            <design:precision>32</design:precision>
+            <design:scale>0</design:scale>
+            <design:nullability>Nullable</design:nullability>
+            <design:uiHints>
+              <design:displayName>WARDCODE</design:displayName>
+            </design:uiHints>
+          </design:attributes>
+          <design:usageHints>
+            <design:label>WARDCODE</design:label>
+            <design:formattingHints>
+              <design:displaySize>32</design:displaySize>
+            </design:formattingHints>
+          </design:usageHints>
+        </design:resultColumnDefinitions>
+        <design:resultColumnDefinitions>
+          <design:attributes>
+            <design:identifier>
+              <design:name>WARDNAME</design:name>
+              <design:position>6</design:position>
+            </design:identifier>
+            <design:nativeDataTypeCode>12</design:nativeDataTypeCode>
+            <design:precision>32</design:precision>
+            <design:scale>0</design:scale>
+            <design:nullability>Nullable</design:nullability>
+            <design:uiHints>
+              <design:displayName>WARDNAME</design:displayName>
+            </design:uiHints>
+          </design:attributes>
+          <design:usageHints>
+            <design:label>WARDNAME</design:label>
+            <design:formattingHints>
+              <design:displaySize>32</design:displaySize>
+            </design:formattingHints>
+          </design:usageHints>
+        </design:resultColumnDefinitions>
+        <design:resultColumnDefinitions>
+          <design:attributes>
+            <design:identifier>
+              <design:name>TITLE</design:name>
+              <design:position>7</design:position>
+            </design:identifier>
+            <design:nativeDataTypeCode>12</design:nativeDataTypeCode>
+            <design:precision>1</design:precision>
+            <design:scale>0</design:scale>
+            <design:nullability>Nullable</design:nullability>
+            <design:uiHints>
+              <design:displayName>TITLE</design:displayName>
+            </design:uiHints>
+          </design:attributes>
+          <design:usageHints>
+            <design:label>TITLE</design:label>
+            <design:formattingHints>
+              <design:displaySize>1</design:displaySize>
+            </design:formattingHints>
+          </design:usageHints>
+        </design:resultColumnDefinitions>
+      </design:resultSetColumns>
+      <design:criteria>
+        <design:rowOrdering>
+          <design:sortKeys>
+            <design:columnIdentifier>
+              <design:name>DIFFICULTYDEGREE</design:name>
+            </design:columnIdentifier>
+            <design:sortDirection>Descending</design:sortDirection>
+            <design:optional>false</design:optional>
+          </design:sortKeys>
+        </design:rowOrdering>
+      </design:criteria>
+    </design:resultSetDefinitions>
+  </design:ResultSets>
+</model:DesignValues>]]></xml-property>
+        </oda-data-set>
+    </data-sets>
+    <cubes>
+        <tabular-cube name="Data Cube" id="703">
+            <property name="dimensions">
+                <tabular-dimension name="Group1" id="704">
+                    <property name="defaultHierarchy">NewTabularHierarchy</property>
+                    <property name="hierarchies">
+                        <tabular-hierarchy name="NewTabularHierarchy" id="705">
+                            <property name="levels">
+                                <tabular-level name="DRUGCODE" id="716">
+                                    <property name="dataType">string</property>
+                                    <property name="columnName">DRUGCODE</property>
+                                </tabular-level>
+                                <tabular-level name="DRUGNAME" id="711">
+                                    <property name="dataType">string</property>
+                                    <property name="columnName">DRUGNAME</property>
+                                </tabular-level>
+                                <tabular-level name="DIFFICULTYDEGREE" id="710">
+                                    <property name="dataType">string</property>
+                                    <property name="columnName">DIFFICULTYDEGREE</property>
+                                </tabular-level>
+                            </property>
+                        </tabular-hierarchy>
+                    </property>
+                </tabular-dimension>
+                <tabular-dimension name="Group2" id="706">
+                    <property name="defaultHierarchy">NewTabularHierarchy1</property>
+                    <property name="hierarchies">
+                        <tabular-hierarchy name="NewTabularHierarchy1" id="707">
+                            <property name="levels">
+                                <tabular-level name="TITLE" id="712">
+                                    <property name="dataType">string</property>
+                                    <property name="columnName">TITLE</property>
+                                </tabular-level>
+                                <tabular-level name="WARDNAME" id="713">
+                                    <property name="dataType">string</property>
+                                    <property name="columnName">WARDNAME</property>
+                                </tabular-level>
+                            </property>
+                        </tabular-hierarchy>
+                    </property>
+                </tabular-dimension>
+            </property>
+            <property name="measureGroups">
+                <tabular-measure-group name="Summary Field" id="714">
+                    <property name="measures">
+                        <tabular-measure name="COUNT1" id="715">
+                            <property name="function">sum</property>
+                            <property name="isCalculated">false</property>
+                            <expression name="measureExpression" type="javascript">dataSetRow["COUNT1"]</expression>
+                            <property name="dataType">decimal</property>
+                            <property name="isVisible">true</property>
+                        </tabular-measure>
+                    </property>
+                </tabular-measure-group>
+            </property>
+            <property name="dataSet">Data Set</property>
+        </tabular-cube>
+    </cubes>
+    <styles>
+        <style name="report" id="4">
+            <property name="fontFamily">sans-serif</property>
+            <property name="fontSize">10pt</property>
+        </style>
+        <style name="crosstab-cell" id="5">
+            <property name="borderBottomColor">#CCCCCC</property>
+            <property name="borderBottomStyle">solid</property>
+            <property name="borderBottomWidth">1pt</property>
+            <property name="borderLeftColor">#CCCCCC</property>
+            <property name="borderLeftStyle">solid</property>
+            <property name="borderLeftWidth">1pt</property>
+            <property name="borderRightColor">#CCCCCC</property>
+            <property name="borderRightStyle">solid</property>
+            <property name="borderRightWidth">1pt</property>
+            <property name="borderTopColor">#CCCCCC</property>
+            <property name="borderTopStyle">solid</property>
+            <property name="borderTopWidth">1pt</property>
+        </style>
+        <style name="crosstab" id="6">
+            <property name="borderBottomColor">#CCCCCC</property>
+            <property name="borderBottomStyle">solid</property>
+            <property name="borderBottomWidth">1pt</property>
+            <property name="borderLeftColor">#CCCCCC</property>
+            <property name="borderLeftStyle">solid</property>
+            <property name="borderLeftWidth">1pt</property>
+            <property name="borderRightColor">#CCCCCC</property>
+            <property name="borderRightStyle">solid</property>
+            <property name="borderRightWidth">1pt</property>
+            <property name="borderTopColor">#CCCCCC</property>
+            <property name="borderTopStyle">solid</property>
+            <property name="borderTopWidth">1pt</property>
+        </style>
+        <style name="title" id="662">
+            <property name="fontSize">12px</property>
+            <property name="fontWeight">normal</property>
+            <property name="fontStyle">normal</property>
+            <property name="color">#666666</property>
+            <property name="textAlign">center</property>
+            <property name="verticalAlign">middle</property>
+        </style>
+        <style name="content" id="663">
+            <property name="fontSize">12px</property>
+            <property name="fontWeight">normal</property>
+            <property name="color">#666666</property>
+            <property name="textAlign">center</property>
+            <property name="verticalAlign">middle</property>
+        </style>
+        <style name="mainTitle" id="664">
+            <property name="fontSize">12px</property>
+            <property name="fontWeight">normal</property>
+            <property name="color">#FFFFFF</property>
+            <property name="textAlign">center</property>
+            <property name="verticalAlign">middle</property>
+        </style>
+    </styles>
+    <page-setup>
+        <simple-master-page name="NewSimpleMasterPage" id="513"/>
+    </page-setup>
+    <body>
+        <grid id="417">
+            <property name="height">3.3645833333333335in</property>
+            <column id="418"/>
+            <column id="419"/>
+            <row id="420">
+                <property name="height">0.2708333333333333in</property>
+                <cell id="422">
+                    <property name="colSpan">2</property>
+                    <property name="rowSpan">1</property>
+                    <property name="backgroundColor">#98B2E3</property>
+                    <property name="color">#000000</property>
+                    <data id="690">
+                        <property name="fontSize">12px</property>
+                        <property name="color">white</property>
+                        <property name="paddingTop">3pt</property>
+                        <property name="textAlign">center</property>
+                        <list-property name="boundDataColumns">
+                            <structure>
+                                <property name="name">title</property>
+                                <expression name="expression" type="javascript">params["title"]
+								</expression>
+                                <property name="dataType">string</property>
+                            </structure>
+                        </list-property>
+                        <property name="resultSetColumn">title</property>
+                    </data>
+                </cell>
+            </row>
+            <row id="423">
+                <property name="height">0.2708333333333333in</property>
+                <cell id="424">
+                    <property name="backgroundColor">#BCCEF2</property>
+                    <property name="color">white</property>
+                    <data id="601">
+                        <property name="paddingTop">3pt</property>
+                        <list-property name="boundDataColumns">
+                            <structure>
+                                <property name="name">user</property>
+                                <expression name="expression" type="javascript">params["user"]
+								</expression>
+                                <property name="dataType">string</property>
+                            </structure>
+                        </list-property>
+                        <property name="resultSetColumn">user</property>
+                    </data>
+                </cell>
+                <cell id="425">
+                    <property name="backgroundColor">#BCCEF2</property>
+                    <property name="color">white</property>
+                    <text id="514">
+                        <property name="paddingTop">3pt</property>
+                        <property name="textAlign">right</property>
+                        <property name="contentType">html</property>
+                        <text-property name="content"><![CDATA[统计时间：<![CDATA[<value-of format="yyyy-MM-dd HH:mm:ss">new Date()</value-of>]]&gt;]]></text-property>
+                    </text>
+                </cell>
+            </row>
+            <row id="426">
+                <cell id="427">
+                    <property name="colSpan">2</property>
+                    <property name="rowSpan">1</property>
+                    <extended-item extensionName="Crosstab" extensionVersion="2.5.0" id="717">
+                        <property name="cube">Data Cube</property>
+                        <property name="measures">
+                            <extended-item extensionName="MeasureView" id="850">
+                                <property name="measure">COUNT1</property>
+                                <property name="detail">
+                                    <extended-item extensionName="AggregationCell" id="851">
+                                        <property name="aggregationOnRow">Group1/DIFFICULTYDEGREE</property>
+                                        <property name="aggregationOnColumn">Group2/WARDNAME</property>
+                                        <property name="content">
+                                            <data id="852">
+                                                <property name="style">content</property>
+                                                <property name="color">#666666</property>
+                                                <property name="textAlign">center</property>
+                                                <property name="pageBreakAfter">auto</property>
+                                                <property name="pageBreakBefore">auto</property>
+                                                <method name="onRender"><![CDATA[if(this.getValue()==null){  this.setDisplayValue(0);}]]></method>
+                                                <property name="resultSetColumn">COUNT1_Group1/DIFFICULTYDEGREE_Group2/WARDNAME</property>
+                                            </data>
+                                        </property>
+                                        <property name="height">0.1875in</property>
+                                    </extended-item>
+                                </property>
+                                <property name="aggregations">
+                                    <extended-item extensionName="AggregationCell" id="856">
+                                        <property name="aggregationOnColumn">Group2/WARDNAME</property>
+                                        <property name="backgroundColor">#FAF5CE</property>
+                                        <property name="content">
+                                            <data id="857">
+                                                <property name="style">content</property>
+                                                <property name="pageBreakAfter">auto</property>
+                                                <property name="pageBreakBefore">auto</property>
+                                                <method name="onRender"><![CDATA[if(this.getValue()==null){  this.setDisplayValue(0);}]]></method>
+                                                <property name="resultSetColumn">COUNT1_Group2/WARDNAME</property>
+                                            </data>
+                                        </property>
+                                        <property name="height">0.2708333333333333in</property>
+                                    </extended-item>
+                                    <extended-item extensionName="AggregationCell" id="860">
+                                        <property name="aggregationOnRow">Group1/DIFFICULTYDEGREE</property>
+                                        <property name="aggregationOnColumn">Group2/TITLE</property>
+                                        <property name="backgroundColor">#FAF5CE</property>
+                                        <property name="content">
+                                            <data id="861">
+                                                <property name="style">content</property>
+                                                <property name="fontSize">12px</property>
+                                                <property name="color">#666666</property>
+                                                <property name="pageBreakAfter">auto</property>
+                                                <property name="pageBreakBefore">auto</property>
+                                                <method name="onRender"><![CDATA[if(this.getValue()==null){  this.setDisplayValue(0);}]]></method>
+                                                <property name="resultSetColumn">COUNT1_Group1/DIFFICULTYDEGREE_Group2/TITLE</property>
+                                            </data>
+                                        </property>
+                                    </extended-item>
+                                    <extended-item extensionName="AggregationCell" id="862">
+                                        <property name="aggregationOnColumn">Group2/TITLE</property>
+                                        <property name="backgroundColor">#FAF5CE</property>
+                                        <property name="content">
+                                            <data id="863">
+                                                <property name="style">title</property>
+                                                <property name="pageBreakAfter">auto</property>
+                                                <property name="pageBreakBefore">auto</property>
+                                                <property name="resultSetColumn">COUNT1_Group2/TITLE</property>
+                                            </data>
+                                        </property>
+                                    </extended-item>
+                                </property>
+                                <property name="header">
+                                    <extended-item extensionName="CrosstabCell" id="853">
+                                        <property name="content">
+                                            <label id="880">
+                                                <property name="style">title</property>
+                                                <text-property name="text">数量</text-property>
+                                            </label>
+                                        </property>
+                                        <property name="backgroundColor">#FAF5CE</property>
+                                        <property name="height">0.14583333333333334in</property>
+                                    </extended-item>
+                                    <extended-item extensionName="CrosstabCell" id="864">
+                                        <property name="content">
+                                            <label id="881">
+                                                <property name="style">title</property>
+                                                <text-property name="text">数量</text-property>
+                                            </label>
+                                        </property>
+                                        <property name="backgroundColor">#FAF5CE</property>
+                                    </extended-item>
+                                </property>
+                            </extended-item>
+                        </property>
+                        <property name="rows">
+                            <extended-item extensionName="CrosstabView" id="831">
+                                <property name="grandTotal">
+                                    <extended-item extensionName="CrosstabCell" id="855">
+                                        <property name="content">
+                                            <label id="858">
+                                                <property name="style">title</property>
+                                                <property name="fontSize">12px</property>
+                                                <property name="color">#666666</property>
+                                                <property name="textAlign">left</property>
+                                                <property name="pageBreakAfter">auto</property>
+                                                <property name="pageBreakBefore">auto</property>
+                                                <text-property name="text">汇总</text-property>
+                                            </label>
+                                        </property>
+                                        <property name="backgroundColor">#FAF5CE</property>
+                                    </extended-item>
+                                </property>
+                                <property name="views">
+                                    <extended-item extensionName="DimensionView" id="832">
+                                        <property name="dimension">Group1</property>
+                                        <property name="levels">
+                                            <extended-item extensionName="LevelView" name="NewLevel View" id="833">
+                                                <property name="level">Group1/DRUGCODE</property>
+                                                <property name="member">
+                                                    <extended-item extensionName="CrosstabCell" id="834">
+                                                        <property name="content">
+                                                            <data name="DRUGCODE" id="835">
+                                                                <property name="style">content</property>
+                                                                <property name="fontSize">12px</property>
+                                                                <property name="color">#666666</property>
+                                                                <property name="textAlign">left</property>
+                                                                <property name="pageBreakAfter">auto</property>
+                                                                <property name="pageBreakBefore">auto</property>
+                                                                <property name="pageBreakInside">auto</property>
+                                                                <property name="resultSetColumn">DRUGCODE</property>
+                                                            </data>
+                                                        </property>
+                                                    </extended-item>
+                                                </property>
+                                            </extended-item>
+                                            <extended-item extensionName="LevelView" name="NewLevel View1" id="836">
+                                                <property name="level">Group1/DRUGNAME</property>
+                                                <property name="member">
+                                                    <extended-item extensionName="CrosstabCell" id="837">
+                                                        <property name="content">
+                                                            <data name="DRUGNAME" id="838">
+                                                                <property name="style">content</property>
+                                                                <property name="fontSize">12px</property>
+                                                                <property name="color">#666666</property>
+                                                                <property name="textAlign">center</property>
+                                                                <property name="pageBreakAfter">auto</property>
+                                                                <property name="pageBreakBefore">auto</property>
+                                                                <property name="resultSetColumn">DRUGNAME</property>
+                                                            </data>
+                                                        </property>
+                                                    </extended-item>
+                                                </property>
+                                            </extended-item>
+                                            <extended-item extensionName="LevelView" name="NewLevel View2" id="839">
+                                                <property name="level">Group1/DIFFICULTYDEGREE</property>
+                                                <property name="member">
+                                                    <extended-item extensionName="CrosstabCell" id="840">
+                                                        <property name="content">
+                                                            <data name="DIFFICULTYDEGREE" id="841">
+                                                                <property name="style">content</property>
+                                                                <property name="fontSize">12px</property>
+                                                                <property name="color">#666666</property>
+                                                                <property name="textAlign">left</property>
+                                                                <property name="pageBreakAfter">auto</property>
+                                                                <property name="pageBreakBefore">auto</property>
+                                                                <property name="pageBreakInside">auto</property>
+                                                                <property name="resultSetColumn">DIFFICULTYDEGREE</property>
+                                                            </data>
+                                                        </property>
+                                                    </extended-item>
+                                                </property>
+                                            </extended-item>
+                                        </property>
+                                    </extended-item>
+                                </property>
+                                <property name="grandTotalLocation">after</property>
+                            </extended-item>
+                        </property>
+                        <property name="columns">
+                            <extended-item extensionName="CrosstabView" id="842">
+                                <property name="views">
+                                    <extended-item extensionName="DimensionView" id="843">
+                                        <property name="dimension">Group2</property>
+                                        <property name="levels">
+                                            <extended-item extensionName="LevelView" name="NewLevel View3" id="844">
+                                                <property name="level">Group2/TITLE</property>
+                                                <property name="member">
+                                                    <extended-item extensionName="CrosstabCell" id="845">
+                                                        <property name="content">
+                                                            <data name="TITLE" id="846">
+                                                                <property name="style">title</property>
+                                                                <property name="fontSize">12px</property>
+                                                                <property name="color">#666666</property>
+                                                                <property name="textAlign">center</property>
+                                                                <property name="resultSetColumn">TITLE</property>
+                                                            </data>
+                                                        </property>
+                                                        <property name="backgroundColor">#F5E88C</property>
+                                                    </extended-item>
+                                                </property>
+                                                <property name="aggregationHeader">
+                                                    <extended-item extensionName="CrosstabCell" id="859">
+                                                        <property name="content">
+                                                            <data name="TITLE_TOTAL" id="866">
+                                                                <property name="style">title</property>
+                                                                <property name="fontSize">12px</property>
+                                                                <property name="color">#666666</property>
+                                                                <property name="textAlign">center</property>
+                                                                <property name="resultSetColumn">TITLE_TOTAL</property>
+                                                            </data>
+                                                        </property>
+                                                        <property name="backgroundColor">#FAF5CE</property>
+                                                    </extended-item>
+                                                </property>
+                                            </extended-item>
+                                            <extended-item extensionName="LevelView" name="NewLevel View4" id="847">
+                                                <property name="level">Group2/WARDNAME</property>
+                                                <property name="member">
+                                                    <extended-item extensionName="CrosstabCell" id="848">
+                                                        <property name="content">
+                                                            <data name="WARDNAME" id="849">
+                                                                <property name="style">title</property>
+                                                                <property name="fontSize">12px</property>
+                                                                <property name="color">#666666</property>
+                                                                <property name="resultSetColumn">WARDNAME</property>
+                                                            </data>
+                                                        </property>
+                                                        <property name="backgroundColor">#FAF5CE</property>
+                                                    </extended-item>
+                                                </property>
+                                            </extended-item>
+                                        </property>
+                                    </extended-item>
+                                </property>
+                                <property name="grandTotalLocation">after</property>
+                            </extended-item>
+                        </property>
+                        <property name="header">
+                            <extended-item extensionName="CrosstabCell" id="718">
+                                <property name="content">
+                                    <grid id="867">
+                                        <column id="868"/>
+                                        <column id="869"/>
+                                        <column id="870"/>
+                                        <row id="871">
+                                            <cell id="872">
+                                                <label id="875">
+                                                    <property name="style">title</property>
+                                                    <text-property name="text">药品编码</text-property>
+                                                </label>
+                                            </cell>
+                                            <cell id="873">
+                                                <label id="876">
+                                                    <property name="style">title</property>
+                                                    <text-property name="text">药品名称</text-property>
+                                                </label>
+                                            </cell>
+                                            <cell id="874">
+                                                <label id="877">
+                                                    <property name="style">title</property>
+                                                    <text-property name="text">难度系数</text-property>
+                                                </label>
+                                            </cell>
+                                        </row>
+                                    </grid>
+                                </property>
+                                <property name="backgroundColor">#E4EAF8</property>
+                            </extended-item>
+                        </property>
+                        <method name="onPrepare"><![CDATA[
+]]></method>
+                        <list-property name="boundDataColumns">
+                            <structure>
+                                <property name="name">DRUGCODE</property>
+                                <expression name="expression">dimension["Group1"]["DRUGCODE"]</expression>
+                                <property name="dataType">string</property>
+                            </structure>
+                            <structure>
+                                <property name="name">DRUGNAME</property>
+                                <expression name="expression">dimension["Group1"]["DRUGNAME"]</expression>
+                                <property name="dataType">string</property>
+                            </structure>
+                            <structure>
+                                <property name="name">DIFFICULTYDEGREE</property>
+                                <expression name="expression">dimension["Group1"]["DIFFICULTYDEGREE"]</expression>
+                                <property name="dataType">string</property>
+                            </structure>
+                            <structure>
+                                <property name="name">TITLE</property>
+                                <expression name="expression" type="javascript">"病区"</expression>
+                                <property name="dataType">string</property>
+                            </structure>
+                            <structure>
+                                <property name="name">WARDNAME</property>
+                                <expression name="expression">dimension["Group2"]["WARDNAME"]</expression>
+                                <property name="dataType">string</property>
+                            </structure>
+                            <structure>
+                                <property name="name">COUNT1_Group1/DIFFICULTYDEGREE_Group2/WARDNAME</property>
+                                <expression name="expression">measure["COUNT1"]</expression>
+                                <property name="dataType">decimal</property>
+                                <simple-property-list name="aggregateOn">
+                                    <value>Group1/DIFFICULTYDEGREE</value>
+                                    <value>Group2/WARDNAME</value>
+                                </simple-property-list>
+                                <property name="aggregateFunction">SUM</property>
+                            </structure>
+                            <structure>
+                                <property name="name">COUNT1_Group2/WARDNAME</property>
+                                <expression name="expression">measure["COUNT1"]</expression>
+                                <property name="dataType">float</property>
+                                <simple-property-list name="aggregateOn">
+                                    <value>Group2/WARDNAME</value>
+                                </simple-property-list>
+                                <property name="aggregateFunction">SUM</property>
+                            </structure>
+                            <structure>
+                                <property name="name">COUNT1_Group1/DIFFICULTYDEGREE_Group2/TITLE</property>
+                                <expression name="expression">measure["COUNT1"]</expression>
+                                <property name="dataType">float</property>
+                                <simple-property-list name="aggregateOn">
+                                    <value>Group1/DIFFICULTYDEGREE</value>
+                                    <value>Group2/TITLE</value>
+                                </simple-property-list>
+                                <property name="aggregateFunction">SUM</property>
+                            </structure>
+                            <structure>
+                                <property name="name">COUNT1_Group2/TITLE</property>
+                                <expression name="expression">measure["COUNT1"]</expression>
+                                <property name="dataType">float</property>
+                                <simple-property-list name="aggregateOn">
+                                    <value>Group2/TITLE</value>
+                                </simple-property-list>
+                                <property name="aggregateFunction">SUM</property>
+                            </structure>
+                            <structure>
+                                <property name="name">TITLE_TOTAL</property>
+                                <expression name="expression" type="javascript">"汇总"</expression>
+                                <property name="dataType">string</property>
+                            </structure>
+                        </list-property>
+                    </extended-item>
+                </cell>
+            </row>
+        </grid>
+    </body>
+</report>

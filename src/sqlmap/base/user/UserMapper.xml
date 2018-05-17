@@ -1,0 +1,527 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zc.base.sys.modules.user.repository.UserDao" >
+	
+  <resultMap id="UserMap" type="com.zc.base.sys.modules.user.entity.User" >
+    <id column="user_id" property="userId" jdbcType="BIGINT" />
+    <id column="creator" property="creator" jdbcType="BIGINT" />
+    <result column="account" property="account" jdbcType="VARCHAR" />
+    <result column="password" property="password" jdbcType="VARCHAR" />
+    <result column="name" property="name" jdbcType="VARCHAR" />
+    <result column="gender" property="gender" jdbcType="INTEGER" />
+    <result column="telephone" property="telephone" jdbcType="VARCHAR" />
+    <result column="email" property="email" jdbcType="VARCHAR" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="description" property="description" jdbcType="VARCHAR" />
+    <result column="resetPwd" property="resetPwd" jdbcType="INTEGER" />
+    <result column="locked" property="locked" jdbcType="INTEGER" />
+    <result column="account_type" property="accountType" jdbcType="INTEGER" />
+    <result column="user_type" property="userType" jdbcType="INTEGER" />
+    <collection property="userGroup" resultMap="userGroupMap"></collection>
+  </resultMap>
+  
+   <resultMap id="userGroupMap" type="com.zc.base.sys.modules.user.entity.UserGroup" >
+ 	<result column="group_id" property="groupId" jdbcType="BIGINT" />
+ 	<result column="create_id" property="createId" jdbcType="BIGINT" />
+    <result column="group_name" property="groupName" jdbcType="VARCHAR" />
+ </resultMap>
+ 
+ 
+ <resultMap id="UserRefRoleMap" type="com.zc.base.sys.modules.user.entity.UserRefRole">
+ 	<result column="user_id" property="userId" jdbcType="BIGINT" />
+ 	<result column="role_id" property="roleId" jdbcType="BIGINT" />
+ </resultMap>
+ 
+ <resultMap id="UserHisMap" type="com.zc.base.sys.modules.user.entity.UserHis">
+ 	<result column="id" property="id" jdbcType="BIGINT" />
+ 	<result column="user_id" property="userId" jdbcType="BIGINT" />
+ 	<result column="password" property="password" jdbcType="VARCHAR" />
+ 	<result column="modify_time" property="modifyTime" jdbcType="TIMESTAMP" />
+ </resultMap>
+ 
+ <resultMap id="UserLoginMap" type="com.zc.base.sys.modules.user.entity.UserLogin">
+ 	<result column="id" property="id" jdbcType="BIGINT" />
+ 	<result column="user_id" property="userId" jdbcType="BIGINT" />
+ 	<result column="login_date" property="loginDate" jdbcType="TIMESTAMP"  />
+ 	<result column="ip_addr" property="ipAddr" jdbcType="VARCHAR" />
+ </resultMap>
+ 
+  <update id="updateUserHis" parameterType="com.zc.base.sys.modules.user.entity.UserHis">
+ 	update sys_user_history
+ 	set 
+ 	    modify_time=#{userHis.modifyTime},
+ 	    password=#{userHis.password}
+ 	where id = #{userHis.id}
+ </update>
+ 
+ <update id="updateCurrUser" parameterType="com.zc.base.sys.modules.user.entity.User">
+ 	update sys_user
+ 	set 
+ 	    telephone=#{user.telephone,jdbcType=VARCHAR},
+ 	    email=#{user.email,jdbcType=VARCHAR},
+ 	    description=#{user.description,jdbcType=VARCHAR}
+ 	where user_id = #{user.userId}
+ </update>
+
+ 
+ <select id="checkOldPassword" resultType="int">
+ 	select count(1) from sys_user a where a.user_id  = #{0} and a.password=#{1}
+ </select>
+ <update id="updatePassword" parameterType="com.zc.base.sys.modules.user.entity.User">
+ 	update sys_user set resetPwd=1, password=#{user.password} where user_id = ${user.userId}
+ </update>
+  <!-- 删除用户指定角色 -->
+  <delete id="delUserRole">
+		delete from sys_user_ref_role where user_id = #{userId} 
+		<if test="roleIds != null and roleIds.size > 0"> 
+			and role_id
+			not in
+			<foreach item="item" index="index" collection="roleIds"
+			      open="(" separator="," close=")">
+			        #{item}
+			 </foreach>
+		</if>
+	</delete>
+	<!-- 角色批量添加 -->
+	<insert id="addUserRoleBatch">
+		begin
+		<foreach item="roles" index="index" collection="roles" separator=";" >
+		INSERT INTO sys_user_ref_role ( user_id, role_id)
+		VALUES
+	        (#{userId},#{roles})
+  		</foreach>
+  		;end;
+	</insert>
+	
+    <!-- 病室批量添加 -->
+	<insert id="addUserSickRoomBatch">
+		begin
+		<foreach item="sickRoomId" index="index" collection="sickRoomIds" separator=";" >
+		INSERT INTO SYS_USER_REF_SICKROOM ( USER_ID, SICKROOM_ID)
+		VALUES
+	        (#{userId},#{sickRoomId})
+  		</foreach>
+  		;end;
+	</insert>
+	
+	<insert id="addUserHis" parameterType="com.zc.base.sys.modules.user.entity.UserHis">
+		<selectKey resultType="java.lang.Long" order="AFTER" keyProperty="id">
+  			select SQ_SYS_USER_HISTORY.CURRVAL as userId from DUAL
+  		</selectKey>
+		insert into sys_user_history (user_id,password,modify_time)
+		values(#{userId},#{password},#{modifyTime})		
+  </insert>
+  <insert id="addUserLogin" parameterType="com.zc.base.sys.modules.user.entity.UserLogin">
+  		<selectKey resultType="java.lang.Long" order="AFTER" keyProperty="id">
+  			select SQ_SYS_USER_LOGIN.CURRVAL as userId from DUAL
+  		</selectKey>
+		insert into sys_user_login (user_id,login_date,ip_addr)
+		values(#{userId},#{loginDate},#{ipAddr})		
+  </insert>
+	
+  <insert id="addUser" parameterType="com.zc.base.sys.modules.user.entity.User">
+  		<selectKey resultType="java.lang.Long" order="AFTER" keyProperty="userId">
+  			select SQ_SYS_USER.CURRVAL as userId from DUAL
+  		</selectKey>
+	  	INSERT INTO sys_user (
+			account,
+			password,
+			NAME,
+			gender,
+			telephone,
+			email,
+			create_time,
+			description,
+			creator,
+			account_type,
+			user_type
+		)
+		VALUES
+		(
+			#{account,jdbcType=VARCHAR},
+			#{password,jdbcType=VARCHAR},
+			#{name,jdbcType=VARCHAR},
+			#{gender,jdbcType=INTEGER},
+			#{telephone,jdbcType=VARCHAR},
+			#{email,jdbcType=VARCHAR},
+			SYSDATE,
+			#{description,jdbcType=VARCHAR},
+			#{creator,jdbcType=BIGINT},
+			#{accountType,jdbcType=INTEGER},
+			#{userType,jdbcType=INTEGER}
+		) 
+  </insert>
+  
+  <sql id="getUserSql">
+  	select * from (SELECT
+		sys_user.user_id,
+		sys_user.account,
+		sys_user.name,
+		sys_user.gender,
+		sys_user.telephone,
+		sys_user.email,
+		sys_user.create_time,
+		sys_user.description,
+		sys_user.creator,
+		sys_user.del_flag,
+		sys_user.account_type,
+		sys_user.user_type,
+		ug.group_name,
+		ug.create_id,
+	<![CDATA[
+		case when 
+				SYS_LOGIN_INFO.locked=1 
+				and ((
+				 SYS_LOGIN_INFO.lock_time  is not null
+				and SYS_LOGIN_INFO.lock_lost_eff_time   is not null
+				and to_date(to_char(#{date},'yyyy-mm-dd hh24:mi:ss'),'yyyy-mm-dd hh24:mi:ss')>SYS_LOGIN_INFO.lock_time 
+				and to_date(to_char(#{date},'yyyy-mm-dd hh24:mi:ss'),'yyyy-mm-dd hh24:mi:ss')<SYS_LOGIN_INFO.lock_lost_eff_time 
+				) or
+				(SYS_LOGIN_INFO.lock_time  is  null
+				and SYS_LOGIN_INFO.lock_lost_eff_time  is  null)
+				)
+		    then '1' 
+		    else '0' 
+		end as locked
+	]]>
+	FROM
+		sys_user 
+		left join SYS_LOGIN_INFO on sys_user.user_id = SYS_LOGIN_INFO.user_id
+		left join sys_user_ref_group urg on urg.user_id = sys_user.user_id
+		left join sys_user_group ug on ug.group_id=urg.group_id
+	<if test="user != null">
+			<if test="user.sortname != null and '' neq user.sortname and user.sortname=='account'">
+	   			 order by sys_user.account
+			</if>
+			<if test="user.sortname != null and '' neq user.sortname and user.sortname=='name'">
+	   			 order by sys_user.name
+			</if>
+			<if test="user.sortname != null and '' neq user.sortname and user.sortorder != null and user.sortorder=='asc' ">
+	    		 asc
+			</if>
+		
+			<if test="user.sortname != null and '' neq user.sortname and user.sortorder != null and user.sortorder=='desc' ">
+	 		   desc 
+			</if>
+			<if test="user.sortname == null || '' eq user.sortname">
+	   			 order by sys_user.create_time asc
+			</if>
+	  </if>) sys_user
+	<where>
+			<if test="sysAdmin != null and '' neq sysAdmin">
+			sys_user.account != #{sysAdmin}
+			</if>
+			and sys_user.del_flag=0
+			and sys_user.account_type = 1
+			<if test="user != null">
+				<if test="user.userId != null and '' neq user.userId">
+					and sys_user.user_id = #{user.userId}
+				</if>
+				
+				<if test="user.accounts != null and '' neq user.accounts">
+				and 
+				<foreach item="account" index="index" collection="user.accounts"  open="(" separator="or" close=")" >  
+					sys_user.account like  '%'||#{account}||'%'  escape '\'          
+				</foreach>
+				</if>
+				
+				<if test="user.names != null and '' neq user.names">
+				and 
+				<foreach item="name" index="index" collection="user.names"  open="(" separator="or" close=")" >  
+					sys_user.name like  '%'||#{name}||'%'  escape '\'               
+				</foreach>
+				</if>
+				
+				<if test="user.telephones != null and '' neq user.telephones">
+				and 
+				<foreach item="telephone" index="index" collection="user.telephones"  open="(" separator="or" close=")" >  
+					sys_user.telephone like  '%'||#{telephone}||'%'   escape '\'           
+				</foreach>
+				</if>
+				
+				<if test="user.description != null and '' neq user.description">
+					and sys_user.description like '%'||#{user.description}||'%' 
+				</if>
+				<!--组数据共享 -->
+				<if test="user.createIds != null and '' neq user.createIds">
+					and sys_user.creator in 
+					<foreach item="item" index="index" collection="user.createIds"  open="(" separator="," close=")" >  
+						#{item}              
+					</foreach>
+				</if>
+			</if>
+		</where>
+		
+  </sql>
+  
+  <select id="getUser" resultMap="UserMap">
+  	<include refid="common.jqueryPageHead" />
+  	<include refid="getUserSql"/>
+  	<include refid="common.jqueryPageBottom" />
+  </select>
+  
+  <select id="getAllUser" resultMap="UserMap">
+   	 SELECT
+		sys_user.user_id,
+		sys_user.account,
+		sys_user.password,
+		sys_user.name,
+		sys_user.telephone,
+		sys_user.email,
+		sys_user.create_time,
+		sys_user.description,
+		sys_user.resetPwd,
+		sys_user.user_type,
+		sys_user.gender
+	FROM
+		sys_user
+	where 1=1
+		<if test="exclusiveAccount != null and exclusiveAccount.length > 0">
+			and sys_user.account
+			not in 
+			<foreach item="item" index="index" collection="exclusiveAccount"
+			      open="(" separator="," close=")">
+			        #{item}
+			 </foreach>
+		 </if>
+   </select>
+  
+  <select id="getUserTotal" resultType="int">
+  	select count(1) from (
+  		<include refid="getUserSql"/>
+  	) t1
+  </select>
+  
+  <select id="getUserByAccount" parameterType="string" resultMap="UserMap">
+  <![CDATA[
+	  	SELECT
+		sys_user.user_id,
+		sys_user.account,
+		sys_user.password,
+		sys_user.name,
+		sys_user.telephone,
+		sys_user.email,
+		sys_user.create_time,
+		sys_user.description,
+		sys_user.account_type,
+		sys_user.resetPwd,
+		sys_user.user_type
+	FROM
+		sys_user
+	where 
+		sys_user.account = #{account} and rownum < 2
+  ]]>
+  </select>
+  
+  <update id="updateUser" parameterType="com.zc.base.sys.modules.user.entity.User">
+  	update sys_user set 
+		name = #{name,jdbcType=VARCHAR},
+		telephone = #{telephone,jdbcType=VARCHAR},
+		email = #{email,jdbcType=VARCHAR},
+		description = #{description,jdbcType=VARCHAR}
+		
+		<if test="userType != null">
+			,user_type=#{userType}
+		</if>
+		
+		where user_id = #{userId}
+  </update>
+  
+  <delete id="deleteUserById" parameterType="com.zc.base.sys.modules.user.entity.User">
+  	begin
+  		delete from sys_user where user_id = #{userId};
+  	 	delete from SRVS_GL_NURSE_AREA where  user_id = #{userId};
+  	 end;
+  	 
+  </delete>
+  
+  <delete id="deleteUserHis">
+  	delete from sys_user_history
+  	 where user_id = #{userId}
+  </delete>
+  <delete id="deleteUserLogin">
+  	delete from sys_user_login
+  	 where user_id = #{userId}
+  </delete>
+  
+  <select id="getUserID" parameterType="string" resultMap="UserMap">
+	  	SELECT
+		sys_user.user_id,
+		sys_user.account,
+		sys_user.password,
+		sys_user.name,
+		sys_user.telephone,
+		sys_user.email,
+		sys_user.create_time,
+		sys_user.description,
+		sys_user.user_type
+	FROM
+		sys_user
+	where sys_user.user_id = #{userId}
+  </select>
+  
+  <!--修改个人用户密码-->
+  <update id="updateUserPwd" parameterType="java.util.Map">
+  	update sys_user set  password = #{pwd} where user_id = #{user_id}
+  </update>
+   
+  
+ <!--用户授权--> 
+ <insert id="addUserRefRole" parameterType="com.zc.base.sys.modules.user.entity.UserRefRole">
+		INSERT INTO sys_user_ref_role (
+		user_id,
+		role_id
+	)
+	VALUES
+		(
+			#{userId},
+			#{roleId}
+		)  	
+  </insert>
+  
+  
+ <select id="getUserRefRole" resultType="int">
+	  	SELECT
+	  	count(1)
+	FROM
+		sys_user_ref_role
+	where sys_user_ref_role.user_id = #{userId} and sys_user_ref_role.role_id = #{roleId}
+ </select>  
+ 
+ 
+ <delete id="deleteUserRefRole">
+ 	delete from sys_user_ref_role
+ 	where sys_user_ref_role.user_id = #{userId}
+ </delete>
+ 
+ <!--根据用户编号删除关系表-->
+ <delete id="delUserId">
+ 	delete from sys_user_ref_role
+ 	where sys_user_ref_role.user_id = #{userId}
+ </delete>
+ 
+ 
+<!--根据用户编号查询角色-->
+   <select id="getUserIdRole" parameterType="int" resultMap="UserRefRoleMap">
+	  	SELECT
+		sys_user_ref_role.user_id,
+		sys_user_ref_role.role_id
+	FROM
+		sys_user_ref_role
+	where sys_user_ref_role.user_id = #{userId}
+</select>  
+
+<!--根据用户名获取用户密码修改历史-->
+   <select id="getUserHis" parameterType="string" resultMap="UserHisMap">
+	  	SELECT
+		h.id,
+		h.user_id,
+		h.password,
+		h.modify_time
+	FROM
+		sys_user u, sys_user_history h
+	where u.user_id = h.user_id and u.account=#{account}
+	order by h.modify_time desc
+</select>  
+<!--根据用户名获取用户上一次登录信息-->
+   <select id="getUserLastLogin" parameterType="int" resultMap="UserLoginMap">
+	  	SELECT
+		ul.id,
+		ul.user_id,
+		ul.login_date,
+		ul.ip_addr
+	FROM sys_user_login ul
+	where ul.user_id = #{userId}
+	and ul.login_date = (select max(u2.login_date) from sys_user_login u2 where u2.user_id = #{userId}) 
+</select>
+ 
+ <select id="getUserListID" resultType="int">
+    	<![CDATA[
+	  	select count(1) 
+	  	from sys_user 
+	  	where 
+	  	sys_user.account = #{user.account} 
+	  	and sys_user.user_id <> #{user.userId}
+	  	]]>
+  </select>
+  
+ <select id="getUserList" resultMap="UserMap">
+	  SELECT
+		sys_user.user_id,
+		sys_user.account,
+		sys_user.name,
+		sys_user.telephone,
+		sys_user.email,
+		sys_user.create_time,
+		sys_user.description
+	FROM
+		sys_user
+	where
+		sys_user.account = #{account}
+  </select>
+ 
+   
+  <select id="checkUser" resultMap="UserMap">
+  	select 		
+  		sys_user.user_id,
+		sys_user.account,
+		sys_user.name,
+		sys_user.telephone,
+		sys_user.email,
+		sys_user.create_time,
+		sys_user.description,
+		sys_user.creator,
+		sys_user.del_flag,
+		sys_user.account_type
+	from sys_user where sys_user.del_flag=0 
+	<choose>
+  	<when test="user.account != null and '' neq user.account and user.password != null and '' neq user.password">
+  		and sys_user.account =#{user.account} 
+  		and sys_user.password =#{user.password} 
+  	</when>
+	<otherwise>
+		and 1=0 
+	</otherwise>
+	</choose>
+  </select>
+  
+  <select id="qryAreaListAll" parameterType="Map" resultType="Map">
+  		SELECT
+			deptcode as "deptCode",
+			deptname as "deptName",
+			enabled as "enabled"
+		FROM SRVS_INPATIENTAREA
+		where enabled = 1 
+  </select>
+  
+  <select id="qryGlAreaByUser" parameterType="Map" resultType="Map"  >
+  		select 
+  			a.gid as "gid",
+  			a.deptcode as "deptCode", 
+  			a.deptname as "deptName", 
+  			a.enabled as "enabled"
+  		from SRVS_GL_NURSE_AREA gl , SRVS_INPATIENTAREA a
+  		where user_id = #{map.userId} 
+  		and gl.deptcode = a.deptcode 
+  		and a.enabled = 1 
+  </select>
+  
+  <delete id="delGlAreaByUser">
+  		delete from SRVS_GL_NURSE_AREA
+  		where 1=1 
+  		<choose>
+  			<when test="map.userId !=null" >
+  				and user_id = #{map.userId} 
+  			</when>
+  			<otherwise>
+  				and 1=0 
+  			</otherwise>
+  		</choose>
+  </delete>
+  
+  <insert id="addGlAreaByUser">
+  		insert into SRVS_GL_NURSE_AREA(user_id,account,deptcode,gl_date)
+  		values(#{map.userId},#{map.account},#{map.deptCode},sysdate)
+  </insert>
+  
+</mapper>

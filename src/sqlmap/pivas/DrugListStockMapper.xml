@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zc.pivas.app.dao.DrugListManagerDao" >
+     <update id="updateDrugListManager" parameterType="com.zc.pivas.app.bean.DrugListManagerBean" >
+     update SRVS_PRESCRIPTION set pzcode=#{pzCode},pzmc=#{pzmc},pzrq=#{pzrq} where bottle_label_num=#{bottleNum}
+     </update>
+     
+          <update id="updateDrugListMainManager" parameterType="com.zc.pivas.app.bean.DrugListManagerBean" >
+     update SRVS_PRESCRIPTION_MAIN set pzcode=#{pzCode},pzmc=#{pzmc},pzrq=#{pzrq} where bottle_label_num=#{bottleNum}
+     </update>
+</mapper>

@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zc.pivas.employee.dao.EmployeeInfoDAO" >
+	<resultMap id="employeeInfoMap" type="com.zc.pivas.employee.bean.EmployeeInfoBean" >
+		<id column="gid" property="gid" jdbcType="VARCHAR" />
+		<result column="Staff_Code" property="staff_Code" jdbcType="VARCHAR" />
+		<result column="Staff_Name" property="staff_Name" jdbcType="VARCHAR" />
+	</resultMap>
+	
+	<select id="getEmployeeInfo" resultMap="employeeInfoMap">
+  		SELECT * FROM SRVS_EMPLOYEEINFO
+		<where>
+		1=1
+			<if test="employeeInfo != null">
+				
+				<if test="employeeInfo.staff_Code != null and '' neq employeeInfo.staff_Code">
+					and Staff_Code = #{employeeInfo.staff_Code} 
+				</if>
+			
+			</if>
+		</where>
+ 	</select>
+  
+  
+  <insert id="addEmployeeInfo" parameterType="com.zc.pivas.employee.bean.EmployeeInfoBean">
+	  	INSERT INTO SRVS_EMPLOYEEINFO (
+			Staff_Code,
+			Staff_Name
+		)
+		VALUES
+		(
+			#{staff_Code},
+			#{staff_Name}
+		)
+	</insert>
+
+	<update id="updateEmployeeInfo" parameterType="com.zc.pivas.employee.bean.EmployeeInfoBean">
+  		update SRVS_EMPLOYEEINFO set
+			Staff_Name = #{staff_Name}
+		where Staff_Code = #{staff_Code}
+  	</update>
+  	
+  	<update id="synData" parameterType="com.zc.pivas.employee.bean.EmployeeInfoBean">
+
+		merge into
+		SRVS_EMPLOYEEINFO t1
+		using ( select
+		#{staff_Code} as staff_Code
+		from dual )
+		t2
+		ON
+		(
+		t1.staff_Code = t2.staff_Code
+		)
+		WHEN MATCHED THEN
+		UPDATE SET
+		t1.staff_Name
+		= #{staff_Name}
+		where t1.staff_Code = #{staff_Code}
+		WHEN
+		NOT
+		MATCHED THEN
+		INSERT
+		(
+		t1.staff_Code,
+		t1.staff_Name
+		)
+		VALUES
+		(
+		#{staff_Code},
+		#{staff_Name}
+		)
+	</update>
+	
+	<select id="getEmployeeInfoList" resultMap="employeeInfoMap">
+  		<include refid="common.jqueryPageHead" />
+		<include refid="getEmployeeSql" />
+		<include refid="common.jqueryPageBottom" />
+ 	</select>
+ 	
+ 	<select id="getEmployeeTotal" resultType="int">
+		select count(1) from (
+		<include refid="getEmployeeSql" />
+		) t1
+	</select>
+	
+	<sql id="getEmployeeSql">
+		SELECT * FROM SRVS_EMPLOYEEINFO
+		<where>
+			1=1
+			<if test="employeeInfo != null">
+				
+				<if test="employeeInfo.staff_Code != null and '' neq employeeInfo.staff_Code">
+					and Staff_Code = #{employeeInfo.staff_Code} 
+				</if>
+			
+				<if test="employeeInfo.staff_Codes != null and '' neq employeeInfo.staff_Codes">
+					and
+					<foreach item="staff_Code" index="index" collection="employeeInfo.staff_Codes"
+						open="(" separator="or" close=")">
+						Staff_Code like '%'||#{staff_Code}||'%'
+						escape '\'
+					</foreach>
+				</if>
+				
+				<if test="employeeInfo.staff_Names != null and '' neq employeeInfo.staff_Names">
+					and
+					<foreach item="staff_Name" index="index" collection="employeeInfo.staff_Names"
+						open="(" separator="or" close=")">
+						staff_Name like '%'||#{staff_Name}||'%'
+						escape '\'
+					</foreach>
+				</if>
+			</if>
+		</where>
+	</sql>
+</mapper>

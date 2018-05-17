@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zc.schedule.product.scheduleSettings.dao.PostDao" >
+    
+	<resultMap id="PostMap" type="com.zc.schedule.product.scheduleSettings.entity.PostBean" >
+	    
+		<id column="postid" property="postId" jdbcType="INTEGER" />
+		<result column="postname" property="postName" jdbcType="VARCHAR" />
+		<result column="enabled" property="enabled" jdbcType="VARCHAR" />
+		<result column="creationtime" property="creationTime" jdbcType="DATE" />
+		<result column="creater" property="creater" jdbcType="BIGINT" />
+		
+	</resultMap>
+	
+	
+  <!-- 查询岗位信息 -->
+  <select id="getPostSettingsList" resultMap="PostMap">
+	  	SELECT 
+	  		postid as "postId",
+	  		postname as "postName",
+	  		enabled as "enabled"
+	  	FROM sche_position
+	  	ORDER BY creationtime DESC
+  </select>
+  
+  <!-- 查询当个岗位信息 -->
+  <select id="getPostById" resultMap="PostMap">
+	  	SELECT 
+	  		postid as "postId",
+	  		postname as "postName",
+	  		enabled as "enabled"
+	  	FROM sche_position
+	  	where postid = #{postId}
+  </select>
+  
+  <!-- 岗位名称不重复验证 -->
+  <select id="checkPostNameIsExitst" resultType="int">
+	  	SELECT count(1) FROM sche_position where postname = #{postName}
+  </select>
+  
+  <!-- 新增岗位信息 -->
+  <insert id="addPostSettings" parameterType="com.zc.schedule.product.scheduleSettings.entity.PostBean">
+		INSERT INTO sche_position (
+		postname,
+		enabled,
+		creationtime,
+		CREATER
+	)
+	VALUES
+		(
+			#{postName},
+			#{enabled},
+			sysdate,
+			#{creater}
+		)
+</insert>
+
+  <!-- 修改岗位信息 -->
+<update id="updatePostSettings" parameterType="com.zc.schedule.product.scheduleSettings.entity.PostBean">
+  	update sche_position set
+		postname = #{postName},
+		enabled = #{enabled}
+	where postid = #{postId}
+  </update>
+  
+<!-- 删除岗位信息 -->
+  <delete id="delPostSettings" parameterType="com.zc.schedule.product.scheduleSettings.entity.PostBean">
+  	delete from sche_position
+		where postid = #{postId}
+  </delete>
+  
+  <!-- 查询岗位是否存在排班数据中 -->
+  <select id="getScheduleCount"  resultType="int">
+	select count(1) from sche_record where POSTID in
+		<foreach collection="array" index="index" item="domain" open=" (" separator="," close=")">
+	        #{domain}
+	    </foreach>
+  </select>
+
+  <!-- 查询岗位是否存在排班数据中 -->
+  <select id="getScheduleHistoryCount"  resultType="int">
+	select count(1) from sche_record_his where POSTID in
+		<foreach collection="array" index="index" item="domain" open=" (" separator="," close=")">
+	        #{domain}
+	    </foreach>
+  </select>
+</mapper>

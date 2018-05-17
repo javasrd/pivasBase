@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.zc.schedule.product.workCount.dao.WorkCountDao" >
+	
+
+<select id="getSignList" resultType="com.zc.schedule.product.workCount.entity.SignBean">
+select p.user_id,p.user_name,week.workid,w.workname,w.time_interval,w.totaltime,week.workdate,nvl(s.id,'-1') as issign
+from sche_record_week week
+left join sche_user p on week.user_id = p.user_id
+left join sche_work w on week.workid = w.workid
+left join sche_sign s on s.userid = week.user_id and s.workid = week.workid and s.workdate = week.workdate
+where 1=1
+and w.worktype != 2
+<if test="params.userAccount !=null and params.userAccount !='' ">
+and week.user_id = #{params.userAccount}
+</if>
+<if test="params.workDate !=null and params.workDate !=''">
+and week.workdate =#{params.workDate}
+</if>
+</select>
+
+<insert id="addCheckSign" parameterType="com.zc.schedule.product.workCount.entity.SignBean">
+insert into sche_sign
+	(userid,username,workid,workname,worktime,workdate,creationtime
+	
+	<if test="account != null and account != ''">
+	,creater
+	</if>
+	)
+values
+	(
+	#{user_id}, 
+	#{user_name}, 
+	#{workId}, 
+	#{workName}, 
+	#{totaltime},
+	#{workDate},
+	sysdate
+	<if test="account != null and account != ''">
+	,#{account}
+	</if>
+	)
+</insert>
+
+<select id="getWorkList" resultType="com.zc.schedule.product.scheduleSettings.entity.WorkBean">
+	select workid,workname from sche_work
+	where workstatus = 1
+	and status = 1
+	order by worktype,workid
+</select>
+
+
+</mapper>

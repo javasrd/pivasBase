@@ -1,0 +1,856 @@
+.cbit-grid
+{
+    font-family: "宋体",Arial, sans-serif;
+    font-size: 14px;
+    position: relative;
+    border: none;
+    overflow: hidden;
+    color: #000;
+    background:#f5f5f5;
+    border-top:#d4d4d4 1px solid;
+}
+.cbit-grid .gBlock
+{
+}
+.cbit-grid .gBlock .loading
+{
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+.cbit-grid.hideBody
+{
+    height: 25px !important;
+    border-bottom: 1px solid #99bbe8;
+}
+
+.ie6fullwidthbug
+{
+    border-right: 0px solid #ccc;
+    padding-right: 2px;	
+}
+
+.cbit-grid div.nDiv
+{
+    background: #eee url(../images/flexigrid/line.gif) repeat-y -1px top;
+    border: 1px solid #ccc;
+    border-top: 0px;
+    overflow: auto;
+    left: 0px;
+    position: absolute;
+    z-index: 999;
+    float: left;
+}
+
+.cbit-grid div.nDiv table
+{
+    margin: 2px;
+}
+
+.cbit-grid div.hDivBox
+{
+    float: left; 
+    padding-right: 40px;
+}
+
+.cbit-grid div.bDiv table
+{
+    margin-bottom: 10px;
+    word-break: normal; 
+    word-wrap: break-word;
+}
+.cbit-grid div.bDiv table tr
+{
+   /*bianxw line-height: 30px;*/
+}
+.cbit-grid div.bDiv table tr td  div  a
+{
+    color:#0192d1;
+}
+.cbit-grid div.bDiv table tr td  div  a:LINK
+{
+    color:#0192d1;
+}
+.cbit-grid div.bDiv table tr td  div  a:VISITED
+{
+    color:red;
+}
+.cbit-grid div.bDiv table tr td  div  a:HOVER
+{
+    color:green;
+    text-decoration:underline;
+}
+
+
+
+.cbit-grid div.bDiv table.autoht
+{
+    border-bottom: 0px;
+    margin-bottom: 0px;
+}
+.cbit-grid div.bDiv{
+    scrollbar-face-color:#EAEAEA;
+    scrollbar-shadow-color:#EAEAEA;
+    scrollbar-highlight-color:#EAEAEA;
+    scrollbar-3dlight-color:#EAEAEA;
+    scrollbar-darkshadow-color:#697074;
+    scrollbar-track-color:#F7F7F7;
+    scrollbar-arrow-color:#666666;
+
+}
+
+.cbit-grid div.nDiv td
+{
+    padding: 2px 3px;
+    border: 1px solid #eee;
+    cursor: default;
+}
+
+.cbit-grid div.nDiv tr:hover td, .cbit-grid div.nDiv tr.ndcolover td
+{
+    background: #d5effc url(../images/flexigrid/hl.png) repeat-x top;
+    border: 1px solid #a8d8eb;
+}
+
+.cbit-grid div.nDiv td.ndcol1
+{
+    border-right: 1px solid #ccc;
+}
+
+.cbit-grid div.nDiv td.ndcol2
+{
+    border-left: 1px solid #fff;
+    padding-right: 10px;
+}
+
+
+.cbit-grid div.nDiv tr:hover td.ndcol1, .cbit-grid div.nDiv tr.ndcolover td.ndcol1
+{
+    border-right: 1px solid #d2e3ec;
+}
+
+.cbit-grid div.nDiv tr:hover td.ndcol2, .cbit-grid div.nDiv tr.ndcolover td.ndcol2
+{
+    border-left: 1px solid #eef8ff;
+}
+
+.cbit-grid div.nBtn
+{
+    position: absolute;
+    height: 38px;
+    width: 14px;
+    z-index: 900;
+    /* background:  url(../images/flexigrid/gridth.gif) #f9f9f9 repeat-x bottom; 鍘绘帀蹇�鍕鹃�鎸夐挳鑳屾櫙ouyang*/ 
+   /*border: 0px solid #ccc;*/ 
+   /* border-left: 1px solid #ccc;*/ 
+    top: 0px;
+    left: 0px;
+    margin-top: 1px;
+    cursor: pointer;
+    display: none;
+}
+
+.cbit-grid div.nBtn div
+{
+    height: 38px;
+    width: 14px;
+    /* border-left: 1px solid #fff; 鍘绘帀蹇�鍕鹃�鎸夐挳鑳屾櫙ouyang*/
+    float: left;
+    background: url(../images/flexigrid/ddn.png) no-repeat center;
+}		
+
+.cbit-grid div.nBtn.srtd
+{
+    background: url(../images/flexigrid/gridth.gif)_repeat-x bottom;
+}
+
+
+.cbit-grid div.mDiv
+{
+/*     background: url(../images/flexigrid/headbg.gif) repeat-x top; */   /*2014-01-07*/
+    border:1px solid #d4d4d4;
+    height:32px;/*2014-01-07*/
+    font-weight: bold;
+    display: block;
+    overflow: hidden;
+    white-space: nowrap;
+    position: relative;
+}
+
+.cbit-grid div.mDiv div
+{
+    padding:4px;
+    white-space: nowrap;
+}
+.cbit-grid div.mDiv div.ftitle
+{
+    /*background:url("../images/flexigrid/grid.png") no-repeat left ;*/
+    color:#424242; font-size:14px;
+    font-weight:bold; line-height:30px;/*2014-01-07*/
+    margin-left:10px;
+    padding-left:8px;/*2014-01-07*/
+}
+.cbit-grid div.mDiv div.ptogtitle
+{
+    position: absolute;
+    top: 4px;
+    right: 3px;
+    padding: 0px;
+    height: 16px;
+    width: 16px;
+    overflow: hidden;
+    border: 1px solid #99bbe8;
+    cursor: pointer;
+}
+
+.cbit-grid div.mDiv div.ptogtitle:hover
+{
+    background-position: left -2px;
+    border-color: #99bbe8;
+}
+
+.cbit-grid div.mDiv div.ptogtitle span
+{
+    display: block;
+    border-left: 1px solid #eee;
+    border-top: 1px solid #fff;
+    border-bottom: 1px solid #ddd;
+    width: 14px;
+    height: 14px;
+    background: url(../images/flexigrid/uup.png) no-repeat center;
+}
+
+.cbit-grid div.mDiv div.ptogtitle.vsble span
+{
+    background: url(../images/flexigrid/ddn.png) no-repeat center;			
+}			
+
+.cbit-grid div.tDiv /*toolbar*/
+{
+    /*background:#ccc url(../images/flexigrid/tbg.gif) repeat-x top;	
+    border: 1px solid #99bbe8;*/
+    width:80px; margin-top:-26px;float:right;/*2014-01-07*/
+    position: relative;	
+    height:25px;
+    border-top:0px;	  
+    overflow: hidden;
+}
+
+.cbit-grid div.tDiv2
+{
+    float: left;
+    clear: both;
+/*     padding: 1px; *//*2014-01-08*/
+}
+
+.cbit-grid div.sDiv /*toolbar*/
+{
+    background: #fafafa url(../images/flexigrid/page-bg.gif) repeat-x top;
+    position: relative;
+    border: 1px solid #ccc;
+    border-top: 0px;
+    overflow: hidden;
+    display: none;
+}
+
+.cbit-grid div.sDiv2
+{
+    float: left;
+    clear: both;
+    padding: 5px;
+    padding-left: 5px;
+    width: 1024px;
+}
+
+.cbit-grid div.sDiv2 input, .cbit-grid div.sDiv2 select
+{
+    vertical-align: middle;
+    border:solid 1px #ccc;
+}
+.cbit-grid nobordercheckbox
+{
+  border:none;
+}
+.cbit-grid div.btnseparator
+{
+    float: left;
+    height: 18px;
+    border-left: 1px solid #ccc;
+    border-right: 1px solid #fff;
+    margin-top: 3px;
+}
+
+.cbit-grid div.fbutton
+{
+    float: left;
+    display: block;
+    cursor: pointer;
+/*     padding: 1px; *//*2014-01-08*/
+    height:22px;
+}
+
+.cbit-grid div.fbutton div
+{
+    float: left;
+/*     padding: 2px 3px; *//*2014-01-08*/
+}		
+
+.cbit-grid div.fbutton span
+{
+    float: left;
+    display: block;		
+}
+
+ .cbit-grid div.fbutton.fbOver
+{
+    border: #466094 1px solid;
+    padding: 0;
+    cursor: pointer;
+    background-color: #EDF1D5;
+}
+
+.cbit-grid div.fbutton:hover
+{
+    padding: 0;
+    cursor: pointer;
+}
+.cbit-grid div.fbutton:hover div
+{
+/*     padding: 1px 2px; */
+/*     border-left: 1px solid #fff; */
+/*     border-top: 1px solid #fff; */
+/*     border-right: 1px solid #eee; */
+/*     border-bottom: 1px solid #eee; *//*2014-01-08*/
+}	
+
+ .cbit-grid div.fbutton.fbOver div
+{
+/*     padding: 1px 2px; */
+/*     border-left: 1px solid #fff; */
+/*     border-top: 1px solid #fff; */
+/*     border-right: 1px solid #eee; */
+/*     border-bottom: 1px solid #eee; *//*2014-01-08*/
+}		
+
+
+/* end toolbar*/
+
+.cbit-grid div.hDiv
+{
+	line-height : 29px;
+	  height: 32px;/*bxw  */
+	/*margin-top:-1px;2014-01-07*/
+/*bxw   background: #7ECEF4 url(../images/flexigrid/title_bg.png) repeat-x center;*//*淇敼琛ㄥご鑳屾櫙鑹瞣uyang*/
+	background-color: #b5b5b5;/*bxw  */
+    position: relative;
+/*     border: #d4d4d4 1px solid;	 */
+/*     border-top:#d4d4d4 1px solidf; */
+/*     border-bottom:  #d4d4d4 1px solid; */
+    overflow: hidden;
+    /*bxw border: rgb(47,142,208) 1px solid;*/
+}	
+
+.cbit-grid div.hDiv table
+{
+/*border-right: 1px solid #fff;*/
+}
+
+.cbit-grid div.cDrag
+{
+    float: left;
+    position: absolute;
+    z-index: 2;
+    overflow: visible;
+}
+
+.cbit-grid div.cDrag div
+{   
+    float: left;
+    background: none;
+    display: block;
+    position: absolute;
+    height: 24px;
+    width: 5px;
+    cursor: e-resize;
+}
+
+.cbit-grid div.cDrag div:hover, .cbit-grid div.cDrag div.dragging
+{
+    background: url(../images/flexigrid/line.gif) repeat-y 2px center;
+}
+
+.cbit-grid div.iDiv
+{
+    border: 1px solid #316ac5;
+    position: absolute;
+    overflow: visible;
+    background: none;
+    }
+
+.cbit-grid div.iDiv input, .cbit-grid div.iDiv select, .cbit-grid div.iDiv textarea
+{
+
+}
+
+.cbit-grid div.iDiv input.tb
+{
+    border: 0px;
+    padding: 0px;
+    width: 100%;
+    height: 100%;
+    padding: 0px;
+    background: none;
+}			
+
+.cbit-grid div.bDiv
+{
+    /*border: 1px solid #ccc;*/
+    border-top: 0px; 
+    background: #f5f5f5;
+    overflow: auto;
+    position: relative;
+    text-align:left;
+}
+
+.cbit-grid div.bDiv table
+{
+    border-bottom: 0px;
+    color:#666666;
+}
+
+.cbit-grid div.hGrip
+{
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    height: 5px;
+    width: 5px;
+    background: url(../images/flexigrid/line.gif) repeat-x center;
+    margin-right: 1px;
+    cursor: e-resize;
+}
+
+.cbit-grid div.hGrip:hover, .cbit-grid div.hGrip.hgOver
+{
+    border-right: 1px solid #999;				
+    margin-right: 0px;
+}
+
+.cbit-grid div.vGrip
+{
+    height: 5px;
+    overflow: hidden;
+    position: relative;
+    background: #fafafa url(../images/flexigrid/headbg.gif) repeat-x 0px -1px;
+    border: 1px solid #ccc;
+    border-top: 0px;
+    text-align: center;
+    cursor: n-resize;
+}
+
+.cbit-grid div.vGrip span
+{
+    display: block;
+    margin: 1px auto;
+    width: 20px;
+    height: 1px;
+    overflow: hidden;
+    border-top: 1px solid #aaa;
+    border-bottom: 1px solid #aaa;	
+    background: none;
+}
+
+.cbit-grid div.hDiv th /* common cell properties*/
+{
+    text-align: left;	
+    /*bianxw border-right:solid 1px #7ECEF4; */ 
+    /*bianxw border-left:solid 1px #7ECEF4; */ /*鍘绘帀琛ㄥご杈规 ouyang*/
+    overflow: hidden;
+    vertical-align: middle !important;
+    padding: 2px 0px 0px 6px;
+    height:32px;/*bianxw *//*height: 43px;/*璁剧疆琛ㄥご楂樺害 ouyang*/
+}
+.cbit-grid div.bDiv td  /* common cell properties*/
+{
+	min-height: 32px;/*bianxw */
+    text-align: left;	
+    /*bianxw border-left:1px dotted #fff; /*璁剧疆鍗曞厓鏍煎乏杈规涓篸otted ouyang*/
+    /*bianxw border-top: none;
+    /*bianxw border-bottom: 1px dotted #ddd;
+    /*bianxw border-right:1px dotted #ddd; /*璁剧疆鍗曞厓鏍煎乏杈规涓篸otted ouyang*/
+    overflow: hidden;
+    vertical-align: middle !important;
+    /*bianxw 注释后 高度自适应 white-space: nowrap;*/ 
+    /*bianxw background-color:#fff;*/
+    padding: 5px 0 0 5px;
+    /*border: 1px solid #ddd;*/
+    height: 28px;
+    color: #8c8989;
+}
+.cbit-grid div.hDiv th div,.cbit-grid div.bDiv td div, div.colCopy div /* common inner cell properties*/
+{
+    /*bianxw padding: 4px;*/
+    border-left:none;
+    
+}	
+.cbit-grid div.hDiv th div
+{
+	font-size:14px; /*bianxw font-size:14px; */
+    color: white; 
+/*     font-weight:bold; */
+}		
+.cbit-grid div.hDiv th.cth div
+{
+    /*bianxw padding:1px 4px;    */
+}
+
+.cbit-grid div.hDiv th, div.colCopy
+{
+    font-weight: normal;
+    cursor: default;
+    white-space: nowrap;
+    overflow: hidden;
+   
+}	
+.cbit-grid .itemchk
+{
+    border:none;
+}
+.cbit-grid .noborder
+{
+    border:none;
+}
+
+.cbit-grid div.hDiv th.sorted
+{
+    border-bottom: 0px solid #ccc;
+}
+
+.cbit-grid div.hDiv th.thOver
+{
+}
+
+.cbit-grid div.hDiv th.thOver div, .cbit-grid div.hDiv th.sorted.thOver div
+{
+    /*border-bottom: 1px solid orange;*/
+    /*padding-bottom: 4px;*/
+}
+
+.cbit-grid div.hDiv th.sorted div
+{
+    border-bottom: 0px solid #ccc;
+    padding-bottom: 4px;
+}
+
+.cbit-grid div.hDiv th.thMove
+{
+    background: #fff;
+    color: #fff;
+}
+
+.cbit-grid div.hDiv th.sorted.thMove div
+{
+    /*border-bottom: 1px solid #fff;*/
+    padding-bottom: 4px
+}
+
+.cbit-grid div.hDiv th.thMove div
+{
+    background: #fff !important;
+}	
+
+.cbit-grid div.hDiv th div.sdesc
+{
+    background: url(../images/flexigrid/sort_desc.gif) no-repeat center top;
+}	
+
+.cbit-grid div.hDiv th div.sasc
+{
+    background: url(../images/flexigrid/sort_asc.gif) no-repeat center top;
+}	
+
+.cbit-grid span.cdropleft
+{
+    display: block;
+    background: url(../images/flexigrid/prev.gif) no-repeat -4px center;
+    width: 24px;
+    height: 24px;
+    position: relative;
+    top: -24px;
+    margin-bottom: -24px;
+    z-index: 3;
+}
+
+.cbit-grid div.hDiv span.cdropright
+{
+    display: block;
+    background: url(../images/flexigrid/next.gif) no-repeat 12px center;
+    width: 24px;
+    height: 24px;
+    float: right;
+    position: relative;
+    top: -24px;
+    margin-bottom: -24px;
+}
+
+
+.cbit-grid div.bDiv td div
+{
+	font-size: 14px;
+	/*bianxw 
+    border-top: 0px solid #fff;
+    padding-bottom: 8px;
+    padding-top: 8px;
+    height: 18px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow:ellipsis;*/
+}
+
+
+.cbit-grid tr td.sorted
+{
+}		
+
+.cbit-grid tr td.sorted div
+{
+}
+
+.cbit-grid tr.erow td
+{
+    background: #ededed;
+}
+
+.cbit-grid tr.erow td.sorted
+{
+/*background: #EEF6FF;*/
+}						
+
+.cbit-grid tr.erow td.sorted div
+{    
+	line-height : 24px;
+}
+
+.cbit-grid div.bDiv tr:hover td, 
+.cbit-grid div.bDiv tr:hover td.sorted,
+.cbit-grid div.bDiv tr.trOver td.sorted, 
+.cbit-grid div.bDiv tr.trOver td
+{
+	/*bianxw 表格套表格 样式问题处理 line-height : 24px;*/
+    background: #ffeece/* #e0f0f4 */;
+    /*border-left: 1px solid #eef8ff;*/
+   /*border-bottom: 1px dotted #a8d8eb;*/
+}
+
+.cbit-grid div.bDiv tr.trSelected:hover td, 
+.cbit-grid div.bDiv tr.trSelected:hover td.sorted,
+.cbit-grid div.bDiv tr.trOver.trSelected td.sorted, 
+.cbit-grid div.bDiv tr.trOver.trSelected td,
+.cbit-grid tr.trSelected td.sorted, 
+.cbit-grid tr.trSelected td
+{
+	/*bianxw line-height : 24px;*/
+    /*bianxw background: #ddf1fc*//* #c7dfe6 */;
+    /*border-right: 1px solid #d2e3ec;*/
+    /*border-left: 1px solid #eef8ff;	*/
+    border-top:none;			
+}
+
+/* novstripe adjustments */
+
+.cbit-grid.novstripe .bDiv table
+{
+    border-bottom: 1px solid #ccc;
+    border-right: 1px solid #ccc;
+}
+
+.cbit-grid.novstripe  div.bDiv td  
+{
+    border-right-color: #fff;	
+}
+
+.cbit-grid.novstripe div.bDiv tr.erow td.sorted
+{
+    border-right-color: #e3e3e3;
+}
+
+.cbit-grid.novstripe div.bDiv tr td.sorted
+{
+    border-right-color: #f3f3f3;
+}
+
+.cbit-grid.novstripe  div.bDiv tr.erow td  
+{
+    border-right-color: #f7f7f7;
+    border-left-color: #f7f7f7;
+}
+
+.cbit-grid.novstripe div.bDiv tr.trSelected:hover td, 
+.cbit-grid.novstripe div.bDiv tr.trSelected:hover td.sorted,
+.cbit-grid.novstripe div.bDiv tr.trOver.trSelected td.sorted, 
+.cbit-grid.novstripe div.bDiv tr.trOver.trSelected td,
+.cbit-grid.novstripe tr.trSelected td.sorted, 
+.cbit-grid.novstripe tr.trSelected td
+{
+    border-right: 1px solid #0066FF;
+    border-left: 1px solid #0066FF;
+}		
+
+.cbit-grid.novstripe div.bDiv tr.trOver td, .cbit-grid.novstripe div.bDiv tr:hover td
+{
+    border-left-color: #d9ebf5;
+    border-right-color: #d9ebf5;
+}
+
+/* end novstripe */
+
+.cbit-grid div.pDiv
+{
+	height : 35px;
+    background: #e1e4ef repeat-x;
+    /*padding-top: 3px;*/
+    /*border: 1px solid #ccc;*/
+    border-top: 0px;
+    /*border-bottom: 1px solid #ccc;*/
+    overflow: hidden;
+    white-space: nowrap;
+    position: relative;
+    padding-left:3px;
+    padding-top:5px;
+    color:#7781b5;
+    /*font-weight:bold;*/
+    font-weight:normal;
+}
+.cbit-grid div.pDiv select,.cbit-grid div.pDiv input{
+    color:#7781b5;
+}
+div.pGroup select,div.pGroup input{
+    margin-left:5px;
+}
+
+.cbit-grid div.pDiv div.pDiv2
+{
+    margin: 3px;
+    /*margin-left: -2px;*/
+    /*float: left;*/
+    width:590px;
+    margin:0 auto;
+    overflow: hidden;
+}	
+
+div.pGroup
+{
+    float: left;
+    background: none;
+    height: 24px;
+    margin: 0px 5px;
+}
+div.pGroup select
+{
+    width:50px;
+}
+.cbit-grid div.pDiv .pPageStat, .cbit-grid div.pDiv .pcontrol
+{
+    position: relative;
+    overflow: visible;
+    line-height:24px;
+}
+
+.cbit-grid div.pDiv input
+{
+    vertical-align: text-top;
+    position: relative;
+    top: -5px;
+    text-align:center;
+}
+
+.cbit-grid div.pDiv  div.pButton
+{
+    float: left;
+    width: 22px;
+    height: 22px;
+    border: 0px;
+    cursor: pointer;
+    overflow: hidden;
+    line-height:24px;
+}
+
+.cbit-grid div.pDiv  div.pButton:hover, .cbit-grid div.pDiv  div.pButton.pBtnOver
+{
+    /*bianxw 去掉 宽高，防止鼠标移入 抖动问题
+    width: 20px; 
+    height: 20px;*/
+    border: 1px solid #ccc;
+    cursor: pointer;
+}
+
+.cbit-grid div.pDiv  div.pButton span
+{
+    width: 20px;
+    height: 20px;
+    display: block;
+    float: left;
+}		
+
+.cbit-grid div.pDiv  div.pButton:hover span, .cbit-grid div.pDiv  div.pButton.pBtnOver span
+{
+	/*bianxw 去掉 宽高，防止鼠标移入 抖动问题
+    width: 20px; 
+    height: 20px;*/
+    border-top: 1px solid #fff;
+    border-left: 1px solid #fff;
+}		
+
+
+.cbit-grid .pSearch
+{
+    background: url(../images/flexigrid/magnifier.png) no-repeat center;
+}
+
+.cbit-grid .pFirst
+{
+    background: url(../images/flexigrid/page-first.png) no-repeat center;
+}
+
+.cbit-grid .pPrev
+{
+    background: url(../images/flexigrid/page-prev.png) no-repeat center;
+}
+
+.cbit-grid .pNext
+{
+    background: url(../images/flexigrid/page-next.png) no-repeat center;
+}
+
+.cbit-grid .pLast
+{
+    background: url(../images/flexigrid/page-last.png) no-repeat center;
+}
+
+.cbit-grid .pReload
+{
+    background: url(../images/flexigrid/load.png) no-repeat center;
+}
+
+.cbit-grid .pReload.loading
+{
+    background: url(../images/flexigrid/load.gif) no-repeat center;
+}
+/*gongzhuang 娣诲姞鐨刧o鍔熻兘 start*/
+.cbit-grid .pReloadGo
+{
+    background: url(../images/flexigrid/icon_go.gif) no-repeat center;
+}
+
+.cbit-grid .pReloadGo.loading
+{
+    background: url(../images/flexigrid/icon_go.gif) no-repeat center;
+}
+/*gongzhuang 娣诲姞鐨刧o鍔熻兘 end*/
+
+/* ie adjustments */
+.cbit-grid.ie div.hDiv th div, .cbit-grid.ie  div.bDiv td  div, div.colCopy.ie div /* common inner cell properties*/
+{
+	line-height:17px;
+    overflow: hidden;
+}

@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.zc.base.sys.modules.log.repository.LogDao">
+
+	<resultMap type="com.zc.base.sys.modules.log.entity.Log" id="logMap">
+		<id column="log_id" property="id" />
+		<result column="user_account" property="accountId" />
+		<result column="sub_system" property="system" />
+		<result column="module" property="module" />
+		<result column="content" property="content" />
+		<result column="status" property="status" />
+		<result column="create_time" property="time"/>
+		<result column="account" property="account"/>
+		<result column="userName" property="userName"/>
+	</resultMap>
+	
+	<select id="queryLog" resultMap="logMap">
+		<include refid="common.jqueryPageHead" />
+		<include refid="queryLogSql"/>
+		<include refid="common.jqueryPageBottom" />
+	</select>
+	
+	<select id="queryLogTotal" resultType="int">
+		select count(1) from (
+		 <include refid="queryLogSql" />
+		) t
+	</select>
+	
+	<sql id="queryLogSql">
+		select
+			blo.log_id,
+			blo.user_account,
+			blo.sub_system,
+			blo.module,
+			blo.content,
+			blo.status,
+			blo.create_time,
+			u.account,
+      		u.name userName
+			from SYS_LOG_OPER blo left join sys_user u on u.user_id = blo.user_account
+		<where>
+			<if test="1 == 1">
+				1 = 1
+			</if>
+			<if test="bo != null">
+			
+				<if test="bo.accounts != null and '' neq bo.accounts">
+				and 
+				<foreach item="account" index="index" collection="bo.accounts"  open="(" separator="or" close=")" >  
+					u.account like  '%'||#{account}||'%' escape '\'              
+				</foreach>
+				</if>
+				
+				<if test="bo.contents != null and '' neq bo.contents">
+				and 
+				<foreach item="content" index="index" collection="bo.contents"  open="(" separator="or" close=")" >  
+					blo.content like  '%'||#{content}||'%'              
+				</foreach>
+				</if>
+				
+				<if test="bo.account != null and '' neq bo.account">
+					and u.account like #{bo.account} escape '\'
+				</if>
+				<if test="bo.status != null ">
+					and blo.status = #{bo.status}
+				</if>
+				<if test="bo.system != null ">
+					and blo.sub_system = #{bo.system}
+				</if>
+				<if test="bo.module != null and '' neq bo.module">
+					and blo.module = #{bo.module}
+				</if>
+				<if test="bo.start != null and '' neq bo.start">
+					and blo.create_time &gt;= to_date(#{bo.start},'yyyy-mm-dd hh24:mi:ss')
+				</if>
+				<if test="bo.end != null and '' neq bo.end">
+					and blo.create_time &lt;= to_date(#{bo.end},'yyyy-mm-dd hh24:mi:ss')
+				</if>
+			</if>
+			order by blo.create_time desc
+		</where>
+	</sql>
+	
+	<insert id="insertLog" parameterType="com.zc.base.sys.modules.log.entity.Log">
+		insert into SYS_LOG_OPER (
+			user_account,
+			sub_system,
+			module,
+			content,
+			status,
+			create_time
+		)
+		values(
+			#{accountId},
+			#{system},
+			#{module},
+			#{content},
+			#{status},
+			#{time}
+		)
+	</insert>
+	
+	<!-- 批量新增log -->
+	<insert id="batchLog" parameterType="com.zc.base.sys.modules.log.entity.Log">
+		insert into SYS_LOG_OPER(
+			user_account,
+			sub_system,
+			module,
+			content,
+			status,
+			create_time)
+		(
+		<foreach item="item" index="index" collection="list"  separator=" union all " >  
+			select 
+				#{item.accountId, jdbcType=BIGINT},
+				#{item.system, jdbcType=INTEGER},
+				#{item.module, jdbcType=INTEGER},
+				#{item.content, jdbcType=VARCHAR},
+				#{item.status, jdbcType=INTEGER},
+				#{item.time, jdbcType=TIMESTAMP}
+			from dual            
+		</foreach>
+		)
+	</insert>
+	
+</mapper>

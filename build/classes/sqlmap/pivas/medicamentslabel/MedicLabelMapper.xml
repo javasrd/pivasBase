@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper
+	namespace="com.zc.pivas.medicamentslabel.repository.MedicLabelDao">
+
+	<resultMap id="MedicLabelMap"
+		type="com.zc.pivas.medicamentslabel.entity.MedicLabel">
+		<id column="LABEL_ID" property="labelId" jdbcType="BIGINT" />
+		<result column="LABEL_NAME" property="labelName" jdbcType="VARCHAR" />
+		<result column="LABEL_NO" property="labelNo" jdbcType="VARCHAR" />
+		<result column="IS_ACTIVE" property="isActive" jdbcType="BIGINT" />
+		<result column="IS_NULL" property="isNull" jdbcType="BIGINT" />
+		<result property="isActiveResult" jdbcType="VARCHAR" />
+	</resultMap>
+
+	<insert id="addMedicLabel"
+		parameterType="com.zc.pivas.medicamentslabel.entity.MedicLabel">
+		<selectKey resultType="java.lang.Long" order="AFTER"
+			keyProperty="labelId">
+			select SQ_SRVS_MEDICAMENTS_LABEL.CURRVAL as labelId from DUAL
+  		</selectKey>
+		insert into SRVS_MEDICAMENTS_label (label_name,label_no,is_active,is_null)
+		values (#{labelName,jdbcType=VARCHAR},#{labelNo,jdbcType=VARCHAR},#{isActive,jdbcType=BIGINT},#{isNull,jdbcType=BIGINT})
+	</insert>
+
+	<sql id="listMedicLabelSql">
+		select label_id, label_name,label_no,is_active,
+		case
+        	when is_active = 0 then
+          		'是'
+        	 else
+         		 '否'
+       		end as isActiveResult,is_null from SRVS_MEDICAMENTS_label
+		<where>
+			1=1
+			<if test="mediclabel != null">
+				<if test="mediclabel.labelNames != null and '' neq mediclabel.labelNames">
+				and 
+				<foreach item="labelName" index="index" collection="mediclabel.labelNames"  open="(" separator="or" close=")" >  
+					label_name like  '%'||#{labelName}||'%'   escape '\'           
+				</foreach>
+				</if>
+				
+				<if test="mediclabel.labelId != null and '' neq mediclabel.labelId">
+					and label_id = #{mediclabel.labelId}
+				</if>
+			</if>
+		</where>
+		order by label_id
+	</sql>
+
+	<select id="listMedicLabel" resultMap="MedicLabelMap">
+		<include refid="common.jqueryPageHead" />
+		<include refid="listMedicLabelSql" />
+		<include refid="common.jqueryPageBottom" />
+	</select>
+
+	<select id="getMedicLabelTotal" resultType="int">
+		select count(1) from SRVS_MEDICAMENTS_label
+		<where>
+			1=1
+			<if test="mediclabel != null">
+				<if test="mediclabel.labelNames != null and '' neq mediclabel.labelNames">
+					and 
+					<foreach item="labelName" index="index" collection="mediclabel.labelNames"  open="(" separator="or" close=")" >  
+						label_name like  '%'||#{labelName}||'%'   escape '\'           
+					</foreach>
+				</if>
+			</if>
+		</where>
+	</select>
+
+	<select id="displayMedicLabel" parameterType="string" resultMap="MedicLabelMap">
+		select label_id, label_name, label_no,is_active,is_null from SRVS_MEDICAMENTS_label
+		<where>
+			label_id = #{labelId}
+	</where>
+	</select>
+
+	<delete id="deleteMedicLabel" parameterType="string">
+		delete from SRVS_MEDICAMENTS_label
+		where label_id = #{labelId}
+  </delete>
+
+	<select id="listMedicLabelByName" resultMap="MedicLabelMap">
+		select label_id, label_name,label_no, is_active,is_null from SRVS_MEDICAMENTS_label
+		where label_name =#{label.labelName}  or label_no = #{label.labelNo}
+  </select>
+
+	<update id="updateMedicLabel"
+		parameterType="com.zc.pivas.medicamentslabel.entity.MedicLabel">
+		update SRVS_MEDICAMENTS_label
+		set
+		<if test="isActive != null ">
+			is_active = #{isActive,jdbcType=BIGINT},
+		</if>
+		<if test="isNull != null ">
+			is_null = #{isNull,jdbcType=BIGINT},
+		</if>
+		label_name = #{labelName},
+		label_no = #{labelNo}
+		where label_id = #{labelId}
+	</update>
+	
+	<select id="getLabelRefTotal" resultType="int" parameterType="string">
+		select count(1) from SRVS_MEDICAMENTS_REF_LABEL
+		<where>
+			label_id = #{labelId}
+		</where>
+	</select>
+	
+</mapper>

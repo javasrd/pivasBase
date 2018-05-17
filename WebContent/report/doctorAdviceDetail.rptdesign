@@ -1,0 +1,1157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<report xmlns="http://www.eclipse.org/birt/2005/design" version="3.2.23" id="1">
+    <property name="createdBy">MyEclipse Report Designer Version 10.0</property>
+    <simple-property-list name="includeResource">
+        <value>report/message</value>
+    </simple-property-list>
+    <list-property name="propertyBindings">
+        <structure>
+            <property name="name">queryText</property>
+            <property name="id">9</property>
+        </structure>
+    </list-property>
+    <property name="units">in</property>
+    <property name="iconFile">/templates/blank_report.gif</property>
+    <property name="layoutPreference">fixed layout</property>
+    <property name="bidiLayoutOrientation">ltr</property>
+    <property name="imageDPI">96</property>
+    <list-property name="libraries">
+        <structure>
+            <property name="fileName">pivasDataSource.rptlibrary</property>
+            <property name="namespace">pivasDataSource</property>
+        </structure>
+    </list-property>
+    <parameters>
+        <scalar-parameter name="searchTime" id="558">
+            <property name="valueType">static</property>
+            <property name="isRequired">false</property>
+            <property name="dataType">string</property>
+            <property name="distinct">true</property>
+            <simple-property-list name="defaultValue">
+                <value type="constant">""</value>
+            </simple-property-list>
+            <list-property name="selectionList"/>
+            <property name="paramType">simple</property>
+            <property name="controlType">text-box</property>
+            <structure name="format">
+                <property name="category">Unformatted</property>
+            </structure>
+        </scalar-parameter>
+        <scalar-parameter name="title" id="655">
+            <property name="valueType">static</property>
+            <property name="isRequired">false</property>
+            <property name="dataType">string</property>
+            <property name="distinct">true</property>
+            <simple-property-list name="defaultValue">
+                <value type="constant">""</value>
+            </simple-property-list>
+            <list-property name="selectionList"/>
+            <property name="paramType">simple</property>
+            <property name="controlType">text-box</property>
+            <structure name="format">
+                <property name="category">Unformatted</property>
+            </structure>
+        </scalar-parameter>
+        <scalar-parameter name="zbr" id="659">
+            <property name="valueType">static</property>
+            <property name="isRequired">false</property>
+            <property name="dataType">string</property>
+            <property name="distinct">true</property>
+            <simple-property-list name="defaultValue">
+                <value type="constant">""</value>
+            </simple-property-list>
+            <list-property name="selectionList"/>
+            <property name="paramType">simple</property>
+            <property name="controlType">text-box</property>
+            <structure name="format">
+                <property name="category">Unformatted</property>
+            </structure>
+        </scalar-parameter>
+        <scalar-parameter name="Doctor" id="712">
+            <property name="valueType">static</property>
+            <property name="dataType">string</property>
+            <property name="distinct">true</property>
+            <list-property name="selectionList"/>
+            <property name="paramType">simple</property>
+            <property name="controlType">text-box</property>
+            <structure name="format">
+                <property name="category">Unformatted</property>
+            </structure>
+        </scalar-parameter>
+        <scalar-parameter name="wardCode" id="713">
+            <property name="valueType">static</property>
+            <property name="dataType">string</property>
+            <property name="distinct">true</property>
+            <list-property name="selectionList"/>
+            <property name="paramType">simple</property>
+            <property name="controlType">text-box</property>
+            <structure name="format">
+                <property name="category">Unformatted</property>
+            </structure>
+        </scalar-parameter>
+    </parameters>
+    <data-sources>
+        <oda-data-source extensionID="org.eclipse.birt.report.data.oda.jdbc.dbprofile" name="ds" id="8"
+ extends="pivasDataSource.Data Source">
+            <method name="beforeOpen"><![CDATA[var resourceFolder = reportContext.getDesignHandle().getResourceFolder();
+this.setExtensionProperty("jarList", resourceFolder+"/WEB-INF/lib/ojdbc-11.2.0.jar");]]></method>
+        </oda-data-source>
+    </data-sources>
+    <data-sets>
+        <oda-data-set extensionID="org.eclipse.birt.report.data.oda.jdbc.dbprofile.sqbDataSet" name="Data Set" id="9">
+            <property name="nullsOrdering">nulls lowest</property>
+            <list-property name="parameters"/>
+            <structure name="cachedMetaData">
+                <list-property name="resultSet">
+                    <structure>
+                        <property name="position">1</property>
+                        <property name="name">TRIALNAME</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">2</property>
+                        <property name="name">SFRQ</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">3</property>
+                        <property name="name">DRUGINFO</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">4</property>
+                        <property name="name">PARENT_NO</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">5</property>
+                        <property name="name">DIANP</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">6</property>
+                        <property name="name">SFYSMC</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">7</property>
+                        <property name="name">ID</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">8</property>
+                        <property name="name">SUPPLY_CODE</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">9</property>
+                        <property name="name">DOSE</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">10</property>
+                        <property name="name">DOSE_UNIT</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">11</property>
+                        <property name="name">QUANTITY</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">12</property>
+                        <property name="name">FREQ_CODE</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">13</property>
+                        <property name="name">TRANSFUSION</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">14</property>
+                        <property name="name">DROPSPEED</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">15</property>
+                        <property name="name">SEX</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">16</property>
+                        <property name="name">AGEUNIT</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">17</property>
+                        <property name="name">AVDP</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                </list-property>
+            </structure>
+            <method name="beforeOpen"><![CDATA[
+var searchTime = this.params["searchTime"].value;
+var doctor = this.params["Doctor"].value;
+var wardCode = this.params["wardCode"].value;
+
+if (searchTime != null &amp;&amp; searchTime != "")
+{
+	this.queryText += " and to_char(SFRQ,'yyyy-mm-dd') like '" + searchTime +  "%'";
+}
+
+if (doctor != null &amp;&amp; doctor != "")
+{
+     this.queryText += " and DOCTOR in ( '" + doctor  + "' )";
+}
+
+if (wardCode != null &amp;&amp; wardCode != "")
+{
+     this.queryText += " and wardname in ( '" + wardCode  + "' )";
+}
+
+
+this.queryText += " ORDER BY SFRQ DESC";
+]]></method>
+            <property name="dataSource">ds</property>
+            <list-property name="resultSet">
+                <structure>
+                    <property name="position">1</property>
+                    <property name="name">TRIALNAME</property>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="position">2</property>
+                    <property name="name">SFRQ</property>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="position">3</property>
+                    <property name="name">DRUGINFO</property>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="position">4</property>
+                    <property name="name">PARENT_NO</property>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="position">5</property>
+                    <property name="name">DIANP</property>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="position">6</property>
+                    <property name="name">SFYSMC</property>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="position">7</property>
+                    <property name="name">ID</property>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="position">8</property>
+                    <property name="name">SUPPLY_CODE</property>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="position">9</property>
+                    <property name="name">DOSE</property>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="position">10</property>
+                    <property name="name">DOSE_UNIT</property>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="position">11</property>
+                    <property name="name">QUANTITY</property>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="position">12</property>
+                    <property name="name">FREQ_CODE</property>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="position">13</property>
+                    <property name="name">TRANSFUSION</property>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="position">14</property>
+                    <property name="name">DROPSPEED</property>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="position">15</property>
+                    <property name="name">SEX</property>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="position">16</property>
+                    <property name="name">AGEUNIT</property>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="position">17</property>
+                    <property name="name">AVDP</property>
+                    <property name="dataType">string</property>
+                </structure>
+            </list-property>
+            <xml-property name="queryText"><![CDATA[SELECT 
+       PTE.TRIALNAME,
+       SFRQ,
+       DRUGINFO,
+       PARENT_NO,
+       DIANP,
+       SFYSMC,
+        YZ.ID,
+       YZ.SUPPLY_CODE,
+       YZ.DOSE AS DOSE,
+       YZ.DOSE_UNIT,
+       YZ.QUANTITY,
+       YZ.FREQ_CODE,
+       YZ.TRANSFUSION,
+       YZ.DROPSPEED,
+       CASE
+         WHEN YZ.SEX = 0 THEN
+          '女'
+         ELSE
+          '男'
+       END AS SEX,
+       YZ.AGE ||
+       
+       CASE
+         WHEN YZ.AGEUNIT = 0 THEN
+          '天'
+       
+         WHEN YZ.AGEUNIT = 1 THEN
+          '月'
+         ELSE
+          '年'
+       END AS AGEUNIT,
+       
+       YZ.AVDP
+       
+  FROM SRVS_DOCTOR_ADVICE_CHECKRESULT YZ
+
+  LEFT JOIN SRVS_TRIAL_ERRORTYPE PTE ON PTE.GID = YZ.YZSHBTGLX
+  WHERE  YZSHZT = 2
+]]></xml-property>
+            <structure name="designerState">
+                <property name="version">1.0</property>
+                <property name="stateContentAsString">&lt;?xml version="1.0"
+					encoding="UTF-8"?>&#13;
+					&lt;SQLQueryBuilder
+					editorInputType="SQLBuilderStorageEditorInput" name="Data Set"
+					version="1.0">&#13;
+					&lt;SQLStatement>SELECT DOCTOR, DOCTOR_NAME, SFRQ, PARENT_NO, PTE.TRIALNAME,&amp;#x0A;
+					DRUGINFO&amp;#x0A; FROM SRVS_DOCTOR_ADVICE_CHECKRESULT
+					YZ&amp;#x0A; WHERE 1 = 1&amp;#x0A;&lt;/SQLStatement>&#13;
+					&lt;connInfo>Undefined:Transient.org.eclipse.datatools.enablement.oracle.connectionProfile:pivas:pivas&lt;/connInfo>&#13;
+					&lt;omitSchemaInfo>false:true:&lt;/omitSchemaInfo>&#13;
+					&lt;editorInputUsageOptions>useWindowState=true&lt;/editorInputUsageOptions>&#13;
+					&lt;windowState height="833" version="1.0" width="1676">&#13;
+					&lt;control height="110" isHideable="true" isVisible="true"
+					name="SQLSourceViewer" width="1649"/>&#13;
+					&lt;control height="522"
+					isHideable="true" isVisible="true"
+					name="DesignViewer"
+					width="1662"/>&#13;
+					&lt;control height="167" isHideable="true"
+					isVisible="true"
+					name="GraphControl" width="0"/>&#13;
+					&lt;control
+					height="163" isHideable="true" isVisible="true"
+					name="OutlineViewer" width="34"/>&#13;
+					&lt;/windowState>&#13;
+					&lt;/SQLQueryBuilder></property>
+            </structure>
+            <xml-property name="designerValues"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<model:DesignValues xmlns:design="http://www.eclipse.org/datatools/connectivity/oda/design" xmlns:model="http://www.eclipse.org/birt/report/model/adapter/odaModel">
+  <Version>2.0</Version>
+  <design:ResultSets derivedMetaData="true">
+    <design:resultSetDefinitions>
+      <design:resultSetColumns>
+        <design:resultColumnDefinitions>
+          <design:attributes>
+            <design:identifier>
+              <design:name>COUNT(0)</design:name>
+              <design:position>1</design:position>
+            </design:identifier>
+            <design:nativeDataTypeCode>2</design:nativeDataTypeCode>
+            <design:precision>0</design:precision>
+            <design:scale>0</design:scale>
+            <design:nullability>Nullable</design:nullability>
+            <design:uiHints>
+              <design:displayName>COUNT(0)</design:displayName>
+            </design:uiHints>
+          </design:attributes>
+          <design:usageHints>
+            <design:label>COUNT(0)</design:label>
+            <design:formattingHints>
+              <design:displaySize>22</design:displaySize>
+            </design:formattingHints>
+          </design:usageHints>
+        </design:resultColumnDefinitions>
+        <design:resultColumnDefinitions>
+          <design:attributes>
+            <design:identifier>
+              <design:name>DEPTNAME</design:name>
+              <design:position>2</design:position>
+            </design:identifier>
+            <design:nativeDataTypeCode>12</design:nativeDataTypeCode>
+            <design:precision>60</design:precision>
+            <design:scale>0</design:scale>
+            <design:nullability>Nullable</design:nullability>
+            <design:uiHints>
+              <design:displayName>DEPTNAME</design:displayName>
+            </design:uiHints>
+          </design:attributes>
+          <design:usageHints>
+            <design:label>DEPTNAME</design:label>
+            <design:formattingHints>
+              <design:displaySize>60</design:displaySize>
+            </design:formattingHints>
+          </design:usageHints>
+        </design:resultColumnDefinitions>
+      </design:resultSetColumns>
+      <design:criteria>
+        <design:rowOrdering/>
+      </design:criteria>
+    </design:resultSetDefinitions>
+  </design:ResultSets>
+</model:DesignValues>]]></xml-property>
+        </oda-data-set>
+    </data-sets>
+    <cubes>
+        <tabular-cube name="Data Cube1" id="73">
+            <property name="dimensions">
+                <tabular-dimension name="Group" id="667">
+                    <property name="defaultHierarchy">NewTabularHierarchy</property>
+                    <property name="hierarchies">
+                        <tabular-hierarchy name="NewTabularHierarchy" id="668">
+                            <property name="levels">
+                                <tabular-level name="TRIALNAME" id="671">
+                                    <property name="dataType">string</property>
+                                    <property name="columnName">TRIALNAME</property>
+                                </tabular-level>
+                                <tabular-level name="SFYSMC" id="736">
+                                    <property name="dataType">string</property>
+                                    <property name="columnName">SFYSMC</property>
+                                </tabular-level>
+                                <tabular-level name="PARENT_NO" id="675">
+                                    <property name="dataType">string</property>
+                                    <property name="columnName">PARENT_NO</property>
+                                </tabular-level>
+                                <tabular-level name="DRUGINFO" id="673">
+                                    <property name="dataType">string</property>
+                                    <property name="columnName">DRUGINFO</property>
+                                </tabular-level>
+                                <tabular-level name="SEX" id="807">
+                                    <property name="dataType">string</property>
+                                    <property name="columnName">SEX</property>
+                                </tabular-level>
+                                <tabular-level name="AGEUNIT" id="800">
+                                    <property name="dataType">string</property>
+                                    <property name="columnName">AGEUNIT</property>
+                                </tabular-level>
+                                <tabular-level name="AVDP" id="801">
+                                    <property name="dataType">string</property>
+                                    <property name="columnName">AVDP</property>
+                                </tabular-level>
+                                <tabular-level name="DOSE" id="802">
+                                    <property name="dataType">string</property>
+                                    <property name="columnName">DOSE</property>
+                                </tabular-level>
+                                <tabular-level name="DOSE_UNIT" id="803">
+                                    <property name="dataType">string</property>
+                                    <property name="columnName">DOSE_UNIT</property>
+                                </tabular-level>
+                                <tabular-level name="TRANSFUSION" id="809">
+                                    <property name="dataType">string</property>
+                                    <property name="columnName">TRANSFUSION</property>
+                                </tabular-level>
+                                <tabular-level name="DROPSPEED" id="804">
+                                    <property name="dataType">string</property>
+                                    <property name="columnName">DROPSPEED</property>
+                                </tabular-level>
+                                <tabular-level name="FREQ_CODE" id="805">
+                                    <property name="dataType">string</property>
+                                    <property name="columnName">FREQ_CODE</property>
+                                </tabular-level>
+                                <tabular-level name="SUPPLY_CODE" id="808">
+                                    <property name="dataType">string</property>
+                                    <property name="columnName">SUPPLY_CODE</property>
+                                </tabular-level>
+                                <tabular-level name="QUANTITY" id="806">
+                                    <property name="dataType">string</property>
+                                    <property name="columnName">QUANTITY</property>
+                                </tabular-level>
+                                <tabular-level name="SFRQ" id="674">
+                                    <property name="dataType">string</property>
+                                    <property name="columnName">SFRQ</property>
+                                </tabular-level>
+                                <tabular-level name="DIANP" id="737">
+                                    <property name="dataType">string</property>
+                                    <property name="columnName">DIANP</property>
+                                </tabular-level>
+                                <tabular-level name="ID" id="899">
+                                    <property name="dataType">string</property>
+                                    <property name="columnName">ID</property>
+                                </tabular-level>
+                            </property>
+                        </tabular-hierarchy>
+                    </property>
+                </tabular-dimension>
+            </property>
+            <property name="dataSet">Data Set</property>
+        </tabular-cube>
+    </cubes>
+    <styles>
+        <style name="report" id="4">
+            <property name="fontFamily">sans-serif</property>
+            <property name="fontSize">10pt</property>
+        </style>
+        <style name="crosstab-cell" id="5">
+            <property name="borderBottomColor">#CCCCCC</property>
+            <property name="borderBottomStyle">solid</property>
+            <property name="borderBottomWidth">1pt</property>
+            <property name="borderLeftColor">#CCCCCC</property>
+            <property name="borderLeftStyle">solid</property>
+            <property name="borderLeftWidth">1pt</property>
+            <property name="borderRightColor">#CCCCCC</property>
+            <property name="borderRightStyle">solid</property>
+            <property name="borderRightWidth">1pt</property>
+            <property name="borderTopColor">#CCCCCC</property>
+            <property name="borderTopStyle">solid</property>
+            <property name="borderTopWidth">1pt</property>
+        </style>
+        <style name="crosstab" id="6">
+            <property name="borderBottomColor">#CCCCCC</property>
+            <property name="borderBottomStyle">solid</property>
+            <property name="borderBottomWidth">1pt</property>
+            <property name="borderLeftColor">#CCCCCC</property>
+            <property name="borderLeftStyle">solid</property>
+            <property name="borderLeftWidth">1pt</property>
+            <property name="borderRightColor">#CCCCCC</property>
+            <property name="borderRightStyle">solid</property>
+            <property name="borderRightWidth">1pt</property>
+            <property name="borderTopColor">#CCCCCC</property>
+            <property name="borderTopStyle">solid</property>
+            <property name="borderTopWidth">1pt</property>
+        </style>
+        <style name="title" id="662">
+            <property name="fontSize">12px</property>
+            <property name="fontWeight">normal</property>
+            <property name="fontStyle">normal</property>
+            <property name="color">#666666</property>
+            <property name="textAlign">center</property>
+            <property name="verticalAlign">middle</property>
+        </style>
+        <style name="content" id="663">
+            <property name="fontSize">12px</property>
+            <property name="fontWeight">normal</property>
+            <property name="color">#666666</property>
+            <property name="textAlign">center</property>
+            <property name="verticalAlign">middle</property>
+        </style>
+        <style name="mainTitle" id="664">
+            <property name="fontSize">12px</property>
+            <property name="fontWeight">normal</property>
+            <property name="color">#FFFFFF</property>
+            <property name="textAlign">center</property>
+            <property name="verticalAlign">middle</property>
+        </style>
+    </styles>
+    <page-setup>
+        <simple-master-page name="NewSimpleMasterPage" id="513"/>
+    </page-setup>
+    <body>
+        <grid id="417">
+            <property name="height">1.9270833333333333in</property>
+            <column id="418"/>
+            <column id="419"/>
+            <row id="420">
+                <property name="height">0.2708333333333333in</property>
+                <cell id="422">
+                    <property name="colSpan">2</property>
+                    <property name="rowSpan">1</property>
+                    <property name="backgroundColor">#98B2E3</property>
+                    <property name="color">#000000</property>
+                    <data id="661">
+                        <property name="style">mainTitle</property>
+                        <property name="paddingTop">3pt</property>
+                        <property name="textAlign">center</property>
+                        <list-property name="boundDataColumns">
+                            <structure>
+                                <property name="name">title</property>
+                                <expression name="expression" type="javascript">params["title"]
+								</expression>
+                                <property name="dataType">string</property>
+                            </structure>
+                        </list-property>
+                        <property name="resultSetColumn">title</property>
+                    </data>
+                </cell>
+            </row>
+            <row id="423">
+                <property name="height">0.2708333333333333in</property>
+                <cell id="424">
+                    <property name="backgroundColor">#BCCEF2</property>
+                    <property name="color">white</property>
+                    <data id="660">
+                        <property name="style">mainTitle</property>
+                        <property name="paddingTop">3pt</property>
+                        <property name="textAlign">left</property>
+                        <list-property name="boundDataColumns">
+                            <structure>
+                                <property name="name">zbr</property>
+                                <expression name="expression" type="javascript">params["zbr"]
+								</expression>
+                                <property name="dataType">string</property>
+                            </structure>
+                        </list-property>
+                        <property name="resultSetColumn">zbr</property>
+                    </data>
+                </cell>
+                <cell id="425">
+                    <property name="backgroundColor">#BCCEF2</property>
+                    <property name="color">white</property>
+                    <text id="514">
+                        <property name="style">mainTitle</property>
+                        <property name="paddingTop">3pt</property>
+                        <property name="textAlign">right</property>
+                        <property name="contentType">html</property>
+                        <text-property name="content"><![CDATA[统计时间：<![CDATA[<value-of format="yyyy-MM-dd HH:mm:ss">new Date()</value-of>]]&gt;]]></text-property>
+                    </text>
+                </cell>
+            </row>
+            <row id="426">
+                <property name="height">1.3854166666666667in</property>
+                <cell id="427">
+                    <property name="colSpan">2</property>
+                    <property name="rowSpan">1</property>
+                    <extended-item extensionName="Crosstab" extensionVersion="2.5.0" id="900">
+                        <property name="cube">Data Cube1</property>
+                        <property name="rows">
+                            <extended-item extensionName="CrosstabView" id="902">
+                                <property name="views">
+                                    <extended-item extensionName="DimensionView" id="903">
+                                        <property name="dimension">Group</property>
+                                        <property name="levels">
+                                            <extended-item extensionName="LevelView" name="NewLevel View" id="904">
+                                                <property name="level">Group/TRIALNAME</property>
+                                                <property name="member">
+                                                    <extended-item extensionName="CrosstabCell" id="905">
+                                                        <property name="content">
+                                                            <data name="TRIALNAME" id="906">
+                                                                <property name="style">content</property>
+                                                                <property name="resultSetColumn">TRIALNAME</property>
+                                                            </data>
+                                                        </property>
+                                                        <property name="verticalAlign">middle</property>
+                                                    </extended-item>
+                                                </property>
+                                            </extended-item>
+                                            <extended-item extensionName="LevelView" name="NewLevel View1" id="907">
+                                                <property name="level">Group/SFYSMC</property>
+                                                <property name="member">
+                                                    <extended-item extensionName="CrosstabCell" id="908">
+                                                        <property name="content">
+                                                            <data name="SFYSMC" id="909">
+                                                                <property name="style">content</property>
+                                                                <property name="resultSetColumn">SFYSMC</property>
+                                                            </data>
+                                                        </property>
+                                                        <property name="verticalAlign">middle</property>
+                                                    </extended-item>
+                                                </property>
+                                            </extended-item>
+                                            <extended-item extensionName="LevelView" name="NewLevel View2" id="910">
+                                                <property name="level">Group/PARENT_NO</property>
+                                                <property name="member">
+                                                    <extended-item extensionName="CrosstabCell" id="911">
+                                                        <property name="content">
+                                                            <data name="PARENT_NO" id="912">
+                                                                <property name="style">content</property>
+                                                                <property name="resultSetColumn">PARENT_NO</property>
+                                                            </data>
+                                                        </property>
+                                                        <property name="verticalAlign">middle</property>
+                                                    </extended-item>
+                                                </property>
+                                            </extended-item>
+                                            <extended-item extensionName="LevelView" name="NewLevel View3" id="913">
+                                                <property name="level">Group/DRUGINFO</property>
+                                                <property name="member">
+                                                    <extended-item extensionName="CrosstabCell" id="914">
+                                                        <property name="content">
+                                                            <data name="DRUGINFO" id="915">
+                                                                <property name="style">content</property>
+                                                                <property name="textAlign">left</property>
+                                                                <method name="onRender"><![CDATA[var name = this.getValue();  
+name = name.toString();  
+
+var rslt = "";   
+
+rslt = name.replace("@@", "\n")
+this.setDisplayValue(rslt);  ]]></method>
+                                                                <property name="resultSetColumn">DRUGINFO</property>
+                                                            </data>
+                                                        </property>
+                                                        <property name="verticalAlign">middle</property>
+                                                    </extended-item>
+                                                </property>
+                                            </extended-item>
+                                            <extended-item extensionName="LevelView" name="NewLevel View4" id="916">
+                                                <property name="level">Group/SEX</property>
+                                                <property name="member">
+                                                    <extended-item extensionName="CrosstabCell" id="917">
+                                                        <property name="content">
+                                                            <data name="SEX" id="918">
+                                                                <property name="style">content</property>
+                                                                <property name="resultSetColumn">SEX</property>
+                                                            </data>
+                                                        </property>
+                                                        <property name="verticalAlign">middle</property>
+                                                    </extended-item>
+                                                </property>
+                                            </extended-item>
+                                            <extended-item extensionName="LevelView" name="NewLevel View5" id="919">
+                                                <property name="level">Group/AGEUNIT</property>
+                                                <property name="member">
+                                                    <extended-item extensionName="CrosstabCell" id="920">
+                                                        <property name="content">
+                                                            <data name="AGEUNIT" id="921">
+                                                                <property name="style">content</property>
+                                                                <property name="resultSetColumn">AGEUNIT</property>
+                                                            </data>
+                                                        </property>
+                                                        <property name="verticalAlign">middle</property>
+                                                    </extended-item>
+                                                </property>
+                                            </extended-item>
+                                            <extended-item extensionName="LevelView" name="NewLevel View6" id="922">
+                                                <property name="level">Group/AVDP</property>
+                                                <property name="member">
+                                                    <extended-item extensionName="CrosstabCell" id="923">
+                                                        <property name="content">
+                                                            <data name="AVDP" id="924">
+                                                                <property name="style">content</property>
+                                                                <property name="resultSetColumn">AVDP</property>
+                                                            </data>
+                                                        </property>
+                                                        <property name="verticalAlign">middle</property>
+                                                    </extended-item>
+                                                </property>
+                                            </extended-item>
+                                            <extended-item extensionName="LevelView" name="NewLevel View7" id="925">
+                                                <property name="level">Group/DOSE</property>
+                                                <property name="member">
+                                                    <extended-item extensionName="CrosstabCell" id="926">
+                                                        <property name="content">
+                                                            <data name="DOSE" id="927">
+                                                                <property name="style">content</property>
+                                                                <property name="textAlign">left</property>
+                                                                <method name="onRender"><![CDATA[var name = this.getValue();  
+name = name.toString();  
+
+var rslt = "";   
+
+rslt = name.replace("@@", "\n")
+this.setDisplayValue(rslt);]]></method>
+                                                                <property name="resultSetColumn">DOSE</property>
+                                                            </data>
+                                                        </property>
+                                                        <property name="verticalAlign">middle</property>
+                                                    </extended-item>
+                                                </property>
+                                            </extended-item>
+                                            <extended-item extensionName="LevelView" name="NewLevel View8" id="928">
+                                                <property name="level">Group/DOSE_UNIT</property>
+                                                <property name="member">
+                                                    <extended-item extensionName="CrosstabCell" id="929">
+                                                        <property name="content">
+                                                            <data name="DOSE_UNIT" id="930">
+                                                                <property name="style">content</property>
+                                                                <property name="textAlign">left</property>
+                                                                <method name="onRender"><![CDATA[var name = this.getValue();  
+name = name.toString();  
+var rslt = "";   
+rslt = name.replace("@@", "\n")
+this.setDisplayValue(rslt);]]></method>
+                                                                <property name="resultSetColumn">DOSE_UNIT</property>
+                                                            </data>
+                                                        </property>
+                                                        <property name="verticalAlign">middle</property>
+                                                    </extended-item>
+                                                </property>
+                                            </extended-item>
+                                            <extended-item extensionName="LevelView" name="NewLevel View9" id="931">
+                                                <property name="level">Group/TRANSFUSION</property>
+                                                <property name="member">
+                                                    <extended-item extensionName="CrosstabCell" id="932">
+                                                        <property name="content">
+                                                            <data name="TRANSFUSION" id="933">
+                                                                <property name="style">content</property>
+                                                                <property name="resultSetColumn">TRANSFUSION</property>
+                                                            </data>
+                                                        </property>
+                                                        <property name="verticalAlign">middle</property>
+                                                    </extended-item>
+                                                </property>
+                                            </extended-item>
+                                            <extended-item extensionName="LevelView" name="NewLevel View10" id="934">
+                                                <property name="level">Group/DROPSPEED</property>
+                                                <property name="member">
+                                                    <extended-item extensionName="CrosstabCell" id="935">
+                                                        <property name="content">
+                                                            <data name="DROPSPEED" id="936">
+                                                                <property name="style">content</property>
+                                                                <property name="resultSetColumn">DROPSPEED</property>
+                                                            </data>
+                                                        </property>
+                                                        <property name="verticalAlign">middle</property>
+                                                    </extended-item>
+                                                </property>
+                                            </extended-item>
+                                            <extended-item extensionName="LevelView" name="NewLevel View11" id="937">
+                                                <property name="level">Group/FREQ_CODE</property>
+                                                <property name="member">
+                                                    <extended-item extensionName="CrosstabCell" id="938">
+                                                        <property name="content">
+                                                            <data name="FREQ_CODE" id="939">
+                                                                <property name="style">content</property>
+                                                                <property name="resultSetColumn">FREQ_CODE</property>
+                                                            </data>
+                                                        </property>
+                                                        <property name="verticalAlign">middle</property>
+                                                    </extended-item>
+                                                </property>
+                                            </extended-item>
+                                            <extended-item extensionName="LevelView" name="NewLevel View12" id="940">
+                                                <property name="level">Group/SUPPLY_CODE</property>
+                                                <property name="member">
+                                                    <extended-item extensionName="CrosstabCell" id="941">
+                                                        <property name="content">
+                                                            <data name="SUPPLY_CODE" id="942">
+                                                                <property name="style">content</property>
+                                                                <property name="resultSetColumn">SUPPLY_CODE</property>
+                                                            </data>
+                                                        </property>
+                                                        <property name="verticalAlign">middle</property>
+                                                    </extended-item>
+                                                </property>
+                                            </extended-item>
+                                            <extended-item extensionName="LevelView" name="NewLevel View13" id="943">
+                                                <property name="level">Group/QUANTITY</property>
+                                                <property name="member">
+                                                    <extended-item extensionName="CrosstabCell" id="944">
+                                                        <property name="content">
+                                                            <data name="QUANTITY" id="945">
+                                                                <property name="style">content</property>
+                                                                <method name="onRender"><![CDATA[var name = this.getValue();  
+name = name.toString();  
+var rslt = "";   
+rslt = name.replace("@@", "\n")
+this.setDisplayValue(rslt);]]></method>
+                                                                <property name="resultSetColumn">QUANTITY</property>
+                                                            </data>
+                                                        </property>
+                                                        <property name="verticalAlign">middle</property>
+                                                    </extended-item>
+                                                </property>
+                                            </extended-item>
+                                            <extended-item extensionName="LevelView" name="NewLevel View14" id="946">
+                                                <property name="level">Group/SFRQ</property>
+                                                <property name="member">
+                                                    <extended-item extensionName="CrosstabCell" id="947">
+                                                        <property name="content">
+                                                            <data name="SFRQ" id="948">
+                                                                <property name="style">content</property>
+                                                                <property name="resultSetColumn">SFRQ</property>
+                                                            </data>
+                                                        </property>
+                                                        <property name="verticalAlign">middle</property>
+                                                    </extended-item>
+                                                </property>
+                                            </extended-item>
+                                            <extended-item extensionName="LevelView" name="NewLevel View15" id="949">
+                                                <property name="level">Group/DIANP</property>
+                                                <property name="member">
+                                                    <extended-item extensionName="CrosstabCell" id="950">
+                                                        <property name="content">
+                                                            <data name="DIANP" id="951">
+                                                                <property name="style">content</property>
+                                                                <property name="resultSetColumn">DIANP</property>
+                                                            </data>
+                                                        </property>
+                                                        <property name="verticalAlign">middle</property>
+                                                    </extended-item>
+                                                </property>
+                                            </extended-item>
+                                            <extended-item extensionName="LevelView" name="NewLevel View16" id="952">
+                                                <property name="level">Group/ID</property>
+                                                <property name="member">
+                                                    <extended-item extensionName="CrosstabCell" id="953">
+                                                        <property name="content">
+                                                            <data name="ID" id="954">
+                                                                <property name="style">content</property>
+                                                                <property name="resultSetColumn">ID</property>
+                                                            </data>
+                                                        </property>
+                                                        <property name="verticalAlign">middle</property>
+                                                        <property name="height">0.6666666666666666in</property>
+                                                    </extended-item>
+                                                </property>
+                                            </extended-item>
+                                        </property>
+                                    </extended-item>
+                                </property>
+                            </extended-item>
+                        </property>
+                        <property name="header">
+                            <extended-item extensionName="CrosstabCell" id="901">
+                                <property name="content">
+                                    <grid id="955">
+                                        <column id="956"/>
+                                        <column id="957"/>
+                                        <column id="958"/>
+                                        <column id="959"/>
+                                        <column id="960"/>
+                                        <column id="961"/>
+                                        <column id="962"/>
+                                        <column id="963"/>
+                                        <column id="964"/>
+                                        <column id="965"/>
+                                        <column id="966"/>
+                                        <column id="967"/>
+                                        <column id="968"/>
+                                        <column id="969"/>
+                                        <column id="970"/>
+                                        <column id="971"/>
+                                        <column id="972"/>
+                                        <row id="973">
+                                            <cell id="974">
+                                                <property name="verticalAlign">middle</property>
+                                                <label id="991">
+                                                    <property name="style">title</property>
+                                                    <text-property name="text">审方错误类型</text-property>
+                                                </label>
+                                            </cell>
+                                            <cell id="975">
+                                                <property name="verticalAlign">middle</property>
+                                                <label id="992">
+                                                    <property name="style">title</property>
+                                                    <text-property name="text">审方人</text-property>
+                                                </label>
+                                            </cell>
+                                            <cell id="976">
+                                                <property name="verticalAlign">middle</property>
+                                                <label id="993">
+                                                    <property name="style">title</property>
+                                                    <text-property name="text">主医嘱号</text-property>
+                                                </label>
+                                            </cell>
+                                            <cell id="977">
+                                                <property name="verticalAlign">middle</property>
+                                                <label id="994">
+                                                    <property name="style">title</property>
+                                                    <text-property name="text">药单信息</text-property>
+                                                </label>
+                                            </cell>
+                                            <cell id="978">
+                                                <property name="verticalAlign">middle</property>
+                                                <label id="995">
+                                                    <property name="style">title</property>
+                                                    <text-property name="text">性别</text-property>
+                                                </label>
+                                            </cell>
+                                            <cell id="979">
+                                                <property name="verticalAlign">middle</property>
+                                                <label id="996">
+                                                    <property name="style">title</property>
+                                                    <text-property name="text">年龄</text-property>
+                                                </label>
+                                            </cell>
+                                            <cell id="980">
+                                                <property name="verticalAlign">middle</property>
+                                                <label id="997">
+                                                    <property name="style">title</property>
+                                                    <text-property name="text">体重</text-property>
+                                                </label>
+                                            </cell>
+                                            <cell id="981">
+                                                <property name="verticalAlign">middle</property>
+                                                <label id="998">
+                                                    <property name="style">title</property>
+                                                    <text-property name="text">单次剂量</text-property>
+                                                </label>
+                                            </cell>
+                                            <cell id="982">
+                                                <property name="verticalAlign">middle</property>
+                                                <label id="999">
+                                                    <property name="style">title</property>
+                                                    <text-property name="text">剂量单位</text-property>
+                                                </label>
+                                            </cell>
+                                            <cell id="983">
+                                                <property name="verticalAlign">middle</property>
+                                                <label id="1000">
+                                                    <property name="style">title</property>
+                                                    <text-property name="text">输液量</text-property>
+                                                </label>
+                                            </cell>
+                                            <cell id="984">
+                                                <property name="verticalAlign">middle</property>
+                                                <label id="1001">
+                                                    <property name="style">title</property>
+                                                    <text-property name="text">滴速</text-property>
+                                                </label>
+                                            </cell>
+                                            <cell id="985">
+                                                <property name="verticalAlign">middle</property>
+                                                <label id="1002">
+                                                    <property name="style">title</property>
+                                                    <text-property name="text">执行频率</text-property>
+                                                </label>
+                                            </cell>
+                                            <cell id="986">
+                                                <property name="verticalAlign">middle</property>
+                                                <label id="1003">
+                                                    <property name="style">title</property>
+                                                    <text-property name="text">用药途径</text-property>
+                                                </label>
+                                            </cell>
+                                            <cell id="987">
+                                                <property name="verticalAlign">middle</property>
+                                                <label id="1004">
+                                                    <property name="style">title</property>
+                                                    <text-property name="text">数量</text-property>
+                                                </label>
+                                            </cell>
+                                            <cell id="988">
+                                                <property name="verticalAlign">middle</property>
+                                                <label id="1005">
+                                                    <property name="style">title</property>
+                                                    <text-property name="text">审方日期</text-property>
+                                                </label>
+                                            </cell>
+                                            <cell id="989">
+                                                <property name="verticalAlign">middle</property>
+                                                <label id="1006">
+                                                    <property name="style">title</property>
+                                                    <text-property name="text">点评</text-property>
+                                                </label>
+                                            </cell>
+                                            <cell id="990">
+                                                <property name="verticalAlign">middle</property>
+                                                <label id="1007">
+                                                    <property name="style">title</property>
+                                                    <text-property name="text">标识</text-property>
+                                                </label>
+                                            </cell>
+                                        </row>
+                                    </grid>
+                                </property>
+                                <property name="backgroundColor">#E4EAF8</property>
+                                <property name="height">0.6354166666666666in</property>
+                            </extended-item>
+                        </property>
+                        <list-property name="boundDataColumns">
+                            <structure>
+                                <property name="name">TRIALNAME</property>
+                                <expression name="expression">dimension["Group"]["TRIALNAME"]</expression>
+                                <property name="dataType">string</property>
+                            </structure>
+                            <structure>
+                                <property name="name">SFYSMC</property>
+                                <expression name="expression">dimension["Group"]["SFYSMC"]</expression>
+                                <property name="dataType">string</property>
+                            </structure>
+                            <structure>
+                                <property name="name">PARENT_NO</property>
+                                <expression name="expression">dimension["Group"]["PARENT_NO"]</expression>
+                                <property name="dataType">string</property>
+                            </structure>
+                            <structure>
+                                <property name="name">DRUGINFO</property>
+                                <expression name="expression">dimension["Group"]["DRUGINFO"]</expression>
+                                <property name="dataType">string</property>
+                            </structure>
+                            <structure>
+                                <property name="name">SEX</property>
+                                <expression name="expression">dimension["Group"]["SEX"]</expression>
+                                <property name="dataType">string</property>
+                            </structure>
+                            <structure>
+                                <property name="name">AGEUNIT</property>
+                                <expression name="expression">dimension["Group"]["AGEUNIT"]</expression>
+                                <property name="dataType">string</property>
+                            </structure>
+                            <structure>
+                                <property name="name">AVDP</property>
+                                <expression name="expression">dimension["Group"]["AVDP"]</expression>
+                                <property name="dataType">string</property>
+                            </structure>
+                            <structure>
+                                <property name="name">DOSE</property>
+                                <expression name="expression">dimension["Group"]["DOSE"]</expression>
+                                <property name="dataType">string</property>
+                            </structure>
+                            <structure>
+                                <property name="name">DOSE_UNIT</property>
+                                <expression name="expression">dimension["Group"]["DOSE_UNIT"]</expression>
+                                <property name="dataType">string</property>
+                            </structure>
+                            <structure>
+                                <property name="name">TRANSFUSION</property>
+                                <expression name="expression">dimension["Group"]["TRANSFUSION"]</expression>
+                                <property name="dataType">string</property>
+                            </structure>
+                            <structure>
+                                <property name="name">DROPSPEED</property>
+                                <expression name="expression">dimension["Group"]["DROPSPEED"]</expression>
+                                <property name="dataType">string</property>
+                            </structure>
+                            <structure>
+                                <property name="name">FREQ_CODE</property>
+                                <expression name="expression">dimension["Group"]["FREQ_CODE"]</expression>
+                                <property name="dataType">string</property>
+                            </structure>
+                            <structure>
+                                <property name="name">SUPPLY_CODE</property>
+                                <expression name="expression">dimension["Group"]["SUPPLY_CODE"]</expression>
+                                <property name="dataType">string</property>
+                            </structure>
+                            <structure>
+                                <property name="name">QUANTITY</property>
+                                <expression name="expression">dimension["Group"]["QUANTITY"]</expression>
+                                <property name="dataType">string</property>
+                            </structure>
+                            <structure>
+                                <property name="name">SFRQ</property>
+                                <expression name="expression">dimension["Group"]["SFRQ"]</expression>
+                                <property name="dataType">string</property>
+                            </structure>
+                            <structure>
+                                <property name="name">DIANP</property>
+                                <expression name="expression">dimension["Group"]["DIANP"]</expression>
+                                <property name="dataType">string</property>
+                            </structure>
+                            <structure>
+                                <property name="name">ID</property>
+                                <expression name="expression">dimension["Group"]["ID"]</expression>
+                                <property name="dataType">string</property>
+                            </structure>
+                        </list-property>
+                    </extended-item>
+                </cell>
+            </row>
+        </grid>
+    </body>
+</report>

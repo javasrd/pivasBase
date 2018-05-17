@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zc.base.bla.modules.menu.repository.MenuDao">
+	
+	<resultMap type="com.zc.base.bla.modules.menu.entity.Privilege" id="privilegeMap">
+		<id property="privilegeId" column="privilege_id"/>
+		<result property="parentId" column="parent_id"/>
+		<result property="name" column="name"/>
+		<result property="type" column="type"/>
+		<result property="url" column="url"/>
+		<result property="module" column="module"/>
+		<result property="seq" column="seq"/>
+		<result property="isHttps" column="is_https"/>
+		<result property="isLeaf" column="is_leaf"/>
+		<result property="description" column="description"/>
+	</resultMap>
+	
+	<select id="getAllPrivileges" resultMap="privilegeMap">
+		select 
+			t1.privilege_id,
+			t1.parent_id,
+			t1.name,
+			t1.type,
+			t1.url,
+			t1.module,
+			t1.seq,
+			t1.is_https,
+			t1.description
+		from SYS_PRIVILEGE t1
+		where t1.parent_id is null
+		order by t1.seq
+	</select>
+	
+	<select id="getPrivilegesByUserId" resultMap="privilegeMap">
+		select 
+			t1.privilege_id,
+			t1.parent_id,
+			t1.name,
+			t1.type,
+			t1.url,
+			t1.module,
+			t1.seq,
+			t1.is_https,			
+			t1.description
+		from SYS_PRIVILEGE t1,
+			SYS_ROLE_REF_PRIVILEGE t2,
+			SYS_ROLE t3,
+			sys_user_ref_role t4,
+			sys_user t5
+		where t2.privilege_id = t1.privilege_id
+		and t3.role_id = t2.role_id
+		and t3.role_id = t4.role_id
+		and t5.user_id = #{userId}
+		order by t1.parent_id asc,t1.seq asc
+	</select>
+	
+	<select id="getAllPrivilegesByParentId" resultMap="privilegeMap">
+		select 
+			t1.privilege_id,
+			t1.parent_id,
+			t1.name,
+			t1.type,
+			t1.url,
+			t1.module,
+			t1.seq,
+			t1.is_https,
+			t1.description 
+		from SYS_PRIVILEGE t1
+		where t1.parent_id = #{parentId}
+		order by t1.seq
+	</select>
+	
+</mapper> 

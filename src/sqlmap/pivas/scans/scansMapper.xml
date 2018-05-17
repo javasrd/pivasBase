@@ -1,0 +1,1307 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zc.pivas.scans.repository.ScansDao" >
+	<resultMap id="BottleLabelBean" type="com.zc.pivas.scans.bean.BottleLabelBean" >
+		<id column="PARENT_NO" property="parentNo" />
+		<result column="ZXBC" property="zXBC" />
+		<result column="YYRQ" property="yYRQ" />
+		<result column="YDZT" property="yDZT" />
+		<result column="YDPQ" property="yDPQ" />
+		<result column="DEPTNAME" property="deptName" />
+		<result column="CATEGORY_CODE_LIST" property="categoryCodeList" />
+		<result column="INHOSPNO" property="inhospno" />
+		<result column="PATNAME" property="patName" />
+		<result column="SEX" property="sex" />
+		<result column="CASE_ID" property="caseID" />
+		<result column="BIRTHDAY" property="birthday" />
+		<result column="AGE" property="age" />
+		<result column="AGEUNIT" property="ageUnit" />
+		<result column="AVDP" property="avdp" />
+		<result column="SFYSMC" property="sfysmc" />
+		<result column="NAME_" property="batchName" />
+		<result column="BEDNO" property="bedNO" />
+		<result column="PIDSJ" property="pidsj" />
+		<result column="DEPTCODE" property="deptCode" />
+		<result column="PCNAME" property="pcName" />
+		<result column="DYBZ" property="dybz" />
+		<result column="SMRQ" property="smRQ" />
+		<result column="SMJG" property="smJG" />
+		<result column="SMSBYY" property="smSBYY" />
+	</resultMap>
+	
+	<resultMap id="BottleLabelResult" type="com.zc.pivas.scans.bean.BottleLabelResult" >
+		<id column="YD_ID" property="ydID" />
+		<result column="SMRQ" property="smRQ"/>
+		<result column="SMJG" property="smJG"/>
+		<result column="SMSBYY" property="smSBYY" />
+		<result column="SMLX" property="smLX" />
+		<result column="ZXBC" property="zxbc" />
+		<result column="OPERATOR" property="operator"/>
+		<result column="YDPQ" property="ydpq" />
+	</resultMap>
+	
+	<resultMap id="MedicineBeanResult" type="com.zc.pivas.scans.bean.MedicineBean" >
+		<id column="YD_ID" property="ydID" />
+		<result column="CHARGE_CODE" property="medicamentsCode" />
+		<result column="ACT_ORDER_NO" property="actOrderNo" />
+		<result column="PARENT_NO" property="parentNo" />
+		<result column="DRUGNAME" property="drugName" />
+		<result column="SPECIFICATIONS" property="specifications" />
+		<result column="DOSE" property="dose" />
+		<result column="DOSE_UNIT" property="doseUnit" />	
+		<result column="QUANTITY" property="quantity" />
+		<result column="MEDICAMENTS_PACKING_UNIT" property="medicamentsPackingUnit" />
+		<result column="YYRQ" property="useDate" />
+		<result column="PIDRQZXBC" property="pidrqzxbc" />
+	</resultMap>
+
+	 <select id="queryScansCountList" resultMap="BottleLabelBean">
+      select t.ZXBC,t.YDZT,count(0) as batchCount ,b.NAME_  from SRVS_LABEL t,srvs_batch b,SRVS_INPATIENTAREA c
+      where  EXISTS (select null from SRVS_PRESCRIPTION_MAIN d where d.BOTTLE_LABEL_NUM = t.YDPQ and d.YDZXZT=0)
+     	and  to_char(t.YYRQ,'yyyymmdd') = to_char(sysdate,'yyyymmdd')
+	  and t.ZXBC = b.ID_ and t.YDZT != 1 and T.deptcode = c.deptcode and c.ENABLED = 1 
+      group by t.ZXBC,t.YDZT,b.NAME_,b.NUM_ order by b.NUM_, b.NAME_ 
+  	</select>	
+  	
+  	
+  	<sql id="fileList">
+  	    t.PARENT_NO,
+  	    t.ZXBC,
+  	    to_char(t.YYRQ,'yyyy-mm-dd') as YYRQ,
+  	    t.YDZT,
+  	    t.YDPQ,
+  	    t.DEPTNAME,
+  	    t.CATEGORY_CODE_LIST,
+  	    t.INHOSPNO,
+  	    t.PATNAME,
+  	    t.SEX,
+  	    t.CASE_ID,
+  	    t.BIRTHDAY,
+  	    t.AGE,
+  	    t.AGEUNIT,
+  	    t.AVDP,
+  	    t.SFYSMC,
+  	    t.BEDNO	    
+  	</sql>
+  	
+  	<select id="queryPQYDListByMap" parameterType="java.util.Map" resultType="com.zc.pivas.docteradvice.bean.BLabelWithPrescription" >
+  	select 
+		pq.PARENT_NO as "pq_parentNo",
+		pq.ZXBC as "pq_zxbc",
+		pq.ZXBC_LAST as "pq_zxbcLast",
+		pq.YYRQ as "pq_yyrq",
+		pq.YDZT as "pq_ydzt",
+		pq.YDPQ as "pq_ydpq",
+		pq.YDPQ_LAST as "pq_ydpqLast",
+		pq.DEPTNAME as "pq_deptname",
+		pq.CATEGORY_CODE_LIST as "pq_categoryCodeList",
+		pq.INHOSPNO as "pq_inhospno",
+		pq.PATNAME as "pq_patname",
+		pq.SEX as "pq_sex",
+		pq.CASE_ID as "pq_caseId",
+		pq.BIRTHDAY as "pq_birthday",
+		pq.AGE as "pq_age",
+		pq.AGEUNIT as "pq_ageunit",
+		pq.AVDP as "pq_avdp",
+		pq.SFYSMC as "pq_sfysmc",
+		pq.BEDNO as "pq_bedno",
+		pq.ZXRQ as "pq_zxrq",
+		pq.ZXSJ as "pq_zxsj",
+		pq.PIDSJ as "pq_pidsj",
+		pq.ISREPEAT as "pq_isrepeat",
+		pq.DEPTCODE as "pq_deptcode",
+		pq.PIDRQZXBC as "pq_pidrqzxbc",
+		pq.YZLX as "pq_yzlx",
+		pq.print_time as "pq_printTime",
+		to_char(pq.print_time,'yyyy-MM-DD hh24:mi:ss') as "pq_printTimeS" ,
+		
+		pb.ID_ as "pb_id",
+		pb.NUM_ as "pb_num",
+		pb.NAME_ as "pb_name",
+		pb.IS_EMPTY_BATCH_ as "pb_isEmptyBatch",
+		pb.START_TIME_ as "pb_startTime",
+		pb.END_TIME_ as "pb_endTime",
+		pb.IS_SECEND_ADVICE_ as "pb_isSecendAdvice",
+		pb.COLOR_ as "pb_color",
+		pb.ENABLED_ as "pb_enabled",
+		pb.RESERVE1_ as "pb_reserve1",
+		pb.RESERVE2_ as "pb_reserve2",
+		pb.RESERVE3_ as "pb_reserve3",
+		pb.IS0P as "pb_is0p",
+		
+		yd.YD_MAIN_ID as "yd_ydMainId",
+		yd.ACT_ORDER_NO as "yd_actNrderNo",
+		yd.PARENT_NO as "yd_parentNo",
+		yd.DYBZ as "yd_dybz",
+		yd.YYRQ as "yd_yyrq",
+		yd.SCRQ as "yd_scrq",
+		yd.ZXBC as "yd_zxbc",
+		yd.YDZXZT as "yd_ydzxzt",
+		yd.MEDICAMENTS_CODE as "yd_medicamentsCode",
+		yd.CHARGE_CODE as "yd_chargeCode",
+		yd.DRUGNAME as "yd_drugname",
+		yd.SPECIFICATIONS as "yd_specifications",
+		yd.DOSE as "yd_dose",
+		yd.DOSE_UNIT as "yd_doseUnit",
+		yd.QUANTITY as "yd_quantity",
+		yd.BOTTLE_LABEL_NUM as "yd_bottleLabelNum",
+		yd.RESERVE1 as "yd_reserve1",
+		yd.RESERVE2 as "yd_reserve2",
+		yd.RESERVE3 as "yd_reserve3",
+		yd.MEDICAMENTS_PACKING_UNIT as "yd_medicamentsPackingUnit",
+		yd.FREQ_CODE as "yd_freq_code",
+		yd.YZSHZT as "yd_yzshzt",
+		yd.YZZDSHZT as "yd_yzzdshzt",
+		yd.WARD_CODE as "yd_wardCode",
+		yd.WARDNAME as "yd_wardname",
+		yd.INPATIENT_NO as "yd_inpatientNo",
+		yd.PATNAME as "yd_patname",
+		yd.SEX as "yd_sex",
+		yd.BEDNO as "yd_bedno",
+		yd.CASE_ID as "yd_caseId",
+		yd.BIRTHDAY as "yd_birthday",
+		yd.AGE as "yd_age",
+		yd.AGEUNIT as "yd_ageunit",
+		yd.ZXRQ as "yd_zxrq",
+		yd.ZXSJ as "yd_zxsj",
+		yd.PIDSJ as "yd_pidsj",
+		yd.YZLX as "yd_yzlx",
+		yd.SFYSMC as "yd_sfysmc",
+		yd.SFYSCODE as "yd_sfyscode",
+		yd.SFRQ as "yd_sfrq",
+		yd.PIDRQZXBC as "yd_pidrqzxbc",
+		yd.DOCTOR as "yd_doctor",
+		yd.DOCTOR_NAME as "yd_doctorName",
+		yd.AVDP as "yd_avdp",
+		yd.TRANSFUSION as "yd_transfusion",
+		yd.DROPSPEED as "yd_dropspeed",
+		yd.YZRESOURCE as "yd_yzresource",
+		yd.START_TIME as "yd_startTime",
+		yd.END_TIME as "yd_endTime" ,
+		
+		sign (yd.SCRQ - to_date(to_char(sysdate,'yyyy-MM-DD')||' 00:00:00','yyyy-MM-DD hh24:mi:ss') ) as "scrqDelToday" ,
+		sign (pq.YYRQ - to_date(to_char(sysdate,'yyyy-MM-DD')||' 00:00:00','yyyy-MM-DD hh24:mi:ss') ) as "yyrqDelToday" ,
+		decode(pb.IS_EMPTY_BATCH_,1,(decode(pb.timetype,'morning','空批上午','afternoon','空批下午',pb.name_)),pb.name_) as "pbname2" 
+	from SRVS_LABEL pq,srvs_batch pb , SRVS_PRESCRIPTION_main yd
+  	where pq.ZXBC = pb.ID_ 
+  	and pq.pidsj = yd.pidsj 
+  	<if test="map.pq_ydpq !=null and map.pq_ydpq !=''" >
+  	and pq.ydpq = #{map.pq_ydpq,jdbcType=VARCHAR}
+  	</if>
+  	<if test="map.pq_ydpq2 !=null and map.pq_ydpq2 !=''" >
+  	and (pq.ydpq = #{map.pq_ydpq2,jdbcType=VARCHAR} or instr(pq.ydpq_last||',',#{map.pq_ydpq2,jdbcType=VARCHAR}||',') >0 )
+  	</if>
+  	<if test="map.pq_yyrq !=null and map.pq_yyrq !=''" >
+  	and pq.yyrq &gt;= to_date(#{map.pq_yyrq,jdbcType=VARCHAR}||' 00:00:00','yyyy-MM-DD hh24:mi:ss') 
+	and pq.yyrq &lt;= to_date(#{map.pq_yyrq,jdbcType=VARCHAR}||' 23:59:59','yyyy-MM-DD hh24:mi:ss') 
+  	</if>
+  	<if test="map.yd_scrq !=null and map.yd_scrq !=''" >
+  	and yd.scrq &gt;= to_date(#{map.yd_scrq,jdbcType=VARCHAR}||' 00:00:00','yyyy-MM-DD hh24:mi:ss') 
+	and yd.scrq &lt;= to_date(#{map.yd_scrq,jdbcType=VARCHAR}||' 23:59:59','yyyy-MM-DD hh24:mi:ss') 
+  	</if>
+  	<if test="map.pq_zxbc !=null and map.pq_zxbc !=''" >
+  	and pq.pq_zxbc = #{map.pq_zxbc,jdbcType=INTEGER}
+  	</if>
+  	</select>
+  	
+  	<select id="queryPQYDListByBottNum" parameterType="java.util.Map" resultType="com.zc.pivas.docteradvice.bean.BLabelWithPrescription" >
+  	select 
+		pq.ZXBC as "pq_zxbc",
+		pq.ZXBC_LAST as "pq_zxbcLast",
+		pq.YDZT as "pq_ydzt",
+		pq.YDPQ as "pq_ydpq",
+		pq.PIDSJ as "pq_pidsj",
+		yd.pidsj  as "yd_pidsj",
+		yd.PARENT_NO as "yd_parentNo",
+		yd.DYBZ as "yd_dybz",
+		yd.YYRQ as "yd_yyrq",
+		yd.SCRQ as "yd_scrq",
+		yd.YDZXZT as "yd_ydzxzt",
+		yd.WARD_CODE as "yd_wardCode",
+		yd.YZLX as "yd_yzlx",
+		yd.INPATIENT_NO as "yd_inpatientNo",
+		pb.NAME_ as "pb_name",
+		sign (yd.SCRQ - to_date(to_char(sysdate,'yyyy-MM-DD')||' 00:00:00','yyyy-MM-DD hh24:mi:ss') ) as "scrqDelToday" ,
+		sign (pq.YYRQ - to_date(to_char(sysdate,'yyyy-MM-DD')||' 00:00:00','yyyy-MM-DD hh24:mi:ss') ) as "yyrqDelToday" 
+	from SRVS_LABEL pq,srvs_batch pb , SRVS_PRESCRIPTION_main yd
+  	where pq.ZXBC = pb.ID_ 
+  	and pq.pidsj = yd.pidsj 
+  	<if test="map.pq_ydpq2 !=null and map.pq_ydpq2 !=''" >
+  	and pq.ydpq = #{map.pq_ydpq2,jdbcType=VARCHAR}
+  	</if>
+  	</select>
+  	
+	 <select id="queryBottleLabelInfo" resultMap="BottleLabelBean">
+	  	select 
+	  	   <include refid="fileList"/>
+	  	   ,b.NAME_
+	  	   ,t.PIDSJ
+	  	   ,t.DEPTCODE
+	  	   ,ydm.dybz 
+	  	 from SRVS_LABEL t,srvs_batch b , SRVS_PRESCRIPTION_main ydm
+	  	where	  	
+	  	 to_char(t.YYRQ,'yyyy-MM-DD') = #{qryRQ,jdbcType=VARCHAR}
+	  	and t.ZXBC = b.ID_ and YDPQ = #{btSn} and rownum &lt; 2 and t.YDZT != 1
+	  	and t.pidsj = ydm.pidsj 
+	  	<if test="batchID != null and '' neq batchID ">
+	  	and t.ZXBC in (${batchID})
+	  	</if> 
+	  	
+	  	<if test="btSn == null">
+	  	  and 1 != 1
+	  	</if> 
+  	</select>
+  	
+	<select id="queryBottleLabelResult" resultMap="BottleLabelResult">
+	  	select 
+	  	   YD_ID,
+	  	   SMRQ,
+	  	   SMJG,
+	  	   SMSBYY,
+	  	   SMLX,
+	  	   ZXBC
+	  	 from SRVS_PRESCRIPTION_SCAN
+	  	where	  	
+	  	YD_ID = #{parentNo} 
+	  	and SMLX = #{scansType} 
+	  	<if test="zxbc !=null">
+	  	and zxbc = #{zxbc} 
+	  	</if>
+	  	and rownum &lt; 2	  	
+  	</select>
+  	
+	<select id="queryBottleLabelResult2" resultMap="BottleLabelResult">
+	  	select 
+	  	   YD_ID,
+	  	   SMRQ,
+	  	   SMJG,
+	  	   SMSBYY,
+	  	   SMLX,
+	  	   ZXBC
+	  	 from SRVS_PRESCRIPTION_SCAN
+	  	where	  	
+	  	YD_ID = #{pidsj} 
+	  	and rownum &lt; 2	  	
+  	</select>
+  	
+  	<insert id="insertBottleLabelRst">
+		insert into SRVS_PRESCRIPTION_SCAN(
+			YD_ID,
+			SMRQ,
+			SMJG,
+			SMSBYY,
+			SMLX,
+			ZXBC,
+			OPERATOR,
+			YDPQ
+		)
+		values(
+			#{bottleLabelRst.ydID,jdbcType=VARCHAR},
+			sysdate,
+			#{bottleLabelRst.smJG,jdbcType=INTEGER},
+			#{bottleLabelRst.smSBYY,jdbcType=VARCHAR},
+			#{bottleLabelRst.smLX,jdbcType=INTEGER},
+			#{bottleLabelRst.zxbc,jdbcType=INTEGER},
+			#{bottleLabelRst.operator,jdbcType=VARCHAR},
+			#{bottleLabelRst.ydpq}
+		)
+  	</insert>
+  	
+  	<update id="updateBottleLabelRst">
+		update SRVS_PRESCRIPTION_SCAN
+		<set>
+		  
+			<if test="bottleLabelRst.smJG != null">
+				SMJG = #{bottleLabelRst.smJG,jdbcType=INTEGER},
+			</if>
+			<if test="bottleLabelRst.smSBYY != null">
+				SMSBYY = #{bottleLabelRst.smSBYY,jdbcType=VARCHAR},
+			</if>
+			<if test="bottleLabelRst.smLX != null">
+				SMLX = #{bottleLabelRst.smLX,jdbcType=INTEGER},
+			</if>
+			<if test="bottleLabelRst.operator != null">
+				operator = #{bottleLabelRst.operator,jdbcType=INTEGER},
+			</if>
+			<if test="bottleLabelRst.ydpq != null">
+				ydpq = #{bottleLabelRst.ydpq},
+			</if>
+			SMRQ = sysdate
+		</set>
+		where YD_ID = #{bottleLabelRst.ydID,jdbcType=VARCHAR}
+  	</update>
+  	<!-- and SMLX = #{bottleLabelRst.smLX,jdbcType=INTEGER} -->
+  	
+  	<select id="queryMedicineList" resultMap="MedicineBeanResult">
+  	  select 
+		ACT_ORDER_NO,
+		PARENT_NO,
+		DRUGNAME,
+		SPECIFICATIONS,
+		DOSE,
+		DOSE_UNIT,
+		QUANTITY,
+		MEDICAMENTS_PACKING_UNIT,
+		YYRQ,
+		YD_ID,
+		CHARGE_CODE,
+		PIDRQZXBC
+		from SRVS_PRESCRIPTION
+	   where PARENT_NO = #{parentNo,jdbcType=VARCHAR} 
+	   and ZXBC = #{batch,jdbcType=INTEGER} 
+	   and to_char(YYRQ,'yyyy-mm-dd') = #{useDate,jdbcType=VARCHAR} and YDZXZT != 1
+  	</select>
+  	
+  	<select id="queryMedicineList2" resultMap="MedicineBeanResult">
+  	  select 
+		ACT_ORDER_NO,
+		PARENT_NO,
+		DRUGNAME,
+		SPECIFICATIONS,
+		DOSE,
+		DOSE_UNIT,
+		QUANTITY,
+		MEDICAMENTS_PACKING_UNIT,
+		YYRQ,
+		YD_ID,
+		CHARGE_CODE,
+		PIDRQZXBC
+		from SRVS_PRESCRIPTION
+		where pidsj = #{pidsj,jdbcType=VARCHAR} and ydzxzt = 0
+  	</select>
+  	
+  	<select id="queryScansCountByDeptList" resultMap="BottleLabelBean">
+	  	select t.ZXBC,t.YDZT,t.DEPTNAME,count(0) as batchCount from SRVS_LABEL t, SRVS_INPATIENTAREA p
+	  	where 
+	  		EXISTS (select null from SRVS_PRESCRIPTION_MAIN d where d.BOTTLE_LABEL_NUM = t.YDPQ and d.YDZXZT=0)
+	  		and to_char(t.YYRQ,'yyyymmdd') = to_char(sysdate,'yyyymmdd') 
+	  		and t.deptcode = p.deptcode and p.enabled = 1 and t.YDZT != 1 
+	  	<if test="scansSearch.zXBC != null and '' neq scansSearch.zXBC ">
+	  	   and t.ZXBC in (${scansSearch.zXBC})
+	  	</if>
+	  	group by t.ZXBC,t.YDZT,t.DEPTNAME order by t.DEPTNAME
+  	</select>
+  	
+  	<select id="queryBottleLabelListWidthOutMid" resultMap="BottleLabelBean"> 
+	  	 select 
+	  	     <include refid="fileList"/>
+	  	  ,pym.drugname
+	  	  ,pb.NAME_ as PCNAME
+	  	  ,smRQ 
+    	  ,smJG 
+    	  ,smSBYY
+	  	 from SRVS_LABEL t
+	  	 left join SRVS_PRESCRIPTION_main pym on pym.PIDSJ = t.PIDSJ
+	  	 left join srvs_batch pb on t.ZXBC = pb.ID_  and pb.ENABLED_ = 1
+	     left join SRVS_INPATIENTAREA area on area.DEPTCODE = t.deptcode
+	     left join SRVS_PRESCRIPTION_SCAN sm on sm.yd_id = t.pidsj
+	  	 where 1=1 
+	  	  and area.enabled = 1 
+	  	  and t.ydzt != 1 
+	  	  
+	  	  and pym.YDZXZT=0 
+	     <choose>
+	     <when test="scansSearch.batchName !=null and scansSearch.batchName =='空批上午'.toString() ">
+	     and pb.IS_EMPTY_BATCH_ =1 and pb.timetype='morning'
+	     </when>
+	     <when test="scansSearch.batchName !=null and scansSearch.batchName =='空批下午'.toString() ">
+	     and pb.IS_EMPTY_BATCH_ =1 and pb.timetype='afternoon'
+	     </when>
+	     <otherwise>
+	     and pb.NAME_ = #{scansSearch.batchName,jdbcType=VARCHAR}
+	     </otherwise>
+	     </choose>
+	      <if test="scansSearch.qryRQ != null and '' neq scansSearch.qryRQ ">
+	  	     and pym.yyrq &gt;= to_date(#{scansSearch.qryRQ,jdbcType=VARCHAR}||' 00:00:00','yyyy-MM-DD hh24:mi:ss') 
+	  	     and pym.yyrq &lt;= to_date(#{scansSearch.qryRQ,jdbcType=VARCHAR}||' 23:59:59','yyyy-MM-DD hh24:mi:ss') 
+	  	  </if>
+	  	  
+	  	  <if test="scansSearch.zXBC != null and '' neq scansSearch.zXBC ">
+	  	     and t.ZXBC in (${scansSearch.zXBC})
+	  	  </if>
+	  	  
+	      <if test="scansSearch.deptName != null and '' neq scansSearch.deptName ">
+	  	     and t.DEPTNAME = #{scansSearch.deptName,jdbcType=VARCHAR}
+	  	  </if>
+	  	  
+	      <if test="scansSearch.smLX != null and '' neq scansSearch.smLX ">
+	  	     <if test="scansSearch.smLX == 0">
+	  	       and t.YDZT &lt;= 7 
+	  	     </if>
+	  	     
+	  	      <if test="scansSearch.smLX == 1">
+               and ( t.YDZT = 5 or t.YDZT = 6 or t.YDZT = 7)
+             </if>
+	  	     
+	  	     <if test="scansSearch.smLX == 2">
+	  	       and ( t.YDZT = 5 or t.YDZT = 6 or t.YDZT = 7 )
+	  	     </if>
+	  	  </if>
+	  	  
+	      <if test="scansSearch.patName != null and '' neq scansSearch.patName ">
+	  	     and t.PATNAME like '%'||#{scansSearch.patName,jdbcType=VARCHAR}||'%'
+	  	  </if>
+	  	  
+	      <if test="scansSearch.bedNO != null and '' neq scansSearch.bedNO ">
+	  	     and t.BEDNO like '%'||#{scansSearch.bedNO,jdbcType=VARCHAR}||'%'
+	  	  </if>
+	  	  
+	      <if test="scansSearch.yDPQ != null and '' neq scansSearch.yDPQ ">
+	  	     and t.YDPQ like #{scansSearch.yDPQ,jdbcType=VARCHAR}||'%'
+	  	  </if>
+	  	  
+	  	  order by t.YDZT asc
+  	</select>
+  	
+  	<select id="queryBottleLabelList" resultMap="BottleLabelBean"> 
+	  	 select 
+	  	     <include refid="fileList"/>
+	  	  ,pym.drugname
+	  	  ,pb.NAME_ as PCNAME
+	  	  ,smRQ 
+    	  ,smJG 
+    	  ,smSBYY
+	  	 from SRVS_LABEL t
+	  	 left join SRVS_PRESCRIPTION_main pym on pym.PIDSJ = t.PIDSJ
+	  	 left join srvs_batch pb on t.ZXBC = pb.ID_  and pb.ENABLED_ = 1
+	     left join SRVS_INPATIENTAREA area on area.DEPTCODE = t.deptcode
+	     left join SRVS_PRESCRIPTION_SCAN sm on sm.yd_id = t.pidsj
+	  	 where 1=1 
+	  	  and area.enabled = 1 
+	  	  and t.ydzt != 1 
+	  	  
+	  	  and pym.YDZXZT=0 
+	     <choose>
+	     <when test="scansSearch.batchName !=null and scansSearch.batchName =='空批上午'.toString() ">
+	     and pb.IS_EMPTY_BATCH_ =1 and pb.timetype='morning'
+	     </when>
+	     <when test="scansSearch.batchName !=null and scansSearch.batchName =='空批下午'.toString() ">
+	     and pb.IS_EMPTY_BATCH_ =1 and pb.timetype='afternoon'
+	     </when>
+	     <otherwise>
+	     and pb.NAME_ = #{scansSearch.batchName,jdbcType=VARCHAR}
+	     </otherwise>
+	     </choose>
+	      <if test="scansSearch.qryRQ != null and '' neq scansSearch.qryRQ ">
+	  	     and pym.yyrq &gt;= to_date(#{scansSearch.qryRQ,jdbcType=VARCHAR}||' 00:00:00','yyyy-MM-DD hh24:mi:ss') 
+	  	     and pym.yyrq &lt;= to_date(#{scansSearch.qryRQ,jdbcType=VARCHAR}||' 23:59:59','yyyy-MM-DD hh24:mi:ss') 
+	  	  </if>
+	  	  
+	  	  <if test="scansSearch.zXBC != null and '' neq scansSearch.zXBC ">
+	  	     and t.ZXBC in (${scansSearch.zXBC})
+	  	  </if>
+	  	  
+	      <if test="scansSearch.deptName != null and '' neq scansSearch.deptName ">
+	  	     and t.DEPTNAME = #{scansSearch.deptName,jdbcType=VARCHAR}
+	  	  </if>
+	  	  
+	      <if test="scansSearch.smLX != null and '' neq scansSearch.smLX ">
+	  	     <if test="scansSearch.smLX == 0">
+	  	       and t.YDZT &lt;= 7 
+	  	     </if>
+	  	     
+	  	      <if test="scansSearch.smLX == 1">
+               and ( t.YDZT = 5 or t.YDZT = 6 or t.YDZT = 7)
+             </if>
+	  	     
+	  	     <if test="scansSearch.smLX == 2">
+	  	       and (t.YDZT = 6 or t.YDZT = 7 )
+	  	     </if>
+	  	  </if>
+	  	  
+	      <if test="scansSearch.patName != null and '' neq scansSearch.patName ">
+	  	     and t.PATNAME like '%'||#{scansSearch.patName,jdbcType=VARCHAR}||'%'
+	  	  </if>
+	  	  
+	      <if test="scansSearch.bedNO != null and '' neq scansSearch.bedNO ">
+	  	     and t.BEDNO like '%'||#{scansSearch.bedNO,jdbcType=VARCHAR}||'%'
+	  	  </if>
+	  	  
+	      <if test="scansSearch.yDPQ != null and '' neq scansSearch.yDPQ ">
+	  	     and t.YDPQ like #{scansSearch.yDPQ,jdbcType=VARCHAR}||'%'
+	  	  </if>
+	  	  
+	  	  order by t.YDZT asc
+  	</select>
+  	
+  	<update id="changePQState">
+	  	  update SRVS_LABEL set YDZT = #{yDZTDesc,jdbcType=INTEGER}
+	  	  where to_char(YYRQ,'yyyymmdd') = to_char(sysdate,'yyyymmdd') 
+	  	  <if test="bottleLabelBean.yDZT != null and '' neq bottleLabelBean.yDZT ">
+	  	     and YDZT = #{bottleLabelBean.yDZT,jdbcType=INTEGER}
+	  	  </if>
+	  	  
+	  	  <if test="bottleLabelBean.zXBC != null and '' neq bottleLabelBean.zXBC ">
+	  	     and ZXBC = #{bottleLabelBean.zXBC,jdbcType=INTEGER}
+	  	  </if>
+	  	  
+	  	  <if test="bottleLabelBean.parentNo != null and '' neq bottleLabelBean.parentNo ">
+	  	     and PARENT_NO = #{bottleLabelBean.parentNo,jdbcType=VARCHAR}
+	  	  </if> 
+  	</update>
+  	
+  	<update id="changePQYdzt" >
+	  	  update SRVS_LABEL set YDZT = #{ydzt,jdbcType=INTEGER}
+	  	  where pidsj = #{pidsj,jdbcType=VARCHAR} 
+  	</update>
+  	
+  	<update id="changePQStateByParentNo" parameterType="Map">
+	  	  update SRVS_LABEL set
+	  	  YDZT = #{orderExecuteStatus}
+	  	  <![CDATA[ where PARENT_NO = #{parentNo} and ydzt < 5 ]]>
+  	</update>
+  	
+  	<update id="changePQBedno" parameterType="Map">
+	  	  update SRVS_LABEL set
+	  	  bedno = #{bedNo},
+	  	  <if test="firstHtml != null">
+			MAIN_HTML = #{firstHtml},
+			</if>
+			<if test="html != null">
+			MAINDRUG_HTML = #{html}, 
+			</if>
+			<if test="menstruumHtml != null">
+			MENSTRUUM_HTML = #{menstruumHtml}
+		</if>
+		
+		<![CDATA[ where pidsj = #{pidsj} and ydzt <= 4 ]]>
+<!-- 	  	  <![CDATA[  where PARENT_NO = #{parentNo} and yyrq >= to_date( to_char(sysdate, 'yyyy-mm-dd') || ' 00:00:00', 'yyyy-mm-dd hh24:mi:ss')]]> -->
+  	</update>
+  	
+  	<select id="getConfigFeeRuleId" resultType="java.lang.Integer">
+  	    select y.GID 
+  	    from SRVS_MEDICAMENTS r,SRVS_CONFIGFEE_RULE y
+  	    where r.CATEGORY_ID = y.DRUGTYPECODE 
+  	    and r.MEDICAMENTS_CODE = #{medicamentsCode,jdbcType=VARCHAR}
+  	    and rownum &lt; 2
+  	</select>
+  	
+  	<insert id="insertConfigFee">
+  	    insert into SRVS_PRESCRIPTION_FEES (
+  	    PQ_REF_FEE_ID,
+  	    PZFZT,  	  
+  	    
+  	    <if test="configFee.pzFSBYY != null and '' neq configFee.pzFSBYY ">
+  	        PZFSBYY,  
+  	    </if>
+  	    
+  	    <if test="configFee.configFeeRuleId != null and '' neq configFee.configFeeRuleId "> 	    
+  	        CONFIGFEERULEID,
+  	    </if>
+  	    <if test="configFee.czYMC != null and '' neq configFee.czYMC "> 
+  	        CZYMC,
+  	    </if>
+  	    
+  	    <if test="configFee.gid != null and '' neq configFee.gid "> 
+  	        GID,
+  	    </if>
+  	    
+  	    <if test="configFee.caseID != null and '' neq configFee.caseID "> 
+  	        CASE_ID,
+  	    </if>
+  	    
+  	    <if test="configFee.costcode != null and '' neq configFee.costcode "> 
+  	        COSTCODE,
+  	    </if> 
+  	    
+  	    <if test="configFee.pidrqzxbc != null and '' neq configFee.pidrqzxbc "> 
+  	        pidrqzxbc,
+  	    </if> 
+  	    
+  	    <if test="configFee.price != null and '' neq configFee.price "> 
+  	        price,
+  	    </if> 
+  	    
+  	    <if test="configFee.amount != null and '' neq configFee.amount "> 
+  	        amount,
+  	    </if> 
+  	    
+  	    <if test="configFee.pqId != null and '' neq configFee.pqId "> 
+  	        PC_ID,
+  	    </if> 
+  	    
+  	    <if test="configFee.deptCode != null and '' neq configFee.deptCode "> 
+  	        deptCode,
+  	    </if> 
+  	    
+  	    PZFSQRQ)
+		values (
+		 #{configFee.pqRefFeeId,jdbcType=INTEGER},
+		 #{configFee.pzFZT,jdbcType=INTEGER},
+		 <if test="configFee.pzFSBYY != null and '' neq configFee.pzFSBYY ">
+		     #{configFee.pzFSBYY,jdbcType=VARCHAR},
+		 </if>
+		 
+		 <if test="configFee.configFeeRuleId != null and '' neq configFee.configFeeRuleId ">
+		     #{configFee.configFeeRuleId,jdbcType=INTEGER},
+		 </if>
+		 
+		 <if test="configFee.czYMC != null and '' neq configFee.czYMC "> 
+		     #{configFee.czYMC,jdbcType=VARCHAR},
+		 </if>
+		 
+		 <if test="configFee.gid != null and '' neq configFee.gid "> 
+		    #{configFee.gid,jdbcType=VARCHAR},
+		 </if>
+		 
+		 <if test="configFee.caseID != null and '' neq configFee.caseID "> 
+		     #{configFee.caseID,jdbcType=VARCHAR},
+		 </if>
+  	     <if test="configFee.costcode != null and '' neq configFee.costcode "> 
+  	         #{configFee.costcode,jdbcType=VARCHAR},
+  	     </if> 
+  	     <if test="configFee.pidrqzxbc != null and '' neq configFee.pidrqzxbc "> 
+  	        #{configFee.pidrqzxbc,jdbcType=VARCHAR},
+  	    </if> 
+  	    
+  	    <if test="configFee.price != null and '' neq configFee.price "> 
+  	        #{configFee.price,jdbcType=VARCHAR},
+  	    </if> 
+  	    
+  	    <if test="configFee.amount != null and '' neq configFee.amount "> 
+  	         #{configFee.amount,jdbcType=INTEGER},
+  	    </if> 
+  	    
+  	    <if test="configFee.pqId != null and '' neq configFee.pqId "> 
+  	        #{configFee.pqId,jdbcType=INTEGER},
+  	    </if> 
+  	    
+  	    <if test="configFee.deptCode != null and '' neq configFee.deptCode "> 
+  	         #{configFee.deptCode,jdbcType=VARCHAR},
+  	    </if> 
+		       <if test="configFee.ChargeDate != null and '' neq configFee.ChargeDate "> 
+             #{configFee.ChargeDate,jdbcType=TIMESTAMP}
+         </if>
+         )
+  	</insert>
+  	
+  	<select id="queryConfigfeeDetailList"  resultType="String">
+  	     select COSTCODE from SRVS_CONFIGFEE_DETAIL where DETAILCODE = #{detailCode,jdbcType=VARCHAR}
+  	</select>
+
+	<insert id="savePqRefFee">
+	 	insert into SRVS_LABEL_REF_CONFIG_FEE(PIDSJ,FEE_RESULT,FEE_RESULT_DETAILS,SQRQ_DETAILS) values
+	 	(#{pqRefFee.pidsj,jdbcType=VARCHAR},
+	 	 #{pqRefFee.result,jdbcType=INTEGER},
+	 	 #{pqRefFee.result_details,jdbcType=VARCHAR},
+	 	 #{pqRefFee.date_details,jdbcType=VARCHAR}
+	 	)
+	 	
+	 	<selectKey resultType="java.lang.Long" order="AFTER" keyProperty="pqRefFee.gid">
+            SELECT sq_SRVS_LABEL_ref_config_fee.currval as gid from dual
+         </selectKey>
+  	</insert>
+  	
+	<select id="queryCountbySN" resultType="java.lang.Integer">
+		select count(1) 
+		from SRVS_LABEL t1, SRVS_PATIENT t2
+		where t1.ydpq = #{barcode, jdbcType=VARCHAR} 
+		  and t1.inhospno = t2.inhospno and t1.bedno = t2.bedno
+	</select>
+	
+	<select id="qryCountMainWidthOutMid" parameterType="java.util.Map" resultType="java.util.Map" >
+	  select t.pcname as "pcname",t.inNeed as "inNeed",t.inAll as "inAll",t.outNeed as "outNeed",
+       		 t.outAll as "outAll",t.midNeed as "midNeed",t.midAll as "midAll"
+		from (
+	  	  select 
+	      pcname as pcname,
+          sum( decode(  sign(5-ydzt),1,1,0 ) ) as inNeed,
+          count(*) as inAll,
+          sum( decode(  sign(5-ydzt),0,1,0 ) ) as outNeed,
+          sum( decode(  sign(ydzt-4),1,1,0 ) ) as outAll,  
+          sum( decode(sign(5 - ydzt),0,1,0)) as midNeed,
+          sum(decode(sign(ydzt - 4),1,1,0)) as midAll
+	  from ( 
+	  select 
+	      pq.zxbc as zxbc,
+	      pq.ydzt as ydzt,
+	      decode(pb.IS_EMPTY_BATCH_,1,decode(pb.timetype,'morning','空批上午','afternoon','空批下午',pb.name_),pb.name_) as pcname   
+	    from SRVS_LABEL pq
+	    left join SRVS_PRESCRIPTION_main ydm
+	      on ydm.PIDSJ = pq.PIDSJ 
+	    left join srvs_batch pb on pq.ZXBC = pb.ID_  and pb.ENABLED_ = 1
+	    left join SRVS_INPATIENTAREA area on area.DEPTCODE = pq.deptcode
+	    where 1=1 
+	     and area.enabled = 1 
+	     and pq.ydzt != 1 
+	     and ydm.YDZXZT=0 
+	      <if test="map.qryRQ != null and '' neq map.qryRQ ">
+	  	     and ydm.yyrq &gt;= to_date(#{map.qryRQ,jdbcType=VARCHAR}||' 00:00:00','yyyy-MM-DD hh24:mi:ss') 
+	  	     and ydm.yyrq &lt;= to_date(#{map.qryRQ,jdbcType=VARCHAR}||' 23:59:59','yyyy-MM-DD hh24:mi:ss') 
+	  	  </if>
+	  ) 
+	  group by pcname
+	  
+	  ) t left join srvs_batch p on t.pcname = p.name_
+	    order by p.order_num asc
+	  
+	</select>
+	
+	<select id="qryCountMain" parameterType="java.util.Map" resultType="java.util.Map" >
+	  select t.pcname as "pcname",t.inNeed as "inNeed",t.inAll as "inAll",t.outNeed as "outNeed",
+       		 t.outAll as "outAll",t.midNeed as "midNeed",t.midAll as "midAll"
+		from (
+	  	  select 
+	      pcname as pcname,
+          sum( decode(  sign(5-ydzt),1,1,0 ) ) as inNeed,
+          count(*) as inAll,
+          sum( decode(  sign(6-ydzt),0,1,0 ) ) as outNeed,
+          sum( decode(  sign(ydzt-5),1,1,0 ) ) as outAll,  
+          sum( decode(sign(5 - ydzt),0,1,0)) as midNeed,
+          sum(decode(sign(ydzt - 4),1,1,0)) as midAll
+	  from ( 
+	  select 
+	      pq.zxbc as zxbc,
+	      pq.ydzt as ydzt,
+	      decode(pb.IS_EMPTY_BATCH_,1,decode(pb.timetype,'morning','空批上午','afternoon','空批下午',pb.name_),pb.name_) as pcname   
+	    from SRVS_LABEL pq
+	    left join SRVS_PRESCRIPTION_main ydm
+	      on ydm.PIDSJ = pq.PIDSJ 
+	    left join srvs_batch pb on pq.ZXBC = pb.ID_  and pb.ENABLED_ = 1
+	    left join SRVS_INPATIENTAREA area on area.DEPTCODE = pq.deptcode
+	    where 1=1 
+	     and area.enabled = 1 
+	     and pq.ydzt != 1 
+	     and ydm.YDZXZT=0 
+	      <if test="map.qryRQ != null and '' neq map.qryRQ ">
+	  	     and ydm.yyrq &gt;= to_date(#{map.qryRQ,jdbcType=VARCHAR}||' 00:00:00','yyyy-MM-DD hh24:mi:ss') 
+	  	     and ydm.yyrq &lt;= to_date(#{map.qryRQ,jdbcType=VARCHAR}||' 23:59:59','yyyy-MM-DD hh24:mi:ss') 
+	  	  </if>
+	  ) 
+	  group by pcname
+	  
+	  ) t left join srvs_batch p on t.pcname = p.name_
+	    order by p.order_num asc
+	  
+	</select>
+	<!--
+		select 
+			pq.zxbc as "zxbc",pb.name_ as "pcname" ,
+			sum( decode(  sign(5-pq.ydzt),1,1,0 ) ) as "inNeed"  ,
+			count(*) as "inAll"  ,
+			sum( decode(  sign(5-pq.ydzt),0,1,0 ) ) as "outNeed"  ,
+			sum( decode(  sign(pq.ydzt-5),1,1,0 ) ) as "outAll"  
+		from SRVS_LABEL pq
+		left join srvs_batch pb on pq.ZXBC = pb.ID_  and pb.ENABLED_ = 1
+		left join SRVS_INPATIENTAREA area on area.DEPTCODE = pq.deptcode
+		where 1=1 
+		 and area.enabled = 1 
+		 and pq.ydzt != 1 
+		group by  pq.zxbc  , pb.name_ 
+    	order by zxbc -->
+	
+	<select id="qryCountByPcnameWidthOutMid" parameterType="java.util.Map" resultType="java.util.Map" >
+	  	select 
+	       area.DEPTCODE as "deptCode",area.DEPTNAME as "deptName",
+		  sum( decode(  sign(5-ydzt),1,1,0 ) ) as "inNeed"  ,
+	      count(*) as "inAll"  ,
+	      sum( decode(  sign(5-ydzt),0,1,0 ) ) as "outNeed" ,
+	      sum( decode(  sign(ydzt-4),1,1,0 ) ) as "outAll",  
+	      sum( decode(sign(5 - ydzt),0,1,0)) as "midNeed",
+	      sum(decode(sign(ydzt - 4),1,1,0)) as "midAll"
+	    from SRVS_LABEL pq
+	    left join SRVS_PRESCRIPTION_main ydm
+	      on ydm.PIDSJ = pq.PIDSJ 
+	    left join srvs_batch pb on pq.ZXBC = pb.ID_  and pb.ENABLED_ = 1
+	    left join SRVS_INPATIENTAREA area on area.DEPTCODE = pq.deptcode
+	    where 1=1 
+	     and area.enabled = 1 
+	     and pq.ydzt != 1 
+	     and ydm.YDZXZT=0 
+	     
+	     <choose>
+	     <when test="map.batchName !=null and map.batchName =='空批上午'.toString() ">
+	     and pb.IS_EMPTY_BATCH_ =1 and pb.timetype='morning'
+	     </when>
+	     <when test="map.batchName !=null and map.batchName =='空批下午'.toString() ">
+	     and pb.IS_EMPTY_BATCH_ =1 and pb.timetype='afternoon'
+	     </when>
+	     <otherwise>
+	     and pb.NAME_ = #{map.batchName,jdbcType=VARCHAR}
+	     </otherwise>
+	     </choose>
+	      <if test="map.qryRQ != null and '' neq map.qryRQ ">
+	  	     and ydm.yyrq &gt;= to_date(#{map.qryRQ,jdbcType=VARCHAR}||' 00:00:00','yyyy-MM-DD hh24:mi:ss') 
+	  	     and ydm.yyrq &lt;= to_date(#{map.qryRQ,jdbcType=VARCHAR}||' 23:59:59','yyyy-MM-DD hh24:mi:ss') 
+	  	  </if>
+	  group by area.DEPTCODE,area.DEPTNAME
+	  order by area.DEPTNAME 
+	</select>
+	
+	
+	
+	<select id="qryCountByPcname" parameterType="java.util.Map" resultType="java.util.Map" >
+	  	select 
+	       area.DEPTCODE as "deptCode",area.DEPTNAME as "deptName",
+		  sum( decode(  sign(5-ydzt),1,1,0 ) ) as "inNeed"  ,
+	      count(*) as "inAll"  ,
+	      sum( decode(  sign(6-ydzt),0,1,0 ) ) as "outNeed" ,
+	      sum( decode(  sign(ydzt-5),1,1,0 ) ) as "outAll",  
+	      sum( decode(sign(5 - ydzt),0,1,0)) as "midNeed",
+	      sum(decode(sign(ydzt - 4),1,1,0)) as "midAll"
+	    from SRVS_LABEL pq
+	    left join SRVS_PRESCRIPTION_main ydm
+	      on ydm.PIDSJ = pq.PIDSJ 
+	    left join srvs_batch pb on pq.ZXBC = pb.ID_  and pb.ENABLED_ = 1
+	    left join SRVS_INPATIENTAREA area on area.DEPTCODE = pq.deptcode
+	    where 1=1 
+	     and area.enabled = 1 
+	     and pq.ydzt != 1 
+	     and ydm.YDZXZT=0 
+	     
+	     <choose>
+	     <when test="map.batchName !=null and map.batchName =='空批上午'.toString() ">
+	     and pb.IS_EMPTY_BATCH_ =1 and pb.timetype='morning'
+	     </when>
+	     <when test="map.batchName !=null and map.batchName =='空批下午'.toString() ">
+	     and pb.IS_EMPTY_BATCH_ =1 and pb.timetype='afternoon'
+	     </when>
+	     <otherwise>
+	     and pb.NAME_ = #{map.batchName,jdbcType=VARCHAR}
+	     </otherwise>
+	     </choose>
+	      <if test="map.qryRQ != null and '' neq map.qryRQ ">
+	  	     and ydm.yyrq &gt;= to_date(#{map.qryRQ,jdbcType=VARCHAR}||' 00:00:00','yyyy-MM-DD hh24:mi:ss') 
+	  	     and ydm.yyrq &lt;= to_date(#{map.qryRQ,jdbcType=VARCHAR}||' 23:59:59','yyyy-MM-DD hh24:mi:ss') 
+	  	  </if>
+	  group by area.DEPTCODE,area.DEPTNAME
+	  order by area.DEPTNAME 
+	</select>
+	
+	<select id="qryPqRefFee"  resultType="com.zc.pivas.scans.bean.PqRefFee">
+  	     select gid,
+  	     pidsj,
+  	     fee_result as result,
+  	     FEE_RESULT_DETAILS asresult_details 
+  	     from SRVS_LABEL_ref_config_fee
+  	     where pidsj = #{pqRefFee.pidsj,jdbcType=VARCHAR}
+  	</select>
+  	
+  	<update id="updatePqRefFee" parameterType="com.zc.pivas.scans.bean.PqRefFee">
+  		update SRVS_LABEL_ref_config_fee
+  			set fee_result = #{result,jdbcType=INTEGER},
+  				FEE_RESULT_DETAILS = #{result_details,jdbcType=VARCHAR}
+  				where pidsj = #{pidsj,jdbcType=VARCHAR}
+  	</update>
+  	
+  	<select id="getScanPQList" resultType="com.zc.pivas.scans.bean.BottleLabelBean">
+  	select ppq.parent_no as "parentNo",
+  	    ppq.pidsj,
+  	    ppq.ydzt as "yDZT",
+  	    ppq.deptname as "deptName",
+  	    ppq.bedno as "bedNO",
+  	    ppq.patname as "patName",
+		ppq.ydpq as "yDPQ"
+		from SRVS_LABEL ppq
+		left join SRVS_PRESCRIPTION_MAIN pym on pym.pidsj = ppq.PIDSJ
+		left join srvs_batch pb on ppq.zxbc = pb.ID_
+		left join SRVS_INPATIENTAREA area on area.deptcode = ppq.deptcode
+		where 1=1
+		<if test="param.inpatientStr !=null and param.inpatientStr !=''">
+			and ppq.deptcode in
+			<foreach collection="param.inpatientStr" item="inpatientStr" separator="," open="(" close=")">
+				#{inpatientStr}
+			</foreach>
+		</if>
+     	<if test="param.yyrq !=null and param.yyrq !=''">
+			and ppq.yyrq &gt;=
+			to_date(#{param.yyrq,jdbcType=VARCHAR}||'00:00:00','yyyy-MM-DD
+			hh24:mi:ss')
+			and ppq.yyrq &lt;=
+			to_date(#{param.yyrq,jdbcType=VARCHAR}||'23:59:59','yyyy-MM-DD
+			hh24:mi:ss')
+		</if>
+     	<if test="param.pcStr !=null and param.pcStr !=''">
+			and ppq.zxbc in
+			<foreach collection="param.pcStr" item="pcid" separator="," open="(" close=")">
+				#{pcid,jdbcType=INTEGER}
+			</foreach>
+		</if>
+		<if test="param.checkType !=null and param.checkType !=''">
+			 and 
+			 <if test="param.checkType == 0 ">
+			 ppq.ydzt = 4
+			 </if>
+			 <if test="param.checkType == 1 ">
+			 ppq.ydzt = 5
+			 </if>
+			 <if test="param.checkType == 2 ">
+			 <choose>
+		     <when test="param.midFlag !=null and param.midFlag !='' ">
+		     ppq.ydzt = 6
+		     </when>
+		     <otherwise>
+		     ppq.ydzt = 5
+		     </otherwise>
+		     </choose>
+			 </if>
+		</if>
+		and pym.ydzxzt = 0
+		and pym.dybz = 0
+		and pb.enabled_ = 1
+		and area.enabled = 1
+		
+		<if test="lastNo != null and '' neq lastNo">
+			and  substr(ppq.parent_no, -1,1) in 
+		<foreach item="groupno" index="index" collection="lastNo" open="(" separator="," close=")">
+			#{groupno}
+		</foreach>
+	</if>
+		order by pym.ward_code,ppq.bedno,ppq.yyrq,pb.order_num,ppq.ydzt
+  	</select>
+  	
+  	
+  	
+  	<select id="getPQList"  resultType="com.zc.pivas.scans.bean.BottleLabelBean">
+  	    select ppq.parent_no as "parentNo",
+  	    ppq.pidsj,
+  	    ppq.ydzt as "yDZT",
+  	    ppq.deptname as "deptName",
+  	    ppq.bedno as "bedNO",
+  	    ppq.patname as "patName",
+		pb.name_ as "pcName",
+		ppq.ydpq as "yDPQ",
+		pym.pzmc ,
+		to_char(sm.smrq,'yyyy-mm-dd hh24:mi:ss') as "smRQ",
+		sm.smsbyy as "smSBYY",
+		ppq.configurator as "configurator"
+		from SRVS_LABEL ppq
+		left join SRVS_PRESCRIPTION_MAIN pym on pym.pidsj = ppq.PIDSJ
+		left join srvs_batch pb on ppq.zxbc = pb.ID_
+		left join SRVS_INPATIENTAREA area on area.deptcode = ppq.deptcode
+		left join SRVS_PRESCRIPTION_SCAN sm on sm.yd_id = ppq.pidsj and sm.ydpq = ppq.ydpq
+		where 1=1
+		<if test="param.inpatientStr !=null and param.inpatientStr !=''">
+			and ppq.deptcode in
+			<foreach collection="param.inpatientStr" item="inpatientStr" separator="," open="(" close=")">
+				#{inpatientStr}
+			</foreach>
+		</if>
+     	<if test="param.yyrqStart != null and param.yyrqEnd != null">
+			and ppq.yyrq &gt;=
+			to_date(#{param.yyrqStart,jdbcType=VARCHAR},'yyyy-MM-DD hh24:mi:ss')
+			and ppq.yyrq &lt;=
+			to_date(#{param.yyrqEnd,jdbcType=VARCHAR},'yyyy-MM-DD hh24:mi:ss')
+		</if>
+     	<if test="param.pcStr !=null and param.pcStr !=''">
+			and ppq.zxbc in
+			<foreach collection="param.pcStr" item="pcid" separator="," open="(" close=")">
+				#{pcid,jdbcType=INTEGER}
+			</foreach>
+		</if>
+		<if test="param.checkType !=null and param.checkType !=''">
+			 and 
+			 <if test="param.checkType == 0 ">
+			 <![CDATA[ ppq.ydzt = 4 ]]>
+			 </if>
+			 <if test="param.checkType == 1 ">
+			 <![CDATA[ ppq.ydzt in (5,6) ]]>
+			 </if>
+			 <if test="param.checkType == 2 ">
+			 <choose>
+		     <when test="param.midFlag !=null and param.midFlag !='' ">
+		     <![CDATA[ ppq.ydzt in (6,7,8) ]]>
+		     </when>
+		     <otherwise>
+		     <![CDATA[ ppq.ydzt in (5,7,8) ]]>
+		     </otherwise>
+		     </choose>
+			 </if>
+		</if>
+		and ppq.ydzt != 1
+		and ppq.ydzt != -1
+		and pym.ydzxzt = 0
+		and pb.enabled_ = 1
+		and area.enabled = 1
+		order by ppq.ydzt,pym.ward_code,ppq.bedno,ppq.yyrq,pb.order_num
+  	</select>
+  	
+  	<select id="getSMResultList" resultType="com.zc.pivas.scans.bean.ScanResult">
+	select t.yd_id,
+         to_char(t.smrq,'yyyy-mm-dd hh24:mi:ss') as smrq,
+         t.smjg,
+         t.smsbyy,
+         t.smlx,
+         t.operator,
+         t.ydpq,
+         t.zxbc
+	 from SRVS_PRESCRIPTION_SCAN t,SRVS_LABEL ppq
+	 where 1=1
+	 and t.operator = #{account}
+	 and t.yd_id = ppq.pidsj
+	 and t.ydpq = ppq.ydpq
+	 <if test="yyrqStart != null and yyrqEnd != null">
+		and ppq.yyrq &gt;=
+		to_date(#{yyrqStart,jdbcType=VARCHAR},'yyyy-MM-DD hh24:mi:ss')
+		and ppq.yyrq &lt;=
+		to_date(#{yyrqEnd,jdbcType=VARCHAR},'yyyy-MM-DD hh24:mi:ss')
+	</if>
+	 
+	 order by t.smrq desc
+  	</select>
+  	
+  	<select id="getYdDetailList" resultType="com.zc.pivas.docteradvice.bean.BLabelWithPrescription">
+  	select 	yd.charge_code as "yd_chargeCode",
+  			yd.drugname as "yd_drugname",
+			substr(yd.specifications,0, decode( instr(yd.specifications,'*'),0,length(yd.specifications),instr(yd.specifications,'*')-1)) 
+			as "yd_specifications",
+			yd.dose as "yd_dose",
+			yd.dose_unit as "yd_doseUnit",
+			yd.quantity as "yd_quantity",
+			yd.medicaments_packing_unit as "yd_medicamentsPackingUnit"
+	from SRVS_PRESCRIPTION yd
+	left join SRVS_LABEL pqs on pqs.pidsj = yd.pidsj
+	where pqs.ydpq = #{pqstr}
+	and yd.ydzxzt = 0
+	order by yd.charge_code
+  	</select>
+  	
+  	<select id="getStopList"  resultType="com.zc.pivas.scans.bean.BottleLabelBean">
+  	    select ppq.parent_no as "parentNo",
+  	    ppq.pidsj,
+  	    ppq.ydzt as "yDZT",
+  	    ppq.deptname as "deptName",
+  	    ppq.bedno as "bedNO",
+  	    ppq.patname as "patName",
+		pb.name_ as "pcName",
+		ppq.ydpq as "yDPQ",
+		pym.pzmc ,
+		to_char(sm.smrq,'yyyy-mm-dd hh24:mi:ss') as "smRQ",
+		sm.smsbyy as "smSBYY"
+		from SRVS_LABEL ppq
+		left join SRVS_PRESCRIPTION_MAIN pym on pym.pidsj = ppq.PIDSJ
+		left join srvs_batch pb on ppq.zxbc = pb.ID_
+		left join SRVS_INPATIENTAREA area on area.deptcode = ppq.deptcode
+		left join SRVS_PRESCRIPTION_SCAN sm on sm.yd_id = ppq.pidsj
+		where 1=1
+		<if test="param.inpatientStr !=null and param.inpatientStr !=''">
+			and ppq.deptcode in
+			<foreach collection="param.inpatientStr" item="inpatientStr" separator="," open="(" close=")">
+				#{inpatientStr}
+			</foreach>
+		</if>
+     	<if test="param.yyrqStart != null and param.yyrqEnd != null">
+			and ppq.yyrq &gt;=
+			to_date(#{param.yyrqStart,jdbcType=VARCHAR},'yyyy-MM-DD hh24:mi:ss')
+			and ppq.yyrq &lt;=
+			to_date(#{param.yyrqEnd,jdbcType=VARCHAR},'yyyy-MM-DD hh24:mi:ss')
+		</if>
+     	<if test="param.pcStr !=null and param.pcStr !=''">
+			and ppq.zxbc in
+			<foreach collection="param.pcStr" item="pcid" separator="," open="(" close=")">
+				#{pcid,jdbcType=INTEGER}
+			</foreach>
+		</if>
+		<if test="param.checkType !=null and param.checkType !=''">
+			and ppq.checktype = #{param.checkType}
+		</if>
+		and (ppq.ydzt = 1 or ppq.ydzt = -1)
+		and (pym.ydzxzt =1 or pym.ydzxzt = 3)
+		and pb.enabled_ = 1
+		and area.enabled = 1
+		order by pym.ward_code,ppq.bedno,ppq.yyrq,pb.order_num,ppq.ydzt
+  	</select>
+  	
+  	<select id="getBatchList"  resultType="com.zc.pivas.scans.bean.ScanPcNum">
+  	select t.id_ as pccode,t.name_ as pcname from srvs_batch t
+  	where t.enabled_ = 1
+	<if test="param.pcStr !=null and param.pcStr !=''">
+			and t.id_ in
+			<foreach collection="param.pcStr" item="pcid" separator="," open="(" close=")">
+				#{pcid,jdbcType=INTEGER}
+			</foreach>
+	</if>
+  	order by t.order_num
+  	</select>
+  	
+  	<select id="getDeptList"  resultType="Map">
+  	select deptcode,deptname from SRVS_INPATIENTAREA
+  	where enabled = 1
+	<if test="param.inpatientStr !=null and param.inpatientStr !=''">
+			and deptcode in
+			<foreach collection="param.inpatientStr" item="inpatientStr" separator="," open="(" close=")">
+				#{inpatientStr}
+			</foreach>
+	</if>
+  	order by gid
+  	</select>
+  	
+  	<select id="getPCNumber"  resultType="String">
+  	
+  	select count(*) from SRVS_PRESCRIPTION_MAIN ydm
+	left join srvs_batch pc on ydm.zxbc = pc.id_
+	left join SRVS_LABEL ppq on ydm.pidsj = ppq.pidsj
+	where 1 = 1
+	and ydm.ydzxzt = 0
+	and pc.enabled_ = 1
+	
+	<if test="deptcode != null and deptcode != null ">
+	and ydm.ward_code = #{deptcode}
+	</if>
+	
+	<if test="deptcode == null or '' eq deptcode">
+		<if test="param.inpatientStr !=null and param.inpatientStr !=''">
+			and ydm.ward_code in
+			<foreach collection="param.inpatientStr" item="dept" separator="," open="(" close=")">
+				#{dept}
+			</foreach>
+		</if>
+	</if>
+	
+	and ydm.zxbc = #{pccode}
+	<if test="param.yyrqStart != null and param.yyrqEnd != null ">
+		and ydm.yyrq &gt;=
+		to_date(#{param.yyrqStart,jdbcType=VARCHAR},'yyyy-MM-DD hh24:mi:ss')
+		and ydm.yyrq &lt;=
+		to_date(#{param.yyrqEnd,jdbcType=VARCHAR},'yyyy-MM-DD hh24:mi:ss')
+	</if>
+	<if test="param.checkType !=null and param.checkType !=''">
+		and <![CDATA[ ppq.ydzt = 6 ]]>
+	</if>
+	union all
+	select count(*) from SRVS_PRESCRIPTION_MAIN ydm
+	left join srvs_batch pc on ydm.zxbc = pc.id_
+	left join SRVS_LABEL ppq on ydm.pidsj = ppq.pidsj
+	where 1 = 1
+	and ydm.ydzxzt = 0
+	and pc.enabled_ = 1
+	<if test="deptcode != null and deptcode != null ">
+	and ydm.ward_code = #{deptcode}
+	</if>
+	
+	<if test="deptcode == null or '' eq deptcode">
+		<if test="param.inpatientStr !=null and param.inpatientStr !=''">
+			and ydm.ward_code in
+			<foreach collection="param.inpatientStr" item="dept" separator="," open="(" close=")">
+				#{dept}
+			</foreach>
+		</if>
+	</if>
+	
+	and ydm.zxbc = #{pccode}
+	<if test="param.yyrq !=null and param.yyrq !=''">
+		and ydm.yyrq &gt;=
+		to_date(#{param.yyrq,jdbcType=VARCHAR}||'00:00:00','yyyy-MM-DD
+		hh24:mi:ss')
+		and ydm.yyrq &lt;=
+		to_date(#{param.yyrq,jdbcType=VARCHAR}||'23:59:59','yyyy-MM-DD
+		hh24:mi:ss')
+	</if>
+	<if test="param.checkType !=null and param.checkType !=''">
+		and <![CDATA[ ppq.ydzt = 5 ]]>
+		
+	</if>
+	union all
+	select count(*) from SRVS_PRESCRIPTION_MAIN ydm
+	left join srvs_batch pc on ydm.zxbc = pc.id_
+	left join SRVS_LABEL ppq on ydm.pidsj = ppq.pidsj
+	where 1 = 1
+	and ydm.ydzxzt = 0
+	and pc.enabled_ = 1
+	<if test="deptcode != null and deptcode != null ">
+	and ydm.ward_code = #{deptcode}
+	</if>
+	
+	<if test="deptcode == null or '' eq deptcode">
+		<if test="param.inpatientStr !=null and param.inpatientStr !=''">
+			and ydm.ward_code in
+			<foreach collection="param.inpatientStr" item="dept" separator="," open="(" close=")">
+				#{dept}
+			</foreach>
+		</if>
+	</if>
+	
+	and ydm.zxbc = #{pccode}
+	<if test="param.yyrq !=null and param.yyrq !=''">
+		and ydm.yyrq &gt;=
+		to_date(#{param.yyrq,jdbcType=VARCHAR}||'00:00:00','yyyy-MM-DD
+		hh24:mi:ss')
+		and ydm.yyrq &lt;=
+		to_date(#{param.yyrq,jdbcType=VARCHAR}||'23:59:59','yyyy-MM-DD
+		hh24:mi:ss')
+	</if>
+	<if test="param.checkType !=null and param.checkType !=''">
+		and <![CDATA[ ( ppq.ydzt  > 4 )]]>
+	</if>
+	
+  	</select>
+  	
+  	<update id="addPQConfigurator">
+  	update  SRVS_LABEL
+	SET configurator = #{account}
+	where pidsj = #{pidsj}
+	and ydpq = #{ydpq}
+  	</update>
+  	
+  	<update id="updateCheckType">
+  	update  SRVS_LABEL
+	set checktype = #{scansType}
+	where pidsj = #{pidsj}
+	and ydpq = #{ydpq}
+  	</update>
+  	
+  	<select id="getScansBatchList" resultType="com.zc.base.sc.modules.batch.entity.Batch">
+	  	select
+	  		ID_ id,
+	     	NUM_ num,
+	     	NAME_ name,
+	     	ENABLED_ enabled,
+	     	ORDER_NUM orderNum
+	    from srvs_batch
+		where is_empty_batch_ = 0
+		and num_ not like 'T%'
+		and enabled_ = 1
+		order by order_num
+  	</select>
+  	
+  	<select id="getScanRestult" resultType="Map">
+  	select count(*) as count , smjg from SRVS_PRESCRIPTION_SCAN where yd_id in (select
+  	    ppq.pidsj
+		from SRVS_LABEL ppq
+		left join SRVS_PRESCRIPTION_MAIN pym on pym.pidsj = ppq.PIDSJ
+		left join srvs_batch pb on ppq.zxbc = pb.ID_
+		left join SRVS_INPATIENTAREA area on area.deptcode = ppq.deptcode
+		where 1=1
+		<if test="param.inpatientStr !=null and param.inpatientStr !=''">
+			and ppq.deptcode in
+			<foreach collection="param.inpatientStr" item="inpatientStr" separator="," open="(" close=")">
+				#{inpatientStr}
+			</foreach>
+		</if>
+     	<if test="param.yyrq !=null and param.yyrq !=''">
+			and ppq.yyrq &gt;=
+			to_date(#{param.yyrq,jdbcType=VARCHAR}||'00:00:00','yyyy-MM-DD
+			hh24:mi:ss')
+			and ppq.yyrq &lt;=
+			to_date(#{param.yyrq,jdbcType=VARCHAR}||'23:59:59','yyyy-MM-DD
+			hh24:mi:ss')
+		</if>
+     	<if test="param.pcStr !=null and param.pcStr !=''">
+			and ppq.zxbc in
+			<foreach collection="param.pcStr" item="pcid" separator="," open="(" close=")">
+				#{pcid,jdbcType=INTEGER}
+			</foreach>
+		</if>
+		
+		and pym.ydzxzt = 0
+		and pym.dybz = 0
+		and pb.enabled_ = 1
+		and area.enabled = 1 )  
+		
+		<if test="param.checkType !=null and param.checkType !=''">
+			 and 
+			 <if test="param.checkType == 0 ">
+			 smlx = 0
+			 </if>
+			 <if test="param.checkType == 1 ">
+			smlx =1
+			 </if>
+			 <if test="param.checkType == 2 ">
+			 smlx = 2
+			 </if>
+		</if>
+		
+		group by smjg
+  	</select>
+  	
+</mapper>

@@ -1,0 +1,289 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zc.base.sc.modules.medicalFrequency.repository.MedicalFrequencyDao" >
+
+  <resultMap id="BaseResultMap" type="com.zc.base.sc.modules.medicalFrequency.entity.MedicalFrequency" >
+    <id column="ID_" property="id" jdbcType="BIGINT" />
+    <result column="CODE_" property="code" jdbcType="VARCHAR" />
+    <result column="NAME_" property="name" jdbcType="VARCHAR" />
+    <result column="INTERVAL_" property="interval" jdbcType="INTEGER" />
+    <result column="TIME_OF_DAY_" property="timeOfDay" jdbcType="INTEGER" />
+    <result column="START_TIME_" property="startTime" jdbcType="VARCHAR" />
+    <result column="END_TIME_" property="endTime" jdbcType="VARCHAR" />
+    <result column="RESERVE1_" property="reserve1" jdbcType="VARCHAR" />
+    <result column="RESERVE2_" property="reserve2" jdbcType="VARCHAR" />
+    <result column="RESERVE3_" property="reserve3" jdbcType="VARCHAR" />
+  </resultMap>
+  
+  <sql id="Base_Column_List" >
+    ID_, CODE_, NAME_, INTERVAL_, TIME_OF_DAY_, START_TIME_, END_TIME_, RESERVE1_, RESERVE2_, 
+    RESERVE3_
+  </sql>
+  
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="Long" >
+    select 
+    <include refid="Base_Column_List" />
+    from SRVS_MEDICAMENTS_FREQUENCY
+    where ID_ = #{id,jdbcType=BIGINT}
+  </select>
+  
+  <delete id="deleteByPrimaryKey" parameterType="Long" >
+    delete from SRVS_MEDICAMENTS_FREQUENCY
+    where ID_ = #{id,jdbcType=BIGINT}
+  </delete>
+  
+  <insert id="insert" parameterType="com.zc.base.sc.modules.medicalFrequency.entity.MedicalFrequency" >
+  	<selectKey resultType="java.lang.Long" order="AFTER" keyProperty="id">
+		select sq_SRVS_MEDICAMENTS_frequency.CURRVAL as id from DUAL
+	</selectKey>
+    insert into SRVS_MEDICAMENTS_FREQUENCY (ID_, CODE_, NAME_,
+      INTERVAL_, TIME_OF_DAY_, START_TIME_, 
+      END_TIME_, RESERVE1_, RESERVE2_, 
+      RESERVE3_)
+    values (#{id,jdbcType=BIGINT}, #{code,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR}, 
+      #{interval,jdbcType=INTEGER}, #{timeOfDay,jdbcType=INTEGER}, #{startTime,jdbcType=VARCHAR}, 
+      #{endTime,jdbcType=VARCHAR}, #{reserve1,jdbcType=VARCHAR}, #{reserve2,jdbcType=VARCHAR}, 
+      #{reserve3,jdbcType=VARCHAR})
+  </insert>
+  
+  <insert id="insertSelective" parameterType="com.zc.base.sc.modules.medicalFrequency.entity.MedicalFrequency" >
+  	<selectKey resultType="java.lang.Long" order="AFTER" keyProperty="id">
+		select sq_SRVS_MEDICAMENTS_frequency.CURRVAL as id from DUAL
+	</selectKey>
+    insert into SRVS_MEDICAMENTS_FREQUENCY
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        ID_,
+      </if>
+      <if test="code != null" >
+        CODE_,
+      </if>
+      <if test="name != null" >
+        NAME_,
+      </if>
+      <if test="interval != null" >
+        INTERVAL_,
+      </if>
+      <if test="timeOfDay != null" >
+        TIME_OF_DAY_,
+      </if>
+      <if test="startTime != null" >
+        START_TIME_,
+      </if>
+      <if test="endTime != null" >
+        END_TIME_,
+      </if>
+      <if test="reserve1 != null" >
+        RESERVE1_,
+      </if>
+      <if test="reserve2 != null" >
+        RESERVE2_,
+      </if>
+      <if test="reserve3 != null" >
+        RESERVE3_,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="code != null" >
+        #{code,jdbcType=VARCHAR},
+      </if>
+      <if test="name != null" >
+        #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="interval != null" >
+        #{interval,jdbcType=INTEGER},
+      </if>
+      <if test="timeOfDay != null" >
+        #{timeOfDay,jdbcType=INTEGER},
+      </if>
+      <if test="startTime != null" >
+        #{startTime,jdbcType=VARCHAR},
+      </if>
+      <if test="endTime != null" >
+        #{endTime,jdbcType=VARCHAR},
+      </if>
+      <if test="reserve1 != null" >
+        #{reserve1,jdbcType=VARCHAR},
+      </if>
+      <if test="reserve2 != null" >
+        #{reserve2,jdbcType=VARCHAR},
+      </if>
+      <if test="reserve3 != null" >
+        #{reserve3,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  
+  <update id="updateByPrimaryKeySelective" parameterType="com.zc.base.sc.modules.medicalFrequency.entity.MedicalFrequency" >
+    update SRVS_MEDICAMENTS_FREQUENCY
+    <set >
+      <if test="code != null" >
+        CODE_ = #{code,jdbcType=VARCHAR},
+      </if>
+      <if test="name != null" >
+        NAME_ = #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="interval != null" >
+        INTERVAL_ = #{interval,jdbcType=INTEGER},
+      </if>
+      <if test="timeOfDay != null" >
+        TIME_OF_DAY_ = #{timeOfDay,jdbcType=INTEGER},
+      </if>
+      <if test="startTime != null" >
+        START_TIME_ = #{startTime,jdbcType=VARCHAR},
+      </if>
+      <if test="endTime != null" >
+        END_TIME_ = #{endTime,jdbcType=VARCHAR},
+      </if>
+      <if test="reserve1 != null" >
+        RESERVE1_ = #{reserve1,jdbcType=VARCHAR},
+      </if>
+      <if test="reserve2 != null" >
+        RESERVE2_ = #{reserve2,jdbcType=VARCHAR},
+      </if>
+      <if test="reserve3 != null" >
+        RESERVE3_ = #{reserve3,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where 
+    1=1
+    <if test="id != null" >
+        and ID_ = #{id,jdbcType=BIGINT}
+    </if>
+    
+    <if test="code != null" >
+        and CODE_ = #{code,jdbcType=VARCHAR}
+      </if>
+  </update>
+  
+  <update id="updateByPrimaryKey" parameterType="com.zc.base.sc.modules.medicalFrequency.entity.MedicalFrequency" >
+    update SRVS_MEDICAMENTS_FREQUENCY
+    set CODE_ = #{code,jdbcType=VARCHAR},
+      NAME_ = #{name,jdbcType=VARCHAR},
+      INTERVAL_ = #{interval,jdbcType=INTEGER},
+      TIME_OF_DAY_ = #{timeOfDay,jdbcType=INTEGER},
+      START_TIME_ = #{startTime,jdbcType=VARCHAR},
+      END_TIME_ = #{endTime,jdbcType=VARCHAR},
+      RESERVE1_ = #{reserve1,jdbcType=VARCHAR},
+      RESERVE2_ = #{reserve2,jdbcType=VARCHAR},
+      RESERVE3_ = #{reserve3,jdbcType=VARCHAR}
+    where  1=1
+
+	<if test="id != null" >
+        and ID_ = #{id,jdbcType=BIGINT},
+    </if>
+    
+    <if test="code != null" >
+        and CODE_ = #{code,jdbcType=VARCHAR}
+      </if>
+  </update>
+  
+  <!-- 按条件查询用药频次 -->
+  <select id="queryByPaging" resultMap="BaseResultMap">
+	  <include refid="common.jqueryPageHead" />
+	  	select
+	  		<include refid="Base_Column_List"/>
+	  	<include refid="Base_Where_Sql"/>
+	  <include refid="common.jqueryPageBottom" />
+  </select>
+  
+  <select id="queryAllByCondition" resultMap="BaseResultMap">
+	  select
+	  		<include refid="Base_Column_List"/>
+	  	<include refid="Base_Where_Sql"/>
+  </select>
+  
+  
+  
+  <sql id="Base_Where_Sql">
+  	from
+  		SRVS_MEDICAMENTS_frequency
+	<where>
+		<if test="condition != null">
+		
+			<if test="condition.codes != null and '' neq condition.codes">
+				and 
+				<foreach item="code" index="index" collection="condition.codes"  open="(" separator="or" close=")" >  
+					Lower(code_) like  '%'||Lower(#{code,jdbcType=VARCHAR})||'%'  escape '\'             
+				</foreach>
+			</if>
+			
+			<if test="condition.code != null and '' neq condition.code">
+				and code_ =  #{condition.code,jdbcType=VARCHAR}              
+			</if>
+			
+			<if test="condition.name != null and '' neq condition.name">
+				and name_ =  #{condition.name,jdbcType=VARCHAR}              
+			</if>
+				
+			<if test="condition.names != null and '' neq condition.names">
+				and 
+				<foreach item="name" index="index" collection="condition.names"  open="(" separator="or" close=")" >  
+					Lower(name_) like  '%'||Lower(#{name,jdbcType=VARCHAR})||'%'  escape '\'                
+				</foreach>
+			</if>
+		
+			<if test="condition.interval != null" >
+			  AND interval_ = #{condition.interval,jdbcType=INTEGER}
+			</if>
+			<if test="condition.timeOfDay != null" >
+			  AND time_of_day_ = #{condition.timeOfDay,jdbcType=INTEGER}
+			</if>
+			<if test="condition.startTime != null" >
+			  AND start_time_ = #{condition.startTime,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.endTime != null" >
+			  AND end_time_ = #{condition.endTime,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.reserve1 != null" >
+			  AND reserve1_ = #{condition.reserve1,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.reserve2 != null" >
+			  AND reserve2_ = #{condition.reserve2,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.reserve3 != null" >
+			  AND reserve3_ = #{condition.reserve3,jdbcType=VARCHAR}
+			</if>
+		</if>
+	</where>  
+  </sql>
+  <!-- 用药频次总数 -->
+  <select id="getTotalCount" resultType="int">
+  	select 
+  		count(1)
+  	<include refid="Base_Where_Sql"/>
+  </select>
+  
+  
+  <update id="synData"
+		parameterType="com.zc.base.sc.modules.medicalFrequency.entity.MedicalFrequency">
+
+		merge into SRVS_MEDICAMENTS_FREQUENCY t1
+		using ( select
+		#{code} as CODE_
+		from dual ) t2
+		ON
+		(
+		t1.CODE_ = t2.CODE_
+		)
+		WHEN MATCHED THEN
+		UPDATE SET
+		t1.NAME_ = #{name}
+		where t1.CODE_ = #{code}
+		WHEN NOT MATCHED THEN
+		INSERT
+		(
+		t1.CODE_,
+		t1.NAME_
+		)
+		VALUES
+		(
+		#{code},
+		#{name}
+		)
+	</update>
+	
+</mapper>

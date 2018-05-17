@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration scan="true" scanPeriod="5 seconds">
+	<jmxConfigurator />
+
+	<appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder>
+			<pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+		</encoder>
+	</appender>
+	
+	<!-- Error级别日志 -->
+	<appender name="errorAppender" class="ch.qos.logback.core.rolling.RollingFileAppender">  
+		<file>${web.app.root}/WEB-INF/logs/pivas_error.log</file>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>${web.app.root}/WEB-INF/logs/pivas_error.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+			<!-- 限制文件最大保存时间为30天 -->
+			<maxHistory>30</maxHistory>
+			<timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+				<!--  当文件大小超过35MB时触发滚动,将再生成一个log文件 -->
+				<maxFileSize>35MB</maxFileSize>
+			</timeBasedFileNamingAndTriggeringPolicy>
+		</rollingPolicy>  
+		<encoder>
+			<pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>  
+		</encoder>
+		<filter class="ch.qos.logback.classic.filter.LevelFilter"><!-- 只打印错误日志 -->  
+			<level>ERROR</level>
+			<onMatch>ACCEPT</onMatch>
+			<onMismatch>DENY</onMismatch>
+		</filter>
+	</appender>
+	
+	<!-- Warn级别日志 -->
+	<appender name="warnAppender" class="ch.qos.logback.core.rolling.RollingFileAppender">  
+		<file>${web.app.root}/WEB-INF/logs/pivas_warn.log</file>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>${web.app.root}/WEB-INF/logs/pivas_warn.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+			<!-- 限制文件最大保存时间为30天 -->
+			<maxHistory>30</maxHistory>
+			<timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+				<!--  当文件大小超过35MB时触发滚动,将再生成一个log文件 -->
+				<maxFileSize>35MB</maxFileSize>
+			</timeBasedFileNamingAndTriggeringPolicy>
+		</rollingPolicy>
+		<encoder>
+			<pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>  
+		</encoder>
+		<filter class="ch.qos.logback.classic.filter.LevelFilter"><!-- 只打印错误日志 -->  
+			<level>WARN</level>
+			<onMatch>ACCEPT</onMatch>
+			<onMismatch>DENY</onMismatch>
+		</filter>
+	</appender>
+	
+	<!-- Info级别日志 -->
+	<appender name="infoAppender" class="ch.qos.logback.core.rolling.RollingFileAppender">  
+		<file>${web.app.root}/WEB-INF/logs/pivas_info.log</file>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>${web.app.root}/WEB-INF/logs/pivas_info.%d{yyyy-MM-dd}.%i.log</fileNamePattern>  
+			<!-- 限制文件最大保存时间为30天 -->
+			<maxHistory>30</maxHistory>
+			<timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+				<!--  当文件大小超过50MB时触发滚动,将再生成一个log文件 -->
+				<maxFileSize>50MB</maxFileSize>
+			</timeBasedFileNamingAndTriggeringPolicy>
+		</rollingPolicy>
+		<encoder>
+			<pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>  
+		</encoder>
+		<filter class="ch.qos.logback.classic.filter.LevelFilter"><!-- 只打印错误日志 -->  
+			<level>INFO</level>
+			<onMatch>ACCEPT</onMatch>
+			<onMismatch>DENY</onMismatch>
+		</filter>
+	</appender>
+	
+	<!-- Debug级别日志 -->
+	<appender name="debugAppender" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>${web.app.root}/WEB-INF/logs/pivas_debug.log</file>
+		<!-- 基于时间的滚动策略 -->
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<!-- 每天滚动 -->
+			<fileNamePattern>${web.app.root}/WEB-INF/logs/pivas_debug.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+			<!-- 限制文件最大保存时间为30天 -->
+			<maxHistory>30</maxHistory>
+			<timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+				<!--  当文件大小超过50MB时触发滚动,将再生成一个log文件 -->
+				<maxFileSize>50MB</maxFileSize>
+			</timeBasedFileNamingAndTriggeringPolicy>
+		</rollingPolicy>
+		<encoder>
+			<pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>  
+		</encoder>
+		<filter class="ch.qos.logback.classic.filter.LevelFilter"><!-- 只打印错误日志 -->
+			<level>DEBUG</level>
+			<onMatch>ACCEPT</onMatch>
+			<onMismatch>DENY</onMismatch>
+		</filter>
+	</appender>
+	
+	<appender name="STDOUT" class="org.apache.log4j.ConsoleAppender">
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="%-5p %d{MM-dd HH:mm:ss} %m  (%F:%L) \n" />
+		</layout>
+	</appender>
+	<logger name="dao" level="DEBUG" additivity="false">
+	    <appender-ref ref="console" />  
+	</logger>
+	
+	<!-- 控制台和文件日志打印级别(ERROR,debug)，发布时默认为ERROR -->
+	<root level="ERROR">
+		<appender-ref ref="console" />
+        <!-- <appender-ref ref="errorAppender" />
+		<appender-ref ref="warnAppender" />
+		<appender-ref ref="infoAppender" />
+		<appender-ref ref="debugAppender" />
+		<appender-ref ref="STDOUT" /> -->
+	</root>
+</configuration>

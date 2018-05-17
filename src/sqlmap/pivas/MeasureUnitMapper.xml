@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zc.pivas.measureunit.dao.MeasureUnitDAO" >
+	<resultMap id="MeasureUnitMap" type="com.zc.pivas.measureunit.bean.MeasureUnitBean" >
+		<id column="gid" property="gid" jdbcType="VARCHAR" />
+		<result column="code" property="code" jdbcType="VARCHAR" />
+		<result column="unity" property="unity" jdbcType="VARCHAR" />
+		<result column="protype" property="proType" jdbcType="VARCHAR" />
+		<result column="isUse" property="isUse" jdbcType="INTEGER" />
+		<result property="isUseResult" jdbcType="VARCHAR" />
+		<result column="model" property="model" jdbcType="INTEGER" />
+		<result column="precis" property="precis" jdbcType="VARCHAR" />
+		<result column="scale" property="scale" jdbcType="VARCHAR" />
+		<result column="reserve0" property="reserve0" jdbcType="VARCHAR" />
+		<result column="reserve1" property="reserve1" jdbcType="VARCHAR" />
+		<result column="reserve2" property="reserve2" jdbcType="VARCHAR" />
+	</resultMap>
+	
+	<sql id="getMeasureUnitSql">
+  		SELECT
+  			gid,
+			code,
+			unity,
+			protype,
+			case
+         		when isuse = 0 then
+          		'是'
+         	else
+          		'否'
+       		end as isUseResult,
+			model,
+			precis,
+			scale
+		FROM
+			SRVS_MEASUREMENT_UNIT
+			
+			<where>
+  		    1=1 
+			<if test="measureUnit != null">
+				<if test="measureUnit.proTypes != null and '' neq measureUnit.proTypes">
+				and protype in (select code from SYS_DICT where dict_id in (select dict_id
+                    from SYS_DICT_INFO
+                     where dict_id in
+                       (select dict_id
+                          from SYS_DICT t
+                         where category = 'pivas.measureunit.protype') and 
+				<foreach item="proType" index="index" collection="measureUnit.proTypes"  open="(" separator="or" close=")))" >  
+					content like  '%'||#{proType}||'%'              
+				</foreach>
+				</if>
+				
+				<if test="measureUnit.unityNames != null and '' neq measureUnit.unityNames">
+				and unity in (select code from SYS_DICT where dict_id in (select dict_id
+                    from SYS_DICT_INFO
+                     where dict_id in
+                       (select dict_id
+                          from SYS_DICT t
+                         where category = 'pivas.measureunit.unity') and 
+				<foreach item="unityName" index="index" collection="measureUnit.unityNames"  open="(" separator="or" close=")))" >  
+					content like  '%'||#{unityName}||'%'              
+				</foreach>
+				</if>
+			</if>
+		  </where>
+ 	</sql>
+  
+  <select id="getMeasureUnitList" resultMap="MeasureUnitMap">
+  	<include refid="common.jqueryPageHead" />
+  	<include refid="getMeasureUnitSql"/>
+  	<include refid="common.jqueryPageBottom" />
+  </select>
+  
+  <select id="getMeasureUnitTotal" resultType="int">
+  	select count(1) from (
+  		<include refid="getMeasureUnitSql"/>
+  	) t1
+  </select>
+  
+  <select id="getMeasureUnit" resultMap="MeasureUnitMap">
+	  	SELECT
+  			gid,
+			code,
+			unity,
+			protype,
+			isUse,
+			model,
+			precis,
+			scale
+		FROM
+			SRVS_MEASUREMENT_UNIT
+			<where>
+  		    1=1 
+			<if test="measureUnit != null">
+				<if test="measureUnit.gid != null and '' neq measureUnit.gid ">
+					and gid = #{measureUnit.gid}
+				</if>
+				
+				<if test="measureUnit.unity != null and '' neq measureUnit.unity ">
+					and unity = #{measureUnit.unity}
+				</if>
+				
+				<if test="measureUnit.proType != null and '' neq measureUnit.proType ">
+					and protype = #{measureUnit.proType}
+				</if>
+			</if>
+		  </where>
+  </select>
+  
+  <select id="checkMeasureUnitCode" resultMap="MeasureUnitMap">
+	  	SELECT * FROM SRVS_MEASUREMENT_UNIT
+			<where>
+  		    1=1 
+			<if test="measureUnit != null">
+				<if test="measureUnit.gid != null and '' neq measureUnit.gid ">
+					<![CDATA[ and gid <> #{measureUnit.gid} ]]>
+				</if>
+				
+				<if test="measureUnit.code != null and '' neq measureUnit.code ">
+					and code = #{measureUnit.code}
+				</if>
+			</if>
+		  </where>
+  </select>
+  
+  <insert id="addMeasureUnit" parameterType="com.zc.pivas.measureunit.bean.MeasureUnitBean">
+	  	INSERT INTO SRVS_MEASUREMENT_UNIT (
+		code,
+		unity,
+		protype,
+		isUse,
+		model,
+		precis,
+		scale
+	)
+	VALUES
+		(
+			#{code},
+			#{unity},
+			#{proType},
+			#{isUse},
+			#{model},
+			#{precis},
+			#{scale}
+		)
+</insert>
+
+<update id="updateMeasureUnit" parameterType="com.zc.pivas.measureunit.bean.MeasureUnitBean">
+  	update SRVS_MEASUREMENT_UNIT set
+		code = #{code},
+		unity = #{unity},
+		proType = #{proType},
+		isUse = #{isUse},
+		model = #{model},
+		precis = #{precis},
+		scale = #{scale}
+		where gid = #{gid}
+  </update>
+  
+  <delete id="delMeasureUnit" parameterType="com.zc.pivas.measureunit.bean.MeasureUnitBean">
+  	delete from SRVS_MEASUREMENT_UNIT
+		where gid = #{gid}
+</delete>
+
+</mapper>

@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zc.pivas.printlabel.repository.PrintLabelConDao">
+	<sql id="getPrintLabelConSql">
+		SELECT ID,NAME,YYRQ,BATCHID,MEDICCATEGORY as MEDICCATEGORYID,MEDICLABEL as MEDICLABELID,PRINTSTATE,MEDICAL as medicalID, deptcode,ordernum as "orderNum",ispack as "isPack",usetype as "useType" from SRVS_PRINTLABEL_CON
+		<where>
+			1=1
+			<if test="printLabelCon != null">
+				<if test="printLabelCon.id != null and '' neq printLabelCon.id ">
+					and id = #{printLabelCon.id} 
+				</if>
+				
+				<if test="printLabelCon.name != null and '' neq printLabelCon.name ">
+					and name = #{printLabelCon.name}
+				</if>
+			</if>
+		</where>
+		order by ordernum
+	</sql>
+	
+	<select id="queryPrintLabelCon"  resultType="com.zc.pivas.printlabel.entity.PrintLabelConBean">
+		<include refid="common.jqueryPageHead" />
+		<include refid="getPrintLabelConSql" />
+		<include refid="common.jqueryPageBottom" />
+	</select>
+	
+	<select id="getPrintLabelConTotal" resultType="int">
+		select count(1) from (
+		<include refid="getPrintLabelConSql" />
+		) t1
+	</select>
+
+	
+	<insert id="insert" parameterType="com.zc.pivas.printlabel.entity.PrintLabelConBean">
+		insert into
+		SRVS_PRINTLABEL_CON(
+		NAME,
+		YYRQ,
+		<if test="batchid !=null" >
+			BATCHID,
+		</if>
+		
+		<if test="medicCategoryID !=null" >
+			MEDICCATEGORY,
+		</if>
+		
+		<if test="medicLabelID !=null" >
+			MEDICLABEL,
+		</if>
+		
+		<if test="printState !=null" >
+			PRINTSTATE,
+		</if>
+		
+		<if test="medicalID !=null" >
+			MEDICAL,
+		</if>
+		
+		<if test="deptCode !=null" >
+			deptCode,
+		</if>
+		
+		<if test="isPack !=null" >
+			ispack,
+		</if>
+		<if test="orderNum !=null" >
+			ordernum,
+		</if>
+		<if test="useType !=null" >
+			usetype
+		</if>
+		)
+		values(
+		#{name},
+		#{yyrq},
+		<if test="batchid !=null" >
+			#{batchid},
+		</if>
+		
+		<if test="medicCategoryID !=null" >
+			#{medicCategoryID},
+		</if>
+		
+		<if test="medicLabelID !=null" >
+			#{medicLabelID},
+		</if>
+		
+		<if test="printState !=null" >
+			#{printState},
+		</if>
+		
+		<if test="medicalID !=null" >
+			#{medicalID},
+		</if>
+		
+		<if test="deptCode !=null" >
+			#{deptCode},
+		</if>
+		
+		<if test="isPack !=null" >
+			#{isPack},
+		</if>
+		
+		<if test="orderNum !=null" >
+			#{orderNum},
+		</if>
+		
+		<if test="useType !=null" >
+			#{useType}
+		</if>
+		)
+	</insert>
+	
+	
+	<select id="getCountOrder" resultType = "int" parameterType="com.zc.pivas.printlabel.entity.PrintLabelConBean">
+	select count(*) from SRVS_PRINTLABEL_CON where ordernum = #{orderNum}
+	</select>
+	
+	
+	<update id="updatePrintLabelCon" parameterType="com.zc.pivas.printlabel.entity.PrintLabelConBean">
+		update SRVS_PRINTLABEL_CON set
+		NAME = #{name},
+		YYRQ = #{yyrq}
+		
+		<if test="batchid !=null" >
+			,BATCHID = #{batchid}
+		</if>
+		
+		<if test="medicCategoryID !=null" >
+			,MEDICCATEGORY = #{medicCategoryID}
+		</if>
+		
+		<if test="medicLabelID !=null" >
+			,MEDICLABEL = #{medicLabelID}
+		</if>
+		
+		<if test="printState !=null" >
+			,PRINTSTATE = #{printState}
+		</if>
+		
+		<if test="printState ==null" >
+			,PRINTSTATE = null
+		</if>
+		
+		<if test="medicalID !=null" >
+			,MEDICAL = #{medicalID}
+		</if>
+		
+		<if test="deptCode !=null" >
+			,deptCode = #{deptCode}
+		</if>
+		<if test="isPack !=null" >
+			,ispack = #{isPack}
+		</if>
+		<if test="orderNum !=null" >
+			,ordernum = #{orderNum}
+		</if>
+		<if test="useType !=null" >
+			,usetype = #{useType}
+		</if>
+		where id = #{id}
+		
+	</update>
+	
+	<delete id="delPrintLabelCon">
+		delete from SRVS_PRINTLABEL_CON
+			<where>
+			id in 
+				<foreach collection="gids" item="gid" open="(" close=")" separator=",">
+					#{gid}
+				</foreach>
+			</where>
+	</delete>
+	
+	<select id="getPrintLabelConForUPdate"  resultType="com.zc.pivas.printlabel.entity.PrintLabelConBean">
+	  	SELECT ID,NAME,YYRQ,BATCHID,MEDICCATEGORY,MEDICLABEL,PRINTSTATE,MEDICAL,ordernum as "orderNum",ispack as "isPack",usetype as "useType" from SRVS_PRINTLABEL_CON
+		<where>
+			1=1
+			<if test="printLabelCon != null">
+				<if test="printLabelCon.id != null and '' neq printLabelCon.id ">
+					<![CDATA[ and id <> #{printLabelCon.id} ]]>
+				</if>
+				
+				<if test="printLabelCon.name != null and '' neq printLabelCon.name ">
+					and name = #{printLabelCon.name}
+				</if>
+			</if>
+		</where>
+  	</select>
+</mapper>

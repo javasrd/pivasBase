@@ -1,0 +1,397 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zc.pivas.docteradvice.repository.PrescriptionRuleDao" >
+	
+	<select id="qryPrioRulesList" parameterType="Map" resultType="com.zc.pivas.docteradvice.bean.PriorityRulesWithArea">
+		select 
+				prio.pr_id as "prId",
+				prio.pr_type as "prType",
+				prio.deptcode as "deptcode",
+				prio.medic_id as "medicId",
+				prio.medic_type as "medicType",
+				prio.pr_order as "prOrder",
+				prio.pr_user_id as "prUserId",
+				prio.pr_time as "prTime",
+				prio.enabled as "enabled",
+				area.deptname	as "deptname",
+				nvl(medica.medicaments_name,(select category_name from SRVS_MEDICAMENTS_category cate where to_char(cate.category_id)=prio.medic_id)) as "medicName",
+				nvl(medica.medicaments_code,prio.medic_id) as "medicCode",
+				nvl(medica.category_id,prio.medic_id) as "categoryId"
+	    	from  SRVS_PRIORITY_RULES prio
+	    	join SRVS_INPATIENTAREA area on prio.deptcode=area.deptcode
+	    	left join SRVS_MEDICAMENTS medica on prio.medic_id = medica.medicaments_code
+	    	where 1=1
+        	<if test="qry.deptcode !=null and qry.deptcode !=''">
+				and prio.deptcode = #{qry.deptcode,jdbcType=VARCHAR}
+			</if>
+			<if test="qry.prType !=null and qry.prType !=''">
+				and prio.pr_type = #{qry.prType,jdbcType=INTEGER}
+			</if>
+		order by prio.deptcode,prio.pr_order
+	</select>
+	
+	<sql id="qryForceRulesField">
+		t.pr_id as "prId",
+		t.pr_type as "prType",
+		t.deptcode as "deptcode",
+		t.medic_id as "medicId",
+		t.medic_type as "medicType",
+		t.batch_id as "batchId",
+		t.pr_order as "prOrder",
+		t.pr_user_id as "prUserId",
+		t.pr_time as "prTime",
+		t.enabled as "enabled",
+		a.deptname	as "deptname",
+		nvl(m.medicaments_name,(select category_name from SRVS_MEDICAMENTS_category cate where to_char(cate.category_id)=t.medic_id)) as "medicName",
+		nvl(m.medicaments_code,t.medic_id) as "medicCode",
+		nvl(m.category_id,t.medic_id) as "categoryId",
+		b.NAME_ as "batchName"
+	</sql>
+	
+	<sql id="qryForceRulesWhere">
+		from SRVS_PRIORITY_RULES t
+		left join SRVS_INPATIENTAREA a
+		on a.deptcode = t.deptcode 
+		left join SRVS_MEDICAMENTS m
+			on t.medic_id = m.medicaments_code 
+  		left join srvs_batch b
+		on t.batch_id = b.id_ 
+		where 
+			a.deptcode is not null 
+		<if test="qry.deptcode !=null and qry.deptcode !=''">
+			and t.deptcode = #{qry.deptcode,jdbcType=VARCHAR}	
+		</if>
+		<if test="qry.prType !=null and qry.prType !=''">
+			and t.pr_type = #{qry.prType,jdbcType=INTEGER}
+		</if>
+		<if test="qry.enabled !=null and qry.enabled !=''">
+			and t.enabled = #{qry.enabled,jdbcType=INTEGER}
+		</if>
+		<if test="qry.orderby !=null and qry.orderby !=''">
+			order by t.deptcode,t.pr_order
+		</if>
+		<if test="qry.orderby ==null or qry.orderby ==''">
+			order by t.deptcode,t.pr_order desc
+		</if>
+	</sql>
+	
+	<select id="qryForceRulesList" resultType="com.zc.pivas.docteradvice.bean.ForceRulesWithArea">
+		<include refid="common.jqueryPageHead" />
+	  	select <include refid="qryForceRulesField" /><include refid="qryForceRulesWhere" />
+	  	<include refid="common.jqueryPageBottom" />
+	</select>
+	
+	<select id="qryForceRulesCount" resultType="Integer" >
+		select count(*) <include refid="qryForceRulesWhere" />
+	</select>
+	
+	<select id="qryPrioRulesVal" parameterType="Map" resultType="Integer" >
+	select max(pr_order) from SRVS_PRIORITY_RULES t2
+    where t2.pr_type=#{map.prType,jdbcType=INTEGER} 
+    	and t2.deptcode=#{map.deptcode,jdbcType=VARCHAR}
+	</select>
+	
+	<insert id="addPrioRules" parameterType="com.zc.pivas.docteradvice.entity.PriorityRules" >
+		<selectKey resultType="java.lang.Long" order="BEFORE" keyProperty="map.prId">
+			select SQ_SRVS_PRIORITY_RULES.Nextval from DUAL
+		</selectKey>
+		insert into SRVS_PRIORITY_RULES(pr_id,pr_type,deptcode,medic_id,batch_id,pr_order,pr_user_id,pr_time,medic_type)
+		values(
+			#{map.prId,jdbcType=BIGINT},
+			#{map.prType,jdbcType=INTEGER},
+			#{map.deptcode,jdbcType=VARCHAR},
+			#{map.medicId,jdbcType=VARCHAR},
+			#{map.batchId,jdbcType=BIGINT},
+			#{map.prOrder,jdbcType=INTEGER},
+       		#{map.prUserId,jdbcType=BIGINT},
+       		sysdate,
+       		#{map.medicType,jdbcType=INTEGER})
+	</insert>
+	
+	<update id="updPrioRules" parameterType="Map" >
+		update SRVS_PRIORITY_RULES set
+			pr_order = #{map.prOrder,jdbcType=INTEGER},
+			pr_user_id=#{map.prUserId,jdbcType=BIGINT},
+			pr_time = sysdate 
+		where pr_id = #{map.prId,jdbcType=BIGINT} 
+	</update>
+	
+	<update id="updForceRules" parameterType="Map" >
+		update SRVS_PRIORITY_RULES set
+			<choose>
+				<when test="map.enabled !=null and map.enabled !=''">
+					enabled = #{map.enabled,jdbcType=INTEGER},
+				</when>
+				<otherwise>
+				
+					<choose>
+						<when test="map.batchId !=null and map.batchId !=''">
+						batch_id = #{map.batchId,jdbcType=BIGINT},
+						</when>
+						<otherwise>
+						batch_id = null,
+						</otherwise>
+					</choose>
+					
+				</otherwise>
+			</choose>
+			pr_user_id=#{map.prUserId,jdbcType=BIGINT},
+			pr_time = sysdate 
+		where pr_id = #{map.prId,jdbcType=BIGINT} 
+	</update>
+	
+	<!-- 
+			update SRVS_PRIORITY_RULES set
+			pr_order = #{map.prOrder1,jdbcType=INTEGER},
+			pr_user_id=#{map.prUserId,jdbcType=BIGINT},
+			pr_time = sysdate 
+		where pr_id = #{map.prId1,jdbcType=BIGINT} ;
+		
+		update SRVS_PRIORITY_RULES set
+			pr_order = #{map.prOrder2,jdbcType=INTEGER},
+			pr_user_id=#{map.prUserId,jdbcType=BIGINT},
+			pr_time = sysdate 
+		where pr_id = #{map.prId2,jdbcType=BIGINT} ;
+	 -->
+	
+	<delete id="delPrioRules" parameterType="Map">
+		delete from SRVS_PRIORITY_RULES
+		where 1=1 
+		<choose>
+		<when test="map.prId !=null and map.prId !=''">
+		and pr_id = #{map.prId,jdbcType=BIGINT}
+		</when>
+		<when test="map.prIdN !=null and map.prIdN !=''">
+		and pr_id in 
+			<foreach collection="map.prIdN" item="prId" separator="," open="(" close=")" >
+			#{prId,jdbcType=BIGINT} 
+			</foreach>
+		</when>
+		<when test="map.deptcode !=null and map.deptcode !=''">
+		and deptcode = #{map.deptcode,jdbcType=VARCHAR}
+		</when>
+		<otherwise>
+			and 1=0 
+		</otherwise>
+		</choose>
+		<if test="map.prType !=null and map.prType !=''">
+		and pr_type = #{map.prType,jdbcType=INTEGER}
+		</if>
+	</delete>
+	
+	<insert id="addPrioRulesMany" parameterType="Map" >
+		insert into SRVS_PRIORITY_RULES
+		  (pr_id,
+		   pr_type,
+		   deptcode,
+		   medic_id,
+		   pr_order,
+		   batch_id,
+		   pr_user_id,
+		   pr_time,
+		   enabled,
+		   medic_type)
+		select sq_SRVS_PRIORITY_RULES.nextval,
+		       #{map.prType,jdbcType=INTEGER},
+		       #{map.deptcode,jdbcType=VARCHAR},
+		       t1.medic_id,
+		        NVL((select max(prorder.pr_order) from SRVS_PRIORITY_RULES prorder where prorder.deptcode = #{map.deptcode,jdbcType=VARCHAR} and prorder.pr_type =  #{map.prType,jdbcType=INTEGER}), 0) + rownum as new_order,
+		        t1.batch_id,
+		        #{map.prUserId,jdbcType=BIGINT},
+		        sysdate,
+		        enabled,
+		        t1.medic_type
+		  from (select  t.*
+		          from (select medic_id, batch_id, enabled, medic_type
+		                  from SRVS_PRIORITY_RULES priRule
+		                 where priRule.deptcode = #{map.deptcodeNow,jdbcType=VARCHAR}
+		                   and priRule.pr_type =  #{map.prType,jdbcType=INTEGER}
+		                   <if test="map.medicCodeList !=null and map.medicCodeList.size > 0">
+						   		and priRule.medic_id in
+						   		<foreach collection="map.medicCodeList" item="medicCode" separator="," open="(" close=")" >
+						   			#{medicCode}
+						   		</foreach>
+						   	</if>
+						   	<if test="map.medicCodeList == null or map.medicCodeList.size == 0">
+						   		and priRule.medic_id in ("")
+						   	</if>
+		                   and not exists
+		                 (select 1
+		                          from SRVS_PRIORITY_RULES priRuleOther
+		                         where priRuleOther.deptcode = #{map.deptcode,jdbcType=VARCHAR}
+		                           and priRuleOther.pr_type =  #{map.prType,jdbcType=INTEGER}
+		                           and priRuleOther.medic_id = priRule.medic_id)
+		                 order by pr_order) t) t1
+	</insert>
+	
+	<sql id="qryVolumeRulesField"> 
+		t.vr_id as "vrId",
+		t.vr_type as "vrType",
+		t.deptcode as "deptcode",
+		t.batch_id as "batchId",
+		t.overrun as "overrun",
+		t.maxval as "maxval",
+		t.minval as "minval",
+		t.vr_user_id as "vrUserId",
+		t.vr_time as "vrTime",
+		
+		a.deptname	as "deptname",
+		m.NAME_ as "batchName"
+	</sql>
+	
+	<sql id="qryVolumeRulesWhere">
+		from SRVS_VOLUME_RULES t,SRVS_INPATIENTAREA a ,srvs_batch  m
+		where a.deptcode = t.deptcode  
+		and t.batch_id = m.id_ 
+		<if test="qry.deptcode !=null and qry.deptcode !=''">
+			and t.deptcode = #{qry.deptcode,jdbcType=VARCHAR}
+		</if>
+		<if test="qry.vrType !=null and qry.vrType !=''">
+			and t.vr_type = #{qry.vrType,jdbcType=INTEGER}
+		</if>
+		order by t.batch_id 
+	</sql>
+	
+	<select id="qryVolumeRulesList" resultType="com.zc.pivas.docteradvice.bean.VolumeRulesWithBatch" >
+		<include refid="common.jqueryPageHead" />
+	  	select <include refid="qryVolumeRulesField" /><include refid="qryVolumeRulesWhere" />
+	  	<include refid="common.jqueryPageBottom" />
+	</select>
+	
+	<select id="qryVolumeRulesCount" resultType="Integer" >
+		select count(*) <include refid="qryVolumeRulesWhere" />
+	</select>
+	
+	<insert id="addVolumeRules" parameterType="com.zc.pivas.docteradvice.entity.VolumeRules" >
+		<selectKey resultType="java.lang.Long" order="BEFORE" keyProperty="map.vrId" >
+			select SQ_SRVS_VOLUME_RULES.Nextval as "vrId" from DUAL
+		</selectKey>
+		insert into SRVS_VOLUME_RULES(vr_id,vr_type,deptcode,batch_id,overrun,maxval,minval,vr_user_id,vr_time)
+		values(
+			#{map.vrId,jdbcType=INTEGER},
+			#{map.vrType,jdbcType=INTEGER},
+			#{map.deptcode,jdbcType=VARCHAR},
+			#{map.batchId,jdbcType=BIGINT},
+			#{map.overrun,jdbcType=BIGINT},
+       		#{map.maxval,jdbcType=BIGINT},
+       		#{map.minval,jdbcType=BIGINT},
+       		#{map.vrUserId,jdbcType=BIGINT},
+       		sysdate
+       	)
+	</insert>
+	
+	<update id="updVolumeRules" parameterType="Map" >
+		update SRVS_VOLUME_RULES set
+			batch_id=#{map.batchId,jdbcType=BIGINT},
+			overrun=#{map.overrun,jdbcType=BIGINT},
+			maxval=#{map.maxval,jdbcType=BIGINT},
+			minval=#{map.minval,jdbcType=BIGINT},
+			<if test="map.vrUserId !=null and map.vrUserId !=''">vr_user_id=#{map.vrUserId,jdbcType=BIGINT},</if>
+			vr_time = sysdate 
+		where vr_id = #{map.vrId,jdbcType=BIGINT} 
+	</update>
+	
+	<delete id="delVolumeRules" parameterType="Map" >
+		delete from SRVS_VOLUME_RULES
+		where 1=1 
+		<choose>
+		<when test="map.vrId !=null and map.vrId !=''">
+		and vr_id = #{map.prId,jdbcType=BIGINT}
+		</when>
+		<when test="map.vrIdN !=null and map.vrIdN !=''">
+		and vr_id in 
+			<foreach collection="map.vrIdN" item="vrId" separator="," open="(" close=")" >
+			#{vrId,jdbcType=BIGINT} 
+			</foreach>
+		</when>
+		<when test="map.deptcode !=null and map.deptcode !=''">
+		and deptcode = #{map.deptcode,jdbcType=VARCHAR}
+		</when>
+		<otherwise>
+			and 1=0 
+		</otherwise>
+		</choose>
+		
+		<if test="map.vrType !=null and map.vrType !=''">
+		and vr_type = #{map.vrType,jdbcType=INTEGER}
+		</if>
+	</delete>
+	
+	<insert id="addVolumeRulesMany" parameterType="Map" >
+		insert into SRVS_VOLUME_RULES
+		  (vr_type,
+		   deptcode,
+		   batch_id,
+		   overrun,
+		   maxval,
+		   minval,
+		   vr_user_id,
+		   vr_time)
+		  select vr_type,
+		         #{map.deptcode, jdbcType = VARCHAR},
+		         batch_id,
+		         overrun,
+		         maxval,
+		         minval,
+		         #{map.vrUserId,jdbcType = BIGINT},
+		         sysdate
+		    from SRVS_VOLUME_RULES volRule
+		   where volRule.deptcode = #{map.deptcodeNow, jdbcType = VARCHAR} 
+		   	
+		   	<if test="map.vrBatchesList !=null and map.vrBatchesList.size > 0">
+		   		and volRule.Batch_Id in 
+		   		<foreach collection="map.vrBatchesList" item="vrBatch" separator="," open="(" close=")" >
+		   			#{vrBatch}
+		   		</foreach>
+		   	</if>
+		   	<if test="map.vrBatchesList == null or map.vrBatchesList.size == 0">
+		   		and volRule.Batch_Id in ("")
+		   	</if>
+		     and not exists
+		   (select 1
+		            from SRVS_VOLUME_RULES volRuleOther
+		           where volRuleOther.deptcode = #{map.deptcode, jdbcType = VARCHAR}
+		             and volRuleOther.batch_id = volRule.batch_id)
+	</insert>
+	
+	<select id="qryOtherRulesList" parameterType="Map" resultType="com.zc.pivas.docteradvice.entity.OtherRule">
+	select 
+	    OR_ID as "orId",
+	    OR_TYPE as "orType",
+	    OR_NAME as "orName",
+	    OR_DESC as "orDesc",
+	    OR_SORT as "orSort",
+	    ENABLED as "enabled"
+	from SRVS_OTHER_RULE t
+	where 1=1 
+	<if test="qry.orId !=null and qry.orId !=''">
+		and t.OR_ID = #{qry.orId,jdbcType=INTEGER}
+	</if>
+	<if test="qry.orType !=null and qry.orType !=''">
+		and t.or_type = #{qry.orType,jdbcType=INTEGER}
+	</if>
+	order by t.or_sort 
+	</select>
+	
+	<update id="updOtherRules" parameterType="Map" >
+	update SRVS_OTHER_RULE
+	set enabled=#{map.enabled,jdbcType=INTEGER} 
+	where or_id = #{map.orId,jdbcType=BIGINT} 
+	</update>
+	
+	<select id="qryMedicamentCategory" resultType="com.zc.pivas.medicamentscategory.entity.MedicCategory">
+		select 
+		  category_id as categoryId,
+		  category_name as categoryName,
+		  category_code as categoryCode,
+		  category_priority as categoryPriority,
+		  category_IsHard as categoryIsHard
+		from SRVS_MEDICAMENTS_category
+	</select>
+	
+	<select id="checkVolumRuleExist" resultType="com.zc.pivas.docteradvice.entity.VolumeRules">
+		
+		 
+	</select>
+	
+</mapper>

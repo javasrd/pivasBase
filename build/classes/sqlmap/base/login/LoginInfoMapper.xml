@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zc.base.sys.modules.login.repository.LoginInfoDao">
+
+	<resultMap id="LoginInfoMap"
+		type="com.zc.base.sys.modules.login.entity.LoginInfo">
+		<id column="login_info_id" property="loginInfoId" jdbcType="BIGINT" />
+		<result column="user_id" property="userId" jdbcType="BIGINT" />
+		<result column="account" property="account" jdbcType="VARCHAR" />
+		<result column="lst_err_login_time" property="lstErrLoginTime"
+			jdbcType="TIMESTAMP" />
+		<result column="fst_suc_login_time" property="fstSucLoginTime"
+			jdbcType="TIMESTAMP" />
+		<result column="error_count" property="errorCount" jdbcType="INTEGER" />
+		<result column="locked" property="locked" jdbcType="INTEGER" />
+		<result column="lock_time" property="lockTime" jdbcType="TIMESTAMP" />
+		<result column="lock_lost_eff_time" property="lockLostEffTime"
+			jdbcType="TIMESTAMP" />
+	</resultMap>
+
+	<insert id="addLoginInfo"
+		parameterType="com.zc.base.sys.modules.login.entity.LoginInfo">
+		INSERT INTO SYS_LOGIN_INFO (
+			user_id,
+			account,
+			lst_err_login_time,
+			fst_suc_login_time,
+			error_count,
+			locked,
+			lock_time,
+			lock_lost_eff_time
+		)
+		VALUES
+		(
+			#{userId,jdbcType=BIGINT},
+			#{account,jdbcType=VARCHAR},
+			#{lstErrLoginTime,jdbcType=TIMESTAMP},
+			#{fstSucLoginTime,jdbcType=TIMESTAMP},
+			#{errorCount,jdbcType=INTEGER},
+			#{locked,jdbcType=INTEGER},
+			#{lockTime,jdbcType=TIMESTAMP},
+			#{lockLostEffTime,jdbcType=TIMESTAMP}
+		)
+	</insert>
+
+	<select id="getLoginInfoByUserId" resultMap="LoginInfoMap"
+		parameterType="long">
+		SELECT
+		t.login_info_id,
+		t.user_id,
+		t.account,
+		t.lst_err_login_time,
+		t.fst_suc_login_time,
+		t.error_count,
+		t.locked,
+		t.lock_time,
+		t.lock_lost_eff_time
+		from (
+		SELECT *  
+		FROM
+		SYS_LOGIN_INFO
+		where user_id = #{userId}
+		order by login_info_id 
+		) t
+		where rownum = 1
+	</select>
+	
+	<update id="updateLoginInfo" parameterType="com.zc.base.sys.modules.login.entity.LoginInfo">
+		update SYS_LOGIN_INFO set 
+		lst_err_login_time = #{lstErrLoginTime,jdbcType=TIMESTAMP},
+		fst_suc_login_time = #{fstSucLoginTime,jdbcType=TIMESTAMP},
+		error_count = #{errorCount,jdbcType=VARCHAR},
+		locked = #{locked,jdbcType=INTEGER},
+		lock_time = #{lockTime,jdbcType=TIMESTAMP},
+		lock_lost_eff_time = #{lockLostEffTime,jdbcType=TIMESTAMP}
+		where login_info_id = #{loginInfoId}
+	</update>
+	
+	<!-- 解锁用户 -->
+	<update id="unlockUser" parameterType="java.lang.Long">
+		update SYS_LOGIN_INFO  
+		set locked=0,
+		lst_err_login_time=null,
+		lock_time=null,
+		lock_lost_eff_time=null,
+		error_count=0 
+		where user_id = #{0}
+	</update>
+</mapper>

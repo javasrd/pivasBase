@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zc.pivas.statistics.repository.StaticDoctorDao">
+
+	<select id="getDoctorTypeList"
+		resultType="com.zc.pivas.statistics.bean.medicalAdvice.StaticDoctorType">
+		SELECT GID statusKey,
+		TRIALNAME statusName
+		FROM SRVS_TRIAL_ERRORTYPE PTE
+	</select>
+
+	<select id="queryDoctorNameStatusList"
+		resultType="com.zc.pivas.statistics.bean.medicalAdvice.StaticDoctorStatusBean">
+		SELECT YZM.DOCTOR AS doctorId,
+		YZM.DOCTOR_NAME AS doctorName,
+		YZM.YZSHBTGLX AS statusKey,
+		(SELECT TRIALNAME
+		FROM SRVS_TRIAL_ERRORTYPE PTE
+		WHERE GID = YZM.YZSHBTGLX) AS statusName,
+		COUNT(1) AS ststsCount
+
+		FROM SRVS_DOCTOR_ADVICE_CHECKRESULT YZM
+
+		WHERE 1 = 1 AND YZSHZT = 2
+
+		<if test="staticDoctor != null">
+			<if
+				test="staticDoctor.searchTime != null and '' neq staticDoctor.searchTime ">
+				and to_char(YZM.SFRQ,'yyyy-mm-dd') like #{staticDoctor.searchTime}
+				||'%'
+			</if>
+
+			<if
+				test="staticDoctor.searchDoctorIds != null and '' neq staticDoctor.searchDoctorIds ">
+				and YZM.DOCTOR in
+				<foreach item="doctorId" index="index"
+					collection="staticDoctor.searchDoctorIds" open="(" separator=","
+					close=")">
+					#{doctorId,jdbcType=INTEGER}
+				</foreach>
+
+			</if>
+		</if>
+		GROUP BY YZM.DOCTOR, YZM.DOCTOR_NAME, YZM.YZSHBTGLX
+		order by YZM.DOCTOR_NAME
+
+	</select>
+
+	<select id="queryDoctorNamePieList"
+		resultType="com.zc.pivas.statistics.bean.medicalAdvice.StaticDoctorNamePieBean">
+		SELECT
+		YZM.DOCTOR AS doctorId,
+		YZM.DOCTOR_NAME AS name,
+		COUNT(1) AS value
+		FROM SRVS_DOCTOR_ADVICE_CHECKRESULT YZM
+		WHERE 1 = 1 AND YZSHZT = 2
+
+		<if test="staticDoctor != null">
+			<if
+				test="staticDoctor.searchTime != null and '' neq staticDoctor.searchTime ">
+				and to_char(YZM.SFRQ,'yyyy-mm-dd') like #{staticDoctor.searchTime}
+				||'%'
+			</if>
+
+			<if
+				test="staticDoctor.searchDoctorIds != null and '' neq staticDoctor.searchDoctorIds ">
+				and YZM.DOCTOR in
+				<foreach item="doctorId" index="index"
+					collection="staticDoctor.searchDoctorIds" open="(" separator=","
+					close=")">
+					#{doctorId,jdbcType=INTEGER}
+				</foreach>
+
+			</if>
+		</if>
+		GROUP BY YZM.DOCTOR, YZM.DOCTOR_NAME
+		order by YZM.DOCTOR_NAME
+	</select>
+
+	<select id="queryDoctorNameStatusListByID"
+		resultType="com.zc.pivas.statistics.bean.medicalAdvice.StaticDoctorStatusBean">
+		SELECT YZM.DOCTOR AS doctorId,
+		YZM.DOCTOR_NAME AS doctorName,
+		YZM.YZSHBTGLX AS statusKey,
+		(SELECT TRIALNAME
+		FROM SRVS_TRIAL_ERRORTYPE PTE
+		WHERE GID = YZM.YZSHBTGLX) AS statusName,
+		COUNT(1) AS ststsCount
+		FROM SRVS_DOCTOR_ADVICE_CHECKRESULT YZM
+		WHERE 1 = 1 AND YZSHZT = 2 AND YZM.DOCTOR = #{staticDoctor.doctorID}
+		<if test="staticDoctor.searchTime != null and '' neq staticDoctor.searchTime ">
+			and to_char(YZM.SFRQ,'yyyy-mm-dd') like #{staticDoctor.searchTime}||'%'
+		</if>
+		GROUP BY YZM.DOCTOR, YZM.DOCTOR_NAME, YZM.YZSHBTGLX
+	</select>
+
+	<select id="queryDeptStatusList"
+		resultType="com.zc.pivas.statistics.bean.medicalAdvice.StaticDoctorStatusBean">
+		SELECT
+		YZM.YZSHBTGLX AS statusKey,
+		(SELECT TRIALNAME
+		FROM SRVS_TRIAL_ERRORTYPE PTE
+		WHERE GID = YZM.YZSHBTGLX) AS statusName,
+		YZM.WARDNAME AS deptname,
+		COUNT(1) AS ststsCount
+		FROM SRVS_DOCTOR_ADVICE_CHECKRESULT YZM
+		WHERE 1 = 1 AND YZSHZT = 2
+
+		<if test="staticDoctor != null">
+			<if
+				test="staticDoctor.searchTime != null and '' neq staticDoctor.searchTime ">
+				and to_char(YZM.SFRQ,'yyyy-mm-dd') like #{staticDoctor.searchTime}
+				||'%'
+			</if>
+
+			<if
+				test="staticDoctor.searchDeptNames != null and '' neq staticDoctor.searchDeptNames ">
+				and YZM.WARDNAME in
+				<foreach item="deptName" index="index"
+					collection="staticDoctor.searchDeptNames" open="(" separator=","
+					close=")">
+					#{deptName,jdbcType=VARCHAR}
+				</foreach>
+
+			</if>
+		</if>
+		GROUP BY YZM.YZSHBTGLX, YZM.WARDNAME
+		order by YZM.WARDNAME
+	</select>
+
+	<select id="queryDeptPieList"
+		resultType="com.zc.pivas.statistics.bean.medicalAdvice.StaticDoctorDeptPieBean">
+		SELECT
+		YZM.WARDNAME as name,
+		COUNT(1) AS value
+		FROM SRVS_DOCTOR_ADVICE_CHECKRESULT YZM
+		WHERE 1 = 1 AND YZSHZT = 2
+		<if test="staticDoctor != null">
+			<if
+				test="staticDoctor.searchTime != null and '' neq staticDoctor.searchTime ">
+				and to_char(YZM.SFRQ,'yyyy-mm-dd') like #{staticDoctor.searchTime}
+				||'%'
+			</if>
+
+			<if
+				test="staticDoctor.searchDeptNames != null and '' neq staticDoctor.searchDeptNames ">
+				and YZM.WARDNAME in
+				<foreach item="deptName" index="index"
+					collection="staticDoctor.searchDeptNames" open="(" separator=","
+					close=")">
+					#{deptName,jdbcType=VARCHAR}
+				</foreach>
+
+			</if>
+		</if>
+		group by YZM.WARDNAME
+		order by YZM.WARDNAME
+	</select>
+
+	<select id="queryDeptStatusListByName"
+		resultType="com.zc.pivas.statistics.bean.medicalAdvice.StaticDoctorStatusBean">
+
+		SELECT
+		YZM.YZSHBTGLX AS statusKey,
+		(SELECT TRIALNAME
+		FROM SRVS_TRIAL_ERRORTYPE PTE
+		WHERE GID = YZM.YZSHBTGLX) AS statusName,
+		YZM.WARDNAME AS deptname,
+		COUNT(1) AS ststsCount
+		FROM SRVS_DOCTOR_ADVICE_CHECKRESULT YZM
+		WHERE 1 = 1 AND YZSHZT = 2 AND YZM.WARDNAME = #{staticDoctor.deptName}
+		<if test="staticDoctor.searchTime != null and '' neq staticDoctor.searchTime ">
+			and to_char(YZM.SFRQ,'yyyy-mm-dd') like #{staticDoctor.searchTime}||'%'
+		</if>
+		GROUP BY YZM.YZSHBTGLX, YZM.WARDNAME
+	</select>
+
+	<select id="queryDoctorNameList"
+		resultType="com.zc.pivas.statistics.bean.medicalAdvice.StaticDoctorNameBean">
+		SELECT YZM.DOCTOR AS doctorId,YZM.DOCTOR_NAME AS doctorName
+		from SRVS_DOCTOR_ADVICE_CHECKRESULT YZM
+		GROUP BY YZM.DOCTOR ,YZM.DOCTOR_NAME
+		order by YZM.DOCTOR
+	</select>
+
+<!-- 批量更新审方状态 -->
+	<update id="updateYzCheckResult" parameterType="Map">
+		update SRVS_DOCTOR_ADVICE_CHECKRESULT
+		<set>
+			DIANP = #{dianp}
+		</set>
+		where id = #{id,jdbcType=VARCHAR}
+	</update>
+</mapper>

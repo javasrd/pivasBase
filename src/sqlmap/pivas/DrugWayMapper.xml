@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zc.pivas.drugway.dao.DrugWayDAO">
+	<resultMap id="DrugWayMap" type="com.zc.pivas.drugway.bean.DrugWayBean">
+		<id column="gid" property="gid" jdbcType="VARCHAR" />
+		<result column="drugwayid" property="id" jdbcType="VARCHAR" />
+		<result column="drugwaycode" property="code" jdbcType="VARCHAR" />
+		<result column="drugwayname" property="name" jdbcType="INTEGER" />
+		<result column="reserve0" property="reserve0" jdbcType="VARCHAR" />
+		<result column="reserve1" property="reserve1" jdbcType="VARCHAR" />
+		<result column="reserve2" property="reserve2" jdbcType="VARCHAR" />
+	</resultMap>
+
+	<sql id="getDrugWaySql">
+		select * from SRVS_DRUGWAY
+		<where>
+			1=1
+			<if test="drugWay != null">
+				<if test="drugWay.code != null and '' neq drugWay.code">
+					and drugwaycode = #{drugWay.code}
+				</if>
+				
+				<if test="drugWay.id != null and '' neq drugWay.id">
+					and drugwayid = #{drugWay.id}
+				</if>
+
+				<if test="drugWay.codes != null and '' neq drugWay.codes">
+					and
+					<foreach item="code" index="index" collection="drugWay.codes"
+						open="(" separator="or" close=")">
+						drugwaycode like '%'||#{code}||'%' escape '\'
+					</foreach>
+				</if>
+
+				<if test="drugWay.names != null and '' neq drugWay.names">
+					and
+					<foreach item="name" index="index" collection="drugWay.names"
+						open="(" separator="or" close=")">
+						drugwayname like '%'||#{name}||'%' escape '\'
+					</foreach>
+				</if>
+			</if>
+		</where>
+	</sql>
+
+	<select id="getDrugWayList" resultMap="DrugWayMap">
+		<include refid="common.jqueryPageHead" />
+		<include refid="getDrugWaySql" />
+		<include refid="common.jqueryPageBottom" />
+	</select>
+
+	<select id="getDrugWayByCondition" resultMap="DrugWayMap">
+		<include refid="getDrugWaySql" />
+	</select>
+
+	<select id="getDrugWayTotal" resultType="int">
+		select count(1) from (
+		<include refid="getDrugWaySql" />
+		) t1
+	</select>
+
+	<insert id="addDrugWay" parameterType="com.zc.pivas.drugway.bean.DrugWayBean">
+		INSERT INTO SRVS_DRUGWAY
+		(
+		drugwayid,
+		drugwaycode,
+		drugwayname
+		)
+		VALUES
+		(
+		#{id},
+		#{code},
+		#{name}
+		)
+	</insert>
+
+	<update id="updateDrugWay" parameterType="com.zc.pivas.drugway.bean.DrugWayBean">
+		update SRVS_DRUGWAY
+		set
+		drugwayname = #{name}
+		where drugwayid = #{id}
+	</update>
+	
+	
+	<update id="synData" parameterType="com.zc.pivas.drugway.bean.DrugWayBean">
+
+		merge into SRVS_DRUGWAY t1
+		using (
+		select #{id} as drugwayid from
+		dual ) t2
+		ON
+		(
+		t1.drugwayid = t2.drugwayid
+		)
+		WHEN MATCHED THEN UPDATE SET
+		drugwayname = #{name}
+		where drugwayid = #{id}
+		WHEN NOT MATCHED THEN
+		INSERT(
+		drugwayid,
+		drugwaycode,
+		drugwayname
+		)
+		VALUES
+		(
+		#{id},
+		#{code},
+		#{name}
+		)
+	</update>
+</mapper>

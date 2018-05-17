@@ -1,0 +1,93 @@
+@charset "utf-8";
+@import "popup.css";
+/* CSS Document */
+/** 清除内外边距 *Download by http://www.codefans.net*/
+body, h1, h2, h3, h4, h5, h6, hr, p,
+blockquote, /* structural elements 结构元素 */
+dl, dt, dd, ul, ol, li, /* list elements 列表元素 */
+pre, /* text formatting elements 文本格式元素 */
+form, fieldset, legend, button, input, textarea, /* form elements 表单元素 */
+tr,th, td, /* table elements 表格元素 */
+img/* img elements 图片元素 */{
+   border:medium none;
+   margin: 0;
+   padding: 0;
+}
+
+/** 设置默认字体 **/
+/* *{font: 12px/1.5 '宋体',tahoma, Srial, helvetica, sans-serif; color:#585858;} */
+
+body,button, input, select, textarea {
+scrollbar-arrow-clolor:#7c7c7c;
+scrollbar-face-color:#c1c1c1;
+scrollbar-shadow-color:#fbfbfb;
+scrollbar-highlight-color:#fbfbfb;
+scrollbar-track-color:#d8d8d8;
+scrollbar-3dlight-color:#fbfbfb;
+}
+h1, h2, h3, h4, h5, h6 { font-size: 100%; }
+em{font-style:normal;}
+
+/** 重置列表元素 **/
+ul, ol { list-style: none; }
+
+/** 重置超链接元素 **/
+a { text-decoration: none;}
+a:hover { text-decoration:none; color:blue;}
+
+/** 重置图片元素 **/
+img{ border:0px;}
+
+/** 重置表格元素 **/
+table {border-collapse: collapse; border-spacing: 0; }
+
+
+/*清除浮动*/
+.clear{height:0px;line-height:0px;font-size:0px;clear:both; margin:0; padding:0;}
+
+.number{
+	display:block;
+	position:absolute;
+	color:#FFF;
+	font-size:10px;
+	font-weight:800;
+	text-align:center;
+	line-height:18px;
+	right:0;
+	top:0;
+	width:25px;
+	height:18px;
+	-moz-border-radius: 8px; 
+	-webkit-border-radius:8px; 
+	border-radius: 8px;
+	background-color:#f86b4f; 
+}
+
+#main {width:100%;margin: 0 auto;z-index: 1; margin-bottom:25px;}
+
+/*弹出框列表的统一样式*/
+.layeForm{margin:12px 12px 10px 5px;}
+.layeForm table{ width:100%;}
+.layeForm tr{height:30px;}
+.layeForm td.text{height:25px; text-align:right;padding-right:8px; color:#585858;}
+.layeForm td.in input{ height:23px; line-height:23px; width:100%; border:1px solid #d8d8d8;}/*2013-09-23改动部分 line-height:25px;*/
+.layeForm td.tbox{ height:80px; text-align:right; vertical-align:top;padding:5px 8px 0 0; color:#585858;}
+.layeForm td.ibox{padding-top:0px;}
+.layeForm td.ibox input{height:80px; vertical-align:top;line-height:25px;}/*2013-09-23改动部分 line-height:25px;*/
+.layeForm td.in textarea{ height:25px; line-height:25px; width:100%; border:1px solid #d8d8d8;}
+.layeForm td.ibox textarea{height:80px; vertical-align:top;border:1px solid #d8d8d8;line-height:25px;}
+.layeForm td.mand{ width:4%; line-height:26px; text-align:center; color:#FF0000;}
+
+/**增加策略*/
+.Tcontrol{margin:0px 8px 10px 10px; background:#f5f5f5;color:#585858; border:1px solid #dfdfdf;}
+.Tcontrol thead tr{height:32px; background:#dbebf3; border:1px solid #dfdfdf;}
+.Tcontrol tbody tr{height:37px;}
+.maBtn{width:auto; text-align:center;}
+.Tcontrol td{ border-left:1px solid #dfdfdf; border-bottom:1px solid #dfdfdf;}
+.Tcontrol td.ma{ text-align:center; vertical-align:middle;padding-left:5px;}
+.Tcontrol td.ma input{width:auto;z-index:999;}
+.title{background:#cfcfcf;font-weight:bold;text-align:left;padding-left:10px;}
+
+.ui-dialog-buttonset{
+	  margin-bottom: 6px;
+}

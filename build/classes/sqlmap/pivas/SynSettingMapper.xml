@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zc.pivas.synset.dao.SynSettingDAO" >
+	<resultMap id="SynSettingMap" type="com.zc.pivas.synset.bean.SynSettingBean" >
+		<id column="task_id" property="taskID" jdbcType="VARCHAR" />
+		<result column="task_name" property="taskName" jdbcType="VARCHAR" />
+		<result column="task_type" property="taskType" jdbcType="INTEGER" />
+		<result column="task_execute_mode" property="taskExecuteMode" jdbcType="INTEGER" />
+		<result column="task_taskpriority" property="taskTaskPriority" jdbcType="INTEGER" />
+		<result column="task_inteval" property="taskInteval" jdbcType="INTEGER" />
+		<result column="task_execute_time" property="executeTime" jdbcType="TIMESTAMP" />
+		<result column="task_create_time" property="createTime" jdbcType="TIMESTAMP" />
+		<result column="task_update_time" property="updateTime" jdbcType="TIMESTAMP" />
+		<result column="task_content_type" property="taskContentType" jdbcType="INTEGER" />
+		<result column="task_status" property="taskStatus" jdbcType="INTEGER" />
+		<result column="task_remark" property="taskRemark" jdbcType="VARCHAR" />
+		<result column="task_retryInterval" property="retryInterval" jdbcType="VARCHAR" />
+		<result column="task_retryTimes" property="retryTimes" jdbcType="VARCHAR" />
+		<result column="reserve0" property="reserve0" jdbcType="VARCHAR" />
+		<result column="reserve1" property="reserve1" jdbcType="VARCHAR" />
+		<result column="reserve2" property="reserve2" jdbcType="VARCHAR" />
+	</resultMap>
+	
+	<sql id="getSynSettingSql">
+  		SELECT * FROM SRVS_TASK
+			<where>
+  		    1=1 
+			<if test="synSetting != null">
+				<if test="synSetting.taskNames != null and '' neq synSetting.taskNames">
+				and 
+				<foreach item="taskName" index="index" collection="synSetting.taskNames"  open="(" separator="or" close=")" >  
+					task_name like  '%'||#{taskName}||'%'   escape '\'           
+				</foreach>
+				</if>
+			</if>
+		  </where>
+ 	</sql>
+  
+  <select id="getSynSettingList" resultMap="SynSettingMap">
+  	<include refid="common.jqueryPageHead" />
+  	<include refid="getSynSettingSql"/>
+  	<include refid="common.jqueryPageBottom" />
+  </select>
+  
+  <select id="getSynSettingTotal" resultType="int">
+  	select count(1) from (
+  		<include refid="getSynSettingSql"/>
+  	) t1
+  </select>
+  
+  <select id="getSynSetting" resultMap="SynSettingMap">
+	  	SELECT * FROM SRVS_TASK
+			<where>
+			1=1
+			<if test="synSetting != null">
+				<if test="synSetting.taskName != null and '' neq synSetting.taskName ">
+					and task_name = #{synSetting.taskName}
+				</if>
+				
+				<if test="synSetting.taskID != null and '' neq synSetting.taskID ">
+					and task_id = #{synSetting.taskID}
+				</if>
+			</if>
+			</where>
+  </select>
+  
+  <select id="checkTaskNameIsExitst" resultMap="SynSettingMap">
+	  	SELECT * FROM SRVS_TASK
+			<where>
+			1=1
+			<if test="synSetting != null">
+				<if test="synSetting.taskName != null and '' neq synSetting.taskName ">
+					and task_name = #{synSetting.taskName}
+				</if>
+				
+				<if test="synSetting.taskID != null and '' neq synSetting.taskID ">
+					<![CDATA[ and task_id <> #{synSetting.taskID} ]]>
+				</if>
+			</if>
+			</where>
+  </select>
+  
+  <select id="checkContentTypeIsExitst" resultMap="SynSettingMap">
+	  	SELECT * FROM SRVS_TASK
+			<where>
+			1=1
+			<if test="synSetting != null">
+				
+				and task_content_type = #{synSetting.taskContentType}
+				
+				<if test="synSetting.taskID != null and '' neq synSetting.taskID ">
+					<![CDATA[ and task_id <> #{synSetting.taskID} ]]>
+				</if>
+			</if>
+			</where>
+  </select>
+  
+  <insert id="addSynSetting" parameterType="com.zc.pivas.synset.bean.SynSettingBean">
+	  	INSERT INTO SRVS_TASK (
+		task_id,
+		task_name,
+		task_type,
+		task_execute_mode,
+		task_taskpriority,
+		task_inteval,
+		task_execute_time,
+		task_create_time,
+		task_content_type,
+		task_status,
+		task_remark,
+		task_retryInterval,
+		task_retryTimes
+	)
+	VALUES
+		(
+			#{taskID},
+			#{taskName},
+			#{taskType},
+			#{taskExecuteMode},
+			#{taskTaskPriority},
+			#{taskInteval},
+			#{executeTime},
+			#{createTime},
+			#{taskContentType},
+			#{taskStatus},
+			#{taskRemark},
+			#{retryInterval},
+			#{retryTimes}
+		)
+</insert>
+
+<update id="updateSynSetting" parameterType="com.zc.pivas.synset.bean.SynSettingBean">
+  	update SRVS_TASK a set
+  		<if test="taskExecuteMode != null">
+			a.task_execute_mode 	= #{taskExecuteMode},
+		</if>
+		
+		<if test="taskTaskPriority != null">
+		a.task_taskpriority 	= #{taskTaskPriority},
+		</if>
+		
+		<if test="taskInteval != null">
+		a.task_inteval 			= #{taskInteval},
+		</if>
+		
+		<if test="retryTimes != null">
+		a.task_retrytimes       = #{retryTimes},
+		</if>
+		
+		<if test="retryInterval != null">
+		a.task_retryinterval     = #{retryInterval},
+		</if>
+		
+		<if test="executeTime != null ">
+		a.task_execute_time 	= #{executeTime,jdbcType=TIMESTAMP},
+		</if>
+		
+		<if test="updateTime != null">
+		a.task_update_time 		= #{updateTime,jdbcType=TIMESTAMP},
+		</if>
+		
+		<if test="taskContentType != null">
+		a.task_content_type 	= #{taskContentType,jdbcType=INTEGER},
+		</if>
+		
+		<if test="taskStatus != null">
+		a.task_status 			= #{taskStatus,jdbcType=INTEGER},
+		</if>
+		
+		<if test="taskRemark != null">
+		a.task_remark 			= #{taskRemark,jdbcType=VARCHAR},
+		</if>
+		
+		a.task_type 			= #{taskType}
+		where a.task_id = #{taskID,jdbcType=BIGINT} and a.task_name = #{taskName,jdbcType=VARCHAR}
+  </update>
+  
+  <delete id="delSynSetting" parameterType="com.zc.pivas.synset.bean.SynSettingBean">
+  	delete from SRVS_TASK
+		where task_id = #{taskID}
+  </delete>
+  
+  <update id="updateSynState" parameterType="com.zc.pivas.synset.bean.SynSettingBean">
+  	update SRVS_TASK set
+		task_status = #{taskStatus}
+		where task_id = #{taskID}
+  </update>
+</mapper>

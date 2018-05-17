@@ -1,0 +1,538 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zc.pivas.configfee.dao.ChargeDetailsDao" >
+	
+	<select id="groupListMapByMap" resultType="Map" >
+	<include refid="common.jqueryPageHead" />
+	select pidrqzxbc as "pidrqzxbc",sum(decode(PZFZT,0,1,0)) as "errNum",max(PZFSQRQ) as "pzfsqrq" 
+	from (
+		select row_number() over(partition by COSTCODE order by pzfsqrq desc) rownum1 , k.* 
+		from SRVS_PRESCRIPTION_FEES k
+		where 1=1 
+	)t where t.rownum1 =1
+	group by pidrqzxbc 
+	<include refid="common.jqueryPageBottom" />
+	</select>
+	
+	<select id="qryLastChargeDate" resultType="Date">
+	select Max(pzfsqrq) 
+	  from SRVS_PRESCRIPTION_FEES
+	 where pq_ref_fee_id = #{prfid}
+	</select>
+	
+	<select id="groupCountByMap" resultType="Integer" >
+	select count(*) from (
+		select 1 from SRVS_PRESCRIPTION_FEES k
+		where 1=1 
+		group by pidrqzxbc  )
+	</select>
+	
+	<sql id="sqlFromWhere">
+		from SRVS_PRESCRIPTION_FEES pzf ,SRVS_PRESCRIPTION_main ydm
+		where pzf.pidrqzxbc = ydm.pidrqzxbc   
+		
+		<if test="qry.bednoS !=null" > 
+		and (
+		<foreach collection="qry.bednoS" item="bedno" separator="or" >
+		ydm.BEDNO like '%'||#{bedno,jdbcType=VARCHAR}||'%'
+		</foreach>
+		)
+		</if>
+		<if test="qry.patnameS !=null" > 
+		and (
+		<foreach collection="qry.patnameS" item="patname" separator="or" >
+		ydm.PATNAME like '%'||#{patname,jdbcType=VARCHAR}||'%'
+		</foreach>
+		)
+		</if>
+		<if test="qry.parentNoS !=null" > 
+		and (
+		<foreach collection="qry.parentNoS" item="parentNo" separator="or" >
+		ydm.PARENT_NO like '%'||#{parentNo,jdbcType=VARCHAR}||'%'
+		</foreach>
+		)
+		</if>
+		<if test="qry.wardNameS !=null" > 
+		and (
+		<foreach collection="qry.wardNameS" item="wardName" separator="or" >
+		ydm.WARDNAME like '%'||#{wardName,jdbcType=VARCHAR}||'%'
+		</foreach>
+		)
+		</if>
+		<if test="qry.freqCodeS !=null" > 
+		and (
+		<foreach collection="qry.freqCodeS" item="freqCode" separator="or" >
+		ydm.FREQ_CODE like '%'||#{freqCode,jdbcType=VARCHAR}||'%'
+		</foreach>
+		)
+		</if>
+		
+		<if test="qry.pidsj !=null">
+		and ydm.PIDSJ = #{qry.pidsj,jdbcType=VARCHAR}
+		</if>
+		
+		<if test="qry.pidsjN !=null" > 
+		and ydm.PIDSJ in 
+		<foreach collection="qry.pidsjN" item="pidsj" separator="," open="(" close=")" >
+		#{pidsj,jdbcType=VARCHAR} 
+		</foreach>
+		</if>
+		
+		group by ydm.yd_main_id 
+		order by yd_main_id desc 
+	</sql>
+
+
+	<!-- 药单列表 查询条件 -->
+	<sql id="sqlFromWhere2">
+		from SRVS_PRESCRIPTION_FEES pzf ,SRVS_PRESCRIPTION  yd ,SRVS_PRESCRIPTION_main ydm
+		where 1=1 
+		and pzf.yd_id = yd.yd_id  
+		and yd.parent_no = ydm.parent_no 
+		and yd.zxrq=ydm.zxrq 
+		and yd.zxbc=ydm.zxbc 
+		
+		<if test="qry.bednoS !=null" > 
+		and (
+		<foreach collection="qry.bednoS" item="bedno" separator="or" >
+		ydm.BEDNO like '%'||#{bedno,jdbcType=VARCHAR}||'%'
+		</foreach>
+		)
+		</if>
+		<if test="qry.patnameS !=null" > 
+		and (
+		<foreach collection="qry.patnameS" item="patname" separator="or" >
+		ydm.PATNAME like '%'||#{patname,jdbcType=VARCHAR}||'%'
+		</foreach>
+		)
+		</if>
+		<if test="qry.parentNoS !=null" > 
+		and (
+		<foreach collection="qry.parentNoS" item="parentNo" separator="or" >
+		ydm.PARENT_NO like '%'||#{parentNo,jdbcType=VARCHAR}||'%'
+		</foreach>
+		)
+		</if>
+		<if test="qry.wardMameS !=null" > 
+		and (
+		<foreach collection="qry.wardMameS" item="wardName" separator="or" >
+		ydm.WARDNAME like '%'||#{wardName,jdbcType=VARCHAR}||'%'
+		</foreach>
+		)
+		</if>
+		<if test="qry.freqCodeS !=null" > 
+		and (
+		<foreach collection="qry.freqCodeS" item="freqCode" separator="or" >
+		ydm.FREQ_CODE like '%'||#{freqCode,jdbcType=VARCHAR}||'%'
+		</foreach>
+		)
+		</if>
+		<if test="qry.zxbcS !=null" > 
+		and (
+		<foreach collection="qry.zxbcS" item="zxbc" separator="or" >
+		pb.name_ like '%'||#{zxbc,jdbcType=VARCHAR}||'%'
+		</foreach>
+		)
+		</if>
+		
+		<if test="qry.pidsj !=null">
+		and ydm.PIDSJ = #{qry.pidsj,jdbcType=VARCHAR}
+		</if>
+		
+		<if test="qry.pidsjN !=null" > 
+		and ydm.PIDSJ in 
+		<foreach collection="qry.pidsjN" item="pidsj" separator="," open="(" close=")" >
+		#{pidsj,jdbcType=VARCHAR} 
+		</foreach>
+		</if>
+		
+		group by ydm.yd_main_id 
+		order by yd_main_id desc 
+ 	</sql>
+
+	<select id="groupListMapByMap2" resultType="Map" >
+		<include refid="common.jqueryPageHead" />
+		select <include refid="fieldBean" /> <include refid="sqlFromWhere" />
+		<include refid="common.jqueryPageBottom" />
+  	</select>
+  	
+  	<select id="qryListChargeByMap2" resultType="com.zc.pivas.configfee.bean.ChargeBean" >
+    	select 
+    		pzf.yd_pzf_id as "ydPzfId",
+    		pzf.pq_ref_fee_id as "pqRefFeeID",
+    		pzf.deptcode as "deptCode",
+    		pcr.rulename as "rulename",
+    		pzf.costcode as "costcode",
+    		pcf.costname as "costname", 
+    		pzf.price as "price",
+    		pzf.amount as "amount",    		
+    		pzf.czymc as "czymc",
+    		pzf.pzfsqrq as "pzfsqrq",
+    		pzf.pzfzt as "pzfzt",
+    		pzf.pzfsbyy as "pzfsbyy"
+	   from SRVS_PRESCRIPTION_FEES pzf
+  left join SRVS_CONFIGFEE_RULE pcr
+         on pzf.configfeeruleid = pcr.gid
+  left join SRVS_CONFIG_FEE pcf
+         on pzf.costcode = pcf.costcode
+	  where pzf.pq_ref_fee_id = #{qry.gid,jdbcType=BIGINT}
+   order by pzf.costcode asc, pzf.pzfsqrq desc
+  	</select>
+  	
+  	<select id="qryPZFDetail" resultType="com.zc.pivas.configfee.bean.ChargeBean">
+  	select 
+	 		pzf.pq_ref_fee_id as "pqRefFeeID",
+	 		pzf.configfeeruleid as "configfeeruleid",
+	 		pzf.gid as "gid",
+	 		pzf.czymc as "czymc",
+	 		pzf.case_id as "caseID",
+	 		pzf.costcode as "costcode",
+	 		pzf.pidrqzxbc as "pidrqzxbc",
+	 		pzf.price as "price",
+	 		pzf.amount as "amount",
+	 		pzf.pc_id as "bcID",
+	 		pzf.deptcode as "deptCode"
+  	from SRVS_PRESCRIPTION_FEES pzf
+   where pzf.yd_pzf_id=#{ydPzfId,jdbcType=BIGINT}
+  	</select>
+  	
+  	<select id="checkChargeInABatch" resultType="Integer">
+  	 select sum(decode(t.PZFZT,1,0,1)) 
+		from (
+			select row_number() over (partition by pzf.pq_ref_fee_id,pzf.costcode order by pzf.pzfsqrq desc) rownum1, pzf.pq_ref_fee_id, pzf.costcode,pzf.pzfzt
+  			from SRVS_PRESCRIPTION_FEES pzf
+		   )t where t.rownum1 =1 and t.pq_ref_fee_id = #{pqrfid, jdbcType=BIGINT}
+  	</select>
+  	
+  	<update id="updatePPRCF">
+  	update SRVS_LABEL_REF_CONFIG_FEE
+  	set FEE_RESULT_DETAILS=#{feedetails,jdbcType=VARCHAR},SQRQ_DETAILS=#{feedate,jdbcType=VARCHAR} 
+  	where gid = #{gid,jdbcType=BIGINT}
+  	</update>
+  	
+  	<select id="qryPzfPQRefInfo" resultType="com.zc.pivas.configfee.bean.ChargePzfDetailsBean" >
+  	select PQ_REF_FEE_ID as "pqRefFeeID",
+  	          PZFZT as "pzfzt",
+  	          PZFSQRQ as "pzfSQRQ"
+  	          from SRVS_PRESCRIPTION_FEES pzf1,SRVS_LABEL_REF_CONFIG_FEE prcf
+  	                where PZFSQRQ in
+      (
+      select max(PZFSQRQ) from SRVS_PRESCRIPTION_FEES pzf2 where pzf1.costcode =
+      pzf2.costcode and pzf1.pq_ref_fee_id = pzf2.pq_ref_fee_id group by
+      COSTCODE,PQ_REF_FEE_ID
+      )
+      and prcf.GID = pzf1.pq_ref_fee_id and prcf.GID=#{pqrfid,jdbcType=BIGINT}           
+  	</select>
+  	
+  	<select id="qryListChargeByMap" resultType="com.zc.pivas.configfee.bean.ChargeBean" >
+    	select 
+    		ca.category_name as "categoryName" ,
+    		yd.parent_no as "parentNo",
+    		conf.COSTNAME "costname",
+    		ru.rulename "rulename",
+    		yd.drugname "drugname",
+    		yd.dose "dose",
+    		yd.dose_unit as "doseUnit",
+    		yd.quantity as "quantity" ,
+    		yd.doctor_name as "doctorName" ,
+    		pzf.czymc as "czymc",
+    		conf.price as "price",
+    		chkt.checkname as "checkname",
+    		pzf.yd_pzf_id  as "ydPzfId" ,
+    		pzf.pzfzt  as "pzfzt" ,
+    		pzf.yd_id as "ydId",
+    		to_char(pzf.pzfsqrq,'yyyy-MM-DD hh24:mi:ss') as "pzfsqrq",
+    		pzf.pzfsbyy as "pzfsbyy",
+    		pzf.COSTCODE as "costcode"
+		from SRVS_PRESCRIPTION_FEES pzf
+		right join SRVS_PRESCRIPTION yd
+		 on pzf.yd_id = yd.yd_id  
+		<if test="qry.parentNo !=null" > 
+		and yd.parent_no = #{qry.parentNo,jdbcType=VARCHAR} 
+		</if>
+		<if test="qry.zxrq !=null" > 
+		and yd.zxrq = #{qry.zxrq,jdbcType=VARCHAR} 
+		</if>
+		<if test="qry.zxbc !=null" > 
+		and yd.zxbc = #{qry.zxbc,jdbcType=INTEGER} 
+		</if>
+      left join SRVS_CONFIGFEE_RULE ru
+       on pzf.CONFIGFEERULEID = ru.gid 
+      left join SRVS_MEDICAMENTS_CATEGORY ca
+       on ru.DRUGTYPECODE = ca.category_id 
+       left join SRVS_CONFIG_FEE conf
+       on conf.COSTCODE = pzf.COSTCODE 
+       left join SRVS_CHECKTYPE chkt
+         on pzf.gid = chkt.gid
+    where 1=1 
+    and pzf.yd_id is not null 
+    order by pzf.yd_id ,pzf.pzfsqrq desc 
+  	</select>
+  	
+  	<select id="groupCountByMap1" resultType="Integer">
+		SELECT count(1) from ( select ydm.yd_main_id <include refid="sqlFromWhere" /> )
+  	</select>
+  	
+  	<sql id="fieldBean" >
+		ydm.yd_main_id as "ydMainId",
+		sum(decode(PZFZT,0,1,0)) as "errNum",
+		max(PZFSQRQ) as "pzfsqrq" 
+	</sql> 
+	
+	<resultMap id="ChargeDetailsBean" type="com.zc.pivas.configfee.bean.ChargeDetailsBean" >
+		<id column="YD_PZF_ID" property="yDPZFID" />
+		<result column="DEPTNAME" property="dEPTNAME" />
+		<result column="PATNAME" property="pATNAME" />
+		<result column="AGE" property="aGE" />
+		<result column="DRUGNAME" property="dRUGNAME" />
+		<result column="DOSE" property="dOSE" />
+		<result column="QUANTITY" property="qUANTITY" />
+		<result column="PZFZT" property="pZFZT" />
+		<result column="PZFSQRQ" property="pZFSQRQ" />
+		<result column="ACT_ORDER_NO" property="aCTORDER_NO" />
+		<result column="YZSHZT" property="yDZXZT" />
+		<result column="WARDNAME" property="wARDNAME" />
+		<result column="BEDNO" property="bEDNO" />
+		<result column="CASE_ID" property="cASE_ID" />
+		<result column="COSTCODE" property="costcode" />
+		<result column="SEX" property="sEX" />
+		<result column="YD_PZF_ID" property="yDPZFID" />
+		<result column="SFYSMC" property="sFYSMC" />
+		<result column="PZFSBYY" property="pZFSBYY" />
+		<result column="YD_ID" property="yDID" />
+		<result column="CONFIGFEERULEID" property="cONFIGFEERULEID" />
+		<result column="CZYMC" property="cZYMC" />
+		<result column="GID" property="gID" />
+		<result column="PIDRQZXBC" property="pidrqzxbc" />
+		<result column="DOCTOR" property="doctor" />
+		<result column="DOCTOR_NAME" property="doctorName" />
+	</resultMap>
+	<sql id="fileList">
+		yd.DOSE,
+		yd.DRUGNAME,
+		yd.QUANTITY,
+		yd.ACT_ORDER_NO,
+		yd.YDZXZT,
+		yd.WARDNAME,
+		yd.BEDNO,
+		yd.CASE_ID,
+		yd.SEX,
+		yd.SFYSMC,
+		yd.YD_ID,
+		yd.DOCTOR,
+		yd.DOCTOR_NAME,
+  	     pzf.PZFSQRQ,
+  	     pzf.YD_PZF_ID,	    
+  	     pzf.PZFZT,
+  	     pzf.PZFSBYY,
+  	     pq.PATNAME,	    
+  	     pq.AGE,	    
+  	     pq.DEPTNAME,
+  	     pb.nAME_,
+  	     pzf.COSTCODE,
+  	     pzf.CZYMC,
+  	     pzf.GID,
+  	     pzf.PIDRQZXBC,
+  	     pzf.CONFIGFEERULEID
+  	</sql>
+	 <select id="queryChargeDetailsList" resultMap="ChargeDetailsBean">
+	 <include refid="common.jqueryPageHead" />
+      select  <include refid="fileList"/>
+        from SRVS_PRESCRIPTION  yd,SRVS_LABEL pq,SRVS_PRESCRIPTION_FEES  pzf,srvs_batch pb
+        where yd.yd_id=pzf.yd_id
+        and yd.parent_no=pq.parent_no and yd.ZXBC=pb.ID_ 
+         <!--  <where>
+            1=1 
+            <if test="drugWay != null">
+                <if test="drugWay.code != null and '' neq drugWay.code ">
+                    and DRUGNAME like #{drugWay.code}
+                </if>
+            </if>
+        </where>  -->
+        <if test="chargeDetails != null">
+                <if test="chargeDetails.yDPZFID != null and '' neq chargeDetails.yDPZFID ">
+                    and pzf.yd_pzf_id = #{chargeDetails.yDPZFID}
+                </if>
+            </if>
+             ORDER BY yd.yd_id
+        <include refid="common.jqueryPageBottom" />
+  	</select>
+  	 <select id="queryChargeDetailsListTotal" resultType="Int">
+	  	 select count(1) 
+        from SRVS_PRESCRIPTION  yd,SRVS_LABEL pq,SRVS_PRESCRIPTION_FEES  pzf
+        where yd.yd_id=pzf.yd_id
+        and yd.parent_no=pq.parent_no
+  	</select>
+  	
+  	<insert id="insertPzf">
+  	    insert into SRVS_PRESCRIPTION_FEES (
+  	    YD_ID,
+  	    PZFZT,  	
+  	    <if test="configFee.pZFSBYY != null and '' neq configFee.pZFSBYY ">
+  	        PZFSBYY,  
+  	    </if>
+  	    
+  	    <if test="configFee.cONFIGFEERULEID != null and '' neq configFee.cONFIGFEERULEID "> 	    
+  	        CONFIGFEERULEID,
+  	    </if>
+  	    <if test="configFee.cZYMC != null and '' neq configFee.cZYMC "> 
+  	        CZYMC,
+  	    </if>
+  	    
+  	    <if test="configFee.gID != null and '' neq configFee.gID "> 
+  	        GID,
+  	    </if>
+  	    
+  	    <if test="configFee.cASE_ID != null and '' neq configFee.cASE_ID "> 
+  	        CASE_ID,
+  	    </if>
+  	    
+  	    <if test="configFee.costcode != null and '' neq configFee.costcode "> 
+  	        COSTCODE,
+  	    </if> 
+  	    
+  	    <if test="configFee.pidrqzxbc != null and '' neq configFee.pidrqzxbc "> 
+  	        pidrqzxbc,
+  	    </if> 
+  	    PZFSQRQ)
+		values (
+		 #{configFee.yDID,jdbcType=INTEGER},
+		 #{configFee.pZFZT,jdbcType=INTEGER},
+		 <if test="configFee.pZFSBYY != null and '' neq configFee.pZFSBYY ">
+		     #{configFee.pZFSBYY,jdbcType=VARCHAR},
+		 </if>
+		 
+		 <if test="configFee.cONFIGFEERULEID != null and '' neq configFee.cONFIGFEERULEID ">
+		     #{configFee.cONFIGFEERULEID,jdbcType=INTEGER},
+		 </if>
+		 
+		 <if test="configFee.cZYMC != null and '' neq configFee.cZYMC "> 
+		     #{configFee.cZYMC,jdbcType=VARCHAR},
+		 </if>
+		 
+		 <if test="configFee.gID != null and '' neq configFee.gID "> 
+		    #{configFee.gID,jdbcType=VARCHAR},
+		 </if>
+		 
+		 <if test="configFee.cASE_ID != null and '' neq configFee.cASE_ID "> 
+		     #{configFee.cASE_ID,jdbcType=VARCHAR},
+		 </if>
+  	     <if test="configFee.costcode != null and '' neq configFee.costcode "> 
+  	         #{configFee.costcode,jdbcType=VARCHAR},
+  	     </if> 
+  	     <if test="configFee.pidrqzxbc != null and '' neq configFee.pidrqzxbc "> 
+  	        #{configFee.pidrqzxbc,jdbcType=VARCHAR},
+  	    </if> 
+		 sysdate)
+  	</insert>
+  	
+  	<insert id="insertPzf1">
+  	    insert into SRVS_PRESCRIPTION_FEES (
+  	    pq_ref_fee_id,
+  	    PZFZT,
+  	    <if test="chargeBean.pzfsbyy != null and '' neq chargeBean.pzfsbyy ">
+  	        PZFSBYY,  
+  	    </if>
+  	    
+  	    <if test="chargeBean.configfeeruleid != null and '' neq chargeBean.configfeeruleid "> 	    
+  	        CONFIGFEERULEID,
+  	    </if>
+  	    <if test="chargeBean.czymc != null and '' neq chargeBean.czymc "> 
+  	        CZYMC,
+  	    </if>
+  	    
+  	    <if test="chargeBean.gid != null and '' neq chargeBean.gid "> 
+  	        GID,
+  	    </if>
+  	    
+  	    <if test="chargeBean.caseID != null and '' neq chargeBean.caseID "> 
+  	        CASE_ID,
+  	    </if>
+  	    
+  	    <if test="chargeBean.costcode != null and '' neq chargeBean.costcode "> 
+  	        COSTCODE,
+  	    </if> 
+  	    
+  	    <if test="chargeBean.pidrqzxbc != null and '' neq chargeBean.pidrqzxbc "> 
+  	        pidrqzxbc,
+  	    </if> 
+  	    <if test="chargeBean.price != null and '' neq chargeBean.price "> 
+  	        price,
+  	    </if> 
+  	    <if test="chargeBean.amount != null and '' neq chargeBean.amount "> 
+  	        amount,
+  	    </if> 
+  	    <if test="chargeBean.bcID != null and '' neq chargeBean.bcID "> 
+  	        pc_id,
+  	    </if> 
+  	    <if test="chargeBean.deptCode != null and '' neq chargeBean.deptCode "> 
+  	        deptcode,
+  	    </if>
+  	    PZFSQRQ)
+		values (
+		 #{chargeBean.pqRefFeeID,jdbcType=BIGINT},
+		 #{chargeBean.pzfzt,jdbcType=INTEGER},
+		 <if test="chargeBean.pzfsbyy != null and '' neq chargeBean.pzfsbyy ">
+		     #{chargeBean.pzfsbyy,jdbcType=VARCHAR},
+		 </if>
+		 
+		 <if test="chargeBean.configfeeruleid != null and '' neq chargeBean.configfeeruleid ">
+		     #{chargeBean.configfeeruleid,jdbcType=INTEGER},
+		 </if>
+		 
+		 <if test="chargeBean.czymc != null and '' neq chargeBean.czymc "> 
+		     #{chargeBean.czymc,jdbcType=VARCHAR},
+		 </if>
+		 
+		 <if test="chargeBean.gid != null and '' neq chargeBean.gid "> 
+		    #{chargeBean.gid,jdbcType=INTEGER},
+		 </if>
+		 
+		 <if test="chargeBean.caseID != null and '' neq chargeBean.caseID "> 
+		     #{chargeBean.caseID,jdbcType=VARCHAR},
+		 </if>
+  	     <if test="chargeBean.costcode != null and '' neq chargeBean.costcode "> 
+  	         #{chargeBean.costcode,jdbcType=VARCHAR},
+  	     </if> 
+  	     <if test="chargeBean.pidrqzxbc != null and '' neq chargeBean.pidrqzxbc "> 
+  	        #{chargeBean.pidrqzxbc,jdbcType=VARCHAR},
+  	    </if> 
+  	    <if test="chargeBean.price != null and '' neq chargeBean.price "> 
+  	        #{chargeBean.price,jdbcType=VARCHAR},
+  	    </if> 
+  	    <if test="chargeBean.amount != null and '' neq chargeBean.amount "> 
+  	        #{chargeBean.amount,jdbcType=INTEGER},
+  	    </if> 
+  	    <if test="chargeBean.bcID != null and '' neq chargeBean.bcID "> 
+  	        #{chargeBean.bcID,jdbcType=INTEGER},
+  	    </if> 
+  	    <if test="chargeBean.deptCode != null and '' neq chargeBean.deptCode "> 
+  	        #{chargeBean.deptCode,jdbcType=VARCHAR},
+  	    </if>
+		 sysdate)
+  	</insert>
+  	
+  	
+  	
+  	<select id="getChargeCount" resultType="Integer">
+        SELECT count(1) from
+         ( 
+         select * from 
+	        (
+	        select * from  SRVS_PRESCRIPTION_FEES where  CASE_ID = #{chargeDetails.cASE_ID}
+	        and COSTCODE=#{chargeDetails.costcode} 
+	        and TRUNC(PZFSQRQ)=TRUNC(to_date(#{chargeDetails.pZFSQRQ},'yyyy/mm/dd hh24:mi:ss')) ORDER BY PZFSQRQ DESC
+	        )
+	     WHERE ROWNUM=1
+        )
+        WHERE PZFZT !=3
+    </select>
+  	
+  	<update id="updatePZFStatus">
+		update SRVS_PRESCRIPTION_FEES pzf set
+		pzf.PZFZT = #{chargeBean.pzfzt,jdbcType=INTEGER},
+		pzf.PZFSBYY = #{chargeBean.pzfsbyy,jdbcType=VARCHAR},
+		pzf.PZFSQRQ = sysdate
+		where pzf.PQ_REF_FEE_ID=#{chargeBean.pqRefFeeID,jdbcType=BIGINT} and pzf.costcode = #{chargeBean.costcode,jdbcType=VARCHAR}
+	</update>
+</mapper>

@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zc.pivas.medicaments.repository.MedicamentsLogDao">
+
+	<resultMap id="BaseResultMap"
+		type="com.zc.pivas.medicaments.entity.MedicamentsLog">
+		<id column="id" property="id" jdbcType="VARCHAR" />
+		<result column="DRUGCODE" property="drugCode" jdbcType="VARCHAR" />
+		<result column="DRUGNAME" property="drugName" jdbcType="VARCHAR" />
+		<result column="DRUGPLACECODE" property="drugPlaceCode" jdbcType="VARCHAR" />
+		<result column="DRUGPLACE" property="drugPlace" jdbcType="VARCHAR" />
+		<result column="CHECKCODE" property="checkCode" jdbcType="VARCHAR" />
+		<result column="OPERATOR" property="operator" jdbcType="VARCHAR" />
+		<result column="UPDATEDATE" property="updateDate" jdbcType="TIMESTAMP" />
+		<result column="STOCK_LAST" property="stock_last" jdbcType="VARCHAR" />
+		<result column="STOCK_NOW" property="stock_now" jdbcType="VARCHAR" />
+		<result column="CATEGORYID" property="categoryId" jdbcType="VARCHAR" />
+		<result column="CATEGORYNAME" property="categoryName" jdbcType="VARCHAR" />
+	</resultMap>
+
+    <select id="queryByPaging" resultMap="BaseResultMap">
+		<include refid="common.jqueryPageHead" />
+		select * <include refid="Base_Where_Sql" />
+		<include refid="common.jqueryPageBottom" />
+	</select>
+	
+	<select id="getTotalCount" resultType="int">
+		select count(1)
+		<include refid="Base_Where_Sql" />
+	</select>
+	
+	<sql id="Base_Where_Sql">
+		from  SRVS_MEDICAMENT_LOG t1
+		<where> 1=1
+			<if test="condition != null">
+
+				<if test="condition.drugName != null and '' neq condition.drugName">
+					and DRUGNAME like '%'||#{condition.drugName}||'%' escape '\'
+				</if>
+
+				<if test="condition.drugCode != null and '' neq condition.drugCode">
+					AND DRUGCODE like '%'||#{condition.drugCode,jdbcType=VARCHAR}||'%'
+				</if>
+				
+				<if test="condition.checkCode != null and '' neq condition.checkCode">
+					AND CHECKCODE like '%'|| #{condition.checkCode,jdbcType=VARCHAR}||'%' escape '\'
+				</if>
+
+				<if test="condition.drugPlace != null and '' neq condition.drugPlace">
+					and DRUGPLACE like '%'||#{condition.drugPlace}||'%'
+				</if>
+				
+				<if test="condition.operator != null and '' neq condition.operator">
+					and OPERATOR like '%'||#{condition.operator}||'%'
+				</if>
+				
+				<if test="condition.categoryName != null and '' neq condition.categoryName">
+					and CATEGORYNAME like '%'||#{condition.categoryName}||'%'
+				</if>
+				
+				<if test="condition.updateDate != null and '' neq condition.updateDate">
+					and to_char(UPDATEDATE,'yyyy-mm-dd') like #{condition.updateDate} ||'%'
+				</if>
+			</if>
+		</where>
+		
+		order by UPDATEDATE
+	</sql>
+
+	<insert id="insert" parameterType="com.zc.pivas.medicaments.entity.MedicamentsLog">
+		insert into SRVS_MEDICAMENT_LOG (
+		DRUGCODE,
+		DRUGNAME,
+		DRUGPLACECODE,
+		DRUGPLACE,
+		CHECKCODE,
+		OPERATOR,
+		STOCK_LAST,
+		STOCK_NOW, 
+		CATEGORYID,
+		CATEGORYNAME
+		)
+		values
+		(#{drugCode,jdbcType=VARCHAR},
+		#{drugName,jdbcType=VARCHAR},
+		#{drugPlaceCode,jdbcType=VARCHAR},
+		#{drugPlace,jdbcType=VARCHAR},
+		#{checkCode,jdbcType=VARCHAR},
+		#{operator,jdbcType=VARCHAR},
+		#{stock_last,jdbcType=VARCHAR},
+		#{stock_now,jdbcType=VARCHAR},
+		#{categoryId,jdbcType=VARCHAR},
+		#{categoryName,jdbcType=VARCHAR}
+		)
+	</insert>
+</mapper>

@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zc.pivas.configfee.dao.ConfigFeeTypeDao" >
+	<resultMap id="ConfigFeeTypeMap" type="com.zc.pivas.configfee.bean.ConfigFeeTypeBean" >
+		<id column="gid" property="gid" jdbcType="INTEGER" />
+		<result column="typedesc" property="typeDesc" jdbcType="VARCHAR" />
+		<result column="remark" property="remark" jdbcType="VARCHAR" />
+	</resultMap>
+	
+	<sql id="getConfigFeeTypeSql">
+		select gid, 
+			   typedesc, 
+			   remark 
+		from 
+			
+			SRVS_CONFIG_FEETYPE
+			
+			<where>
+  		    1=1 
+			<if test="configFeeType != null">
+				<if test="configFeeType.typeDescs != null and '' neq configFeeType.typeDescs">
+				and 
+				<foreach item="typeDesc" index="index" collection="configFeeType.typeDescs"  open="(" separator="or" close=")" >  
+					typeDesc like  '%'||#{typeDesc}||'%' escape '\'             
+				</foreach>
+				</if>
+				
+				<if test="configFeeType.remarks != null and '' neq configFeeType.remarks">
+				and 
+				<foreach item="remark" index="index" collection="configFeeType.remarks"  open="(" separator="or" close=")" >  
+					remark like  '%'||#{remark}||'%'  escape '\'             
+				</foreach>
+				</if>
+			</if>
+		  </where>
+ 	</sql>
+  
+  <select id="getConfigFeeTypeList" resultMap="ConfigFeeTypeMap">
+  	<include refid="common.jqueryPageHead" />
+  	<include refid="getConfigFeeTypeSql"/>
+  	<include refid="common.jqueryPageBottom" />
+  </select>
+  
+  <select id="getConfigFeeTypeTotal" resultType="int">
+  	select count(1) from (
+  		<include refid="getConfigFeeTypeSql"/>
+  	) t1
+  </select>
+  
+  <select id="getConfigFeeType" resultMap="ConfigFeeTypeMap">
+		select gid, 
+			   typedesc, 
+			   remark 
+		from 
+			
+			SRVS_CONFIG_FEETYPE
+			<where>
+  		    1=1 
+			<if test="configFeeType != null">
+			    <if test="configFeeType.gid != null and '' neq configFeeType.gid ">
+					and gid = #{configFeeType.gid}
+				</if>
+				<if test="configFeeType.typeDesc != null and '' neq configFeeType.typeDesc ">
+					and typedesc = #{configFeeType.typeDesc}
+				</if>
+				
+				<if test="configFeeType.remark != null and '' neq configFeeType.remark ">
+					and remark = #{configFeeType.remark}
+				</if>
+			</if>
+		  </where>
+  </select>
+  
+  <insert id="addConfigFeeType" parameterType="com.zc.pivas.configfee.bean.ConfigFeeTypeBean">
+	  	INSERT INTO SRVS_CONFIG_FEETYPE ( typedesc, remark )
+			VALUES ( #{typeDesc}, #{remark} )
+	</insert>
+
+	<update id="updateConfigFeeType" parameterType="com.zc.pivas.configfee.bean.ConfigFeeTypeBean">
+  		update SRVS_CONFIG_FEETYPE set
+  			typedesc = #{typeDesc},
+			remark = #{remark}
+		where gid = #{gid}
+  	</update>
+  
+  	<delete id="delConfigFeeType" parameterType="com.zc.pivas.configfee.bean.ConfigFeeTypeBean">
+  		delete from SRVS_CONFIG_FEETYPE
+		where gid = #{gid}
+	</delete>
+
+    <select id="getConfigFeeTypes" resultMap="ConfigFeeTypeMap">
+		select gid, 
+			   typedesc, 
+			   remark 
+		from 
+			
+			SRVS_CONFIG_FEETYPE
+			<where>
+  		    1=1 
+			<if test="configFeeType != null">
+			    <if test="configFeeType.gid != null and '' neq configFeeType.gid ">
+					and gid = #{configFeeType.gid}
+				</if>
+				<if test="configFeeType.typeDesc != null and '' neq configFeeType.typeDesc ">
+					and typedesc = #{configFeeType.typeDesc}
+				</if>
+				
+				<if test="configFeeType.remark != null and '' neq configFeeType.remark ">
+					and remark = #{configFeeType.remark}
+				</if>
+			</if>
+		  </where>
+    </select>
+    
+    <select id="getConfigFeeTypeForUpdate" resultMap="ConfigFeeTypeMap">
+		select gid, 
+			   typedesc, 
+			   remark 
+		from 
+			
+			SRVS_CONFIG_FEETYPE
+			<where>
+  		    1=1 
+			<if test="configFeeType != null">
+			    <if test="configFeeType.gid != null and '' neq configFeeType.gid ">
+			    	<![CDATA[ and gid <> #{configFeeType.gid} ]]>
+				</if>
+				<if test="configFeeType.typeDesc != null and '' neq configFeeType.typeDesc ">
+					and typedesc = #{configFeeType.typeDesc}
+				</if>
+				
+				<if test="configFeeType.remark != null and '' neq configFeeType.remark ">
+					and remark = #{configFeeType.remark}
+				</if>
+			</if>
+		  </where>
+    </select>
+</mapper>

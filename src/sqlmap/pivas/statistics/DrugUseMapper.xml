@@ -1,0 +1,261 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zc.pivas.statistics.repository.DrugUseDAO">
+	<sql id="sqlFromWhere">
+		<if test="condition.singleState != null and '' neq condition.singleState and condition.singleState != 0">
+			and yd.scrq between to_date(#{condition.searchStartTime},'yyyy-mm-dd') 
+			and to_date(#{condition.searchEndTime},'yyyy-mm-dd') + 1
+		</if>
+		<if test="condition.singleState != null and '' neq condition.singleState and condition.singleState == 0">
+			and yd.YYRQ between to_date(#{condition.searchStartTime},'yyyy-mm-dd') 
+			and to_date(#{condition.searchEndTime},'yyyy-mm-dd') + 1
+		</if>
+		
+		AND yd.YDZXZT = 0
+			
+		<if test="condition.singleState != null and '' neq condition.singleState and condition.singleState == 0">
+			AND PQ.YDZT > 4
+		</if>
+
+				
+		<if test="condition.medicCategorys != null and '' neq condition.medicCategorys ">
+			and yd.medicaments_code in (select t.medicaments_code from SRVS_MEDICAMENTS t where t.category_id in
+			<foreach item="medicCategory" index="index" collection="condition.medicCategorys" open="(" separator="," close=")">
+				#{medicCategory,jdbcType=VARCHAR}
+			</foreach>
+			)
+		</if>
+			
+		<if test="condition.medicLabels != null and '' neq condition.medicLabels ">
+			and yd.medicaments_code in (select medicaments_code from SRVS_MEDICAMENTS m
+			where m.medicaments_id in (select distinct to_char(t.medicaments_id) from SRVS_MEDICAMENTS_ref_label t where t.label_id in
+			<foreach item="medicLabel" index="index" collection="condition.medicLabels" open="(" separator="," close=")">
+				#{medicLabel,jdbcType=VARCHAR}
+			</foreach>
+			))
+		</if>		
+	</sql>
+	
+	<select id="queryBatchPieList"
+		resultType="com.zc.pivas.statistics.bean.druguse.DrugUseBatchPieBean">
+		SELECT COUNT(YD.charge_code) AS value, bat.name_ as name, YD.ZXBC as zxbc 
+		
+		<if test="condition.compareResult != null and '' neq condition.compareResult and condition.compareResult == 0" >
+		FROM SRVS_PRESCRIPTION_his YD, srvs_batch bat, SRVS_LABEL_his PQ
+		</if>
+		
+		<if test="condition.compareResult == null or '' eq condition.compareResult or condition.compareResult != 0" >
+		FROM SRVS_PRESCRIPTION YD, srvs_batch bat, SRVS_LABEL PQ
+		</if>
+		
+		WHERE YD.ZXBC =
+		bat.id_
+		and YD.pidsj = PQ.pidsj
+		<if test="condition != null">
+			<include refid="sqlFromWhere"/>
+
+			<if test="condition.searchBatchs != null and '' neq condition.searchBatchs ">
+				and YD.ZXBC in
+				<foreach item="batch" index="index" collection="condition.searchBatchs" open="(" separator="," close=")">
+					#{batch,jdbcType=INTEGER}
+				</foreach>
+			</if>
+		</if>
+		GROUP BY YD.ZXBC, bat.name_
+		ORDER BY YD.ZXBC
+	</select>
+
+	<select id="queryBatchDrugClassPieList"
+		resultType="com.zc.pivas.statistics.bean.druguse.DrugUsePieDetailBean">
+		select sum(ceil(YD.QUANTITY)) AS ststsCount,sum(ceil(YD.QUANTITY) *
+		YP.MEDICAMENTS_PRICE) AS ststsCost,CAT.Category_Name as drugClassName
+		
+		<if test="condition.compareResult != null and '' neq condition.compareResult and condition.compareResult == 0" >
+		FROM SRVS_PRESCRIPTION_his YD
+		</if>
+		
+		<if test="condition.compareResult == null or '' eq condition.compareResult or condition.compareResult != 0" >
+		FROM SRVS_PRESCRIPTION YD
+		</if>
+		
+		left join SRVS_MEDICAMENTS YP on YD.MEDICAMENTS_CODE = YP.MEDICAMENTS_CODE
+		
+		<if test="condition.compareResult != null and '' neq condition.compareResult and condition.compareResult == 0" >
+		left join SRVS_LABEL_his PQ on YD.pidsj = PQ.pidsj
+		</if>
+		
+		<if test="condition.compareResult == null or '' eq condition.compareResult or condition.compareResult != 0" >
+		left join SRVS_LABEL PQ on YD.pidsj = PQ.pidsj
+		</if>
+		
+		left join srvs_batch BC on BC.ID_ = YD.ZXBC
+		left join SRVS_MEDICAMENTS_CATEGORY CAT on CAT.CATEGORY_ID = YP.Category_Id
+		where
+		YD.ZXBC = #{condition.batchID}
+		
+		AND yd.YDZXZT = 0
+		
+		<if test="condition.singleState != null and '' neq condition.singleState and condition.singleState == 0">
+			AND PQ.YDZT > 4
+		</if>
+
+		group by CAT.Category_Name
+		order by CAT.Category_Name
+	</select>
+
+	<select id="queryDeptPieList"
+		resultType="com.zc.pivas.statistics.bean.druguse.DrugUseDeptPieBean">
+		SELECT COUNT(YP.CATEGORY_ID) AS value, YD.WARDNAME as name
+		FROM
+		
+		<if test="condition.compareResult != null and '' neq condition.compareResult and condition.compareResult == 0" >
+		SRVS_PRESCRIPTION_his YD, SRVS_MEDICAMENTS YP, SRVS_LABEL_his PQ
+		</if>
+		
+		<if test="condition.compareResult == null or '' eq condition.compareResult or condition.compareResult != 0" >
+		SRVS_PRESCRIPTION YD, SRVS_MEDICAMENTS YP, SRVS_LABEL PQ
+		</if>
+		
+		WHERE
+		YD.MEDICAMENTS_CODE = YP.MEDICAMENTS_CODE
+		AND YD.pidsj = PQ.pidsj
+		<if test="condition != null">
+			<include refid="sqlFromWhere"/>
+
+			<if test="condition.searchDeptNames != null and '' neq condition.searchDeptNames ">
+				and YD.WARD_CODE in
+				<foreach item="dept" index="index" collection="condition.searchDeptNames" open="(" separator="," close=")">
+					#{dept,jdbcType=VARCHAR}
+				</foreach>
+			</if>
+		</if>
+		GROUP BY YD.WARDNAME
+		ORDER BY YD.WARDNAME
+	</select>
+
+	<select id="queryDeptDrugClassPieList"
+		resultType="com.zc.pivas.statistics.bean.druguse.DrugUsePieDetailBean">
+		select sum(ceil(YD.QUANTITY)) AS ststsCount,sum(ceil(YD.QUANTITY) *
+		YP.MEDICAMENTS_PRICE) AS ststsCost,CAT.Category_Name as drugClassName
+		
+		<if test="condition.compareResult != null and '' neq condition.compareResult and condition.compareResult == 0" >
+		from SRVS_PRESCRIPTION_his YD
+		</if>
+		
+		<if test="condition.compareResult == null or '' eq condition.compareResult or condition.compareResult != 0" >
+		from SRVS_PRESCRIPTION YD
+		</if>
+		
+		
+		left join SRVS_MEDICAMENTS YP on YD.MEDICAMENTS_CODE = YP.MEDICAMENTS_CODE
+		
+		<if test="condition.compareResult != null and '' neq condition.compareResult and condition.compareResult == 0" >
+		left join SRVS_LABEL_HIS PQ on YD.pidsj = PQ.pidsj
+		</if>
+		
+		<if test="condition.compareResult == null or '' eq condition.compareResult or condition.compareResult != 0" >
+		left join SRVS_LABEL PQ on YD.pidsj = PQ.pidsj
+		</if>
+		
+		left join srvs_batch BC on BC.ID_ = YD.ZXBC
+		left join SRVS_MEDICAMENTS_CATEGORY CAT on CAT.CATEGORY_ID =
+		YP.Category_Id
+		where YD.WARDNAME = #{condition.deptName}
+
+		AND yd.YDZXZT = 0
+		
+		<if test="condition.singleState != null and '' neq condition.singleState and condition.singleState == 0">
+			AND PQ.YDZT > 4
+		</if>
+		
+		<include refid="sqlFromWhere"/>
+
+		group by CAT.Category_Name
+		order by CAT.Category_Name
+	</select>
+
+	<select id="queryBatchBarList"
+		resultType="com.zc.pivas.statistics.bean.druguse.DrugUseBarGroupByBatch">
+		select sum(ceil(YD.QUANTITY)) AS ststsCount,sum(ceil(YD.QUANTITY) *
+		YP.MEDICAMENTS_PRICE) AS ststsCost,CAT.Category_Name as
+		drugClassName,BC.NAME_ AS batchNAME,BC.Id_ as zxbc
+		
+		<if test="condition.compareResult != null and '' neq condition.compareResult and condition.compareResult == 0" >
+		from SRVS_PRESCRIPTION_HIS YD
+		</if>
+		
+		<if test="condition.compareResult == null or '' eq condition.compareResult or condition.compareResult != 0" >
+		from SRVS_PRESCRIPTION YD
+		</if>
+		
+		left join SRVS_MEDICAMENTS YP on YD.MEDICAMENTS_CODE = YP.MEDICAMENTS_CODE
+		
+		<if test="condition.compareResult != null and '' neq condition.compareResult and condition.compareResult == 0" >
+		left join SRVS_LABEL_HIS PQ on YD.pidsj = PQ.pidsj
+		</if>
+		
+		<if test="condition.compareResult == null or '' eq condition.compareResult or condition.compareResult != 0" >
+		left join SRVS_LABEL PQ on YD.pidsj = PQ.pidsj
+		</if>
+		
+		left join srvs_batch BC on BC.ID_ = YD.ZXBC
+		left join SRVS_MEDICAMENTS_CATEGORY CAT on CAT.CATEGORY_ID =
+		YP.Category_Id
+		where 1=1
+		<if test="condition != null">
+			<include refid="sqlFromWhere"/>
+
+			<if test="condition.searchBatchs != null and '' neq condition.searchBatchs ">
+				and YD.ZXBC in
+				<foreach item="batch" index="index" collection="condition.searchBatchs" open="(" separator="," close=")">
+					#{batch,jdbcType=INTEGER}
+				</foreach>
+
+			</if>
+		</if>
+		group by BC.Id_,BC.NAME_, CAT.Category_Name
+		order by BC.Id_
+	</select>
+
+
+	<select id="queryDeptBarList"
+		resultType="com.zc.pivas.statistics.bean.druguse.DrugUseBarGroupByDept">
+		select sum(ceil(YD.QUANTITY)) AS ststsCount,sum(ceil(YD.QUANTITY) *
+		YP.MEDICAMENTS_PRICE) AS ststsCost,CAT.Category_Name as
+		drugClassName,YD.WARDNAME WARDNAME
+		
+		<if test="condition.compareResult != null and '' neq condition.compareResult and condition.compareResult == 0" >
+		from SRVS_PRESCRIPTION_HIS YD
+		</if>
+		
+		<if test="condition.compareResult == null or '' eq condition.compareResult or condition.compareResult != 0" >
+		from SRVS_PRESCRIPTION YD
+		</if>
+		
+		
+		left join SRVS_MEDICAMENTS YP on YD.MEDICAMENTS_CODE = YP.MEDICAMENTS_CODE
+		
+		<if test="condition.compareResult != null and '' neq condition.compareResult and condition.compareResult == 0" >
+		left join SRVS_LABEL_HIS PQ on YD.pidsj = PQ.pidsj
+		</if>
+		
+		<if test="condition.compareResult == null or '' eq condition.compareResult or condition.compareResult != 0" >
+		left join SRVS_LABEL PQ on YD.pidsj = PQ.pidsj
+		</if>
+		
+		left join srvs_batch BC on BC.ID_ = YD.ZXBC
+		left join SRVS_MEDICAMENTS_CATEGORY CAT on CAT.CATEGORY_ID = YP.Category_Id
+		where 1=1
+		<if test="condition != null">
+			<include refid="sqlFromWhere"/>
+			<if test="condition.searchDeptNames != null and '' neq condition.searchDeptNames ">
+				and YD.WARD_CODE in
+				<foreach item="dept" index="index" collection="condition.searchDeptNames" open="(" separator="," close=")">
+					#{dept,jdbcType=VARCHAR}
+				</foreach>
+			</if>
+		</if>
+		group by YD.WARDNAME, CAT.Category_Name
+		order by YD.WARDNAME
+	</select>
+</mapper>

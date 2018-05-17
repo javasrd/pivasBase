@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zc.base.sys.modules.sysconfig.repository.SystemConfigDao">
+
+	<resultMap type="com.zc.base.sys.modules.sysconfig.entity.SystemConfig" id="systemConfigMap">
+		<id property="sys_key" column="sys_key"/>
+		<result property="sys_value" column="sys_value"/>
+		<result property="type" column="type"/>
+		<result property="description" column="description"/>		
+	</resultMap>
+	
+	<!-- 增加计划 -->
+	<insert id="addSystemConfig" parameterType="com.zc.base.sys.modules.sysconfig.entity.SystemConfig">
+		insert into SYS_CONFIG (
+			sys_key,
+			sys_value,
+			type,
+			description
+		)
+		values(
+			#{systemConfig.sys_key},
+			#{systemConfig.sys_value},
+			#{systemConfig.type},
+			#{systemConfig.description}
+		)
+	</insert>
+	
+	<!-- 修改系统参数配置 -->
+	<update id="updateSystemConfig" parameterType="com.zc.base.sys.modules.sysconfig.entity.SystemConfig">
+		update SYS_CONFIG set 
+			sys_value = #{systemConfig.sys_value},
+			type = #{systemConfig.type},
+			description = #{systemConfig.description}
+		where sys_key = #{systemConfig.sys_key}
+	</update>
+	
+	<!-- 根据sys_key修改sys_value -->
+	<update id="updateSysValue" parameterType="com.zc.base.sys.modules.sysconfig.entity.SystemConfig">
+		update SYS_CONFIG set 
+			sys_value = #{systemConfig.sys_value,jdbcType=VARCHAR}
+		where sys_key = #{systemConfig.sys_key,jdbcType=VARCHAR}
+	</update>
+	
+	<!-- 查询单个 -->
+	<select id="getSystemConfig" resultMap="systemConfigMap">
+		select 
+			sys_key,
+			sys_value,
+			type,
+			description
+		from SYS_CONFIG
+		where sys_key = #{sysKey}
+	</select>	
+	
+	<select id="getAllSystemConfig"  resultMap="systemConfigMap">
+		select 
+			sys_key,
+			sys_value,
+			type,
+			description
+		from SYS_CONFIG
+	</select>
+	
+	<select id="qrySysSequence"  resultType="int">
+		select SQ_PIVAS_GID.NEXTVAL  from dual
+	</select>
+	
+</mapper> 

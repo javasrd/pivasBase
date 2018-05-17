@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper
+	namespace="com.zc.base.sys.modules.language.repository.LanguageDao">
+
+	<resultMap id="LanguageMap"
+		type="com.zc.base.sys.modules.language.entity.Language">
+		<id column="language_id" property="languageId" jdbcType="BIGINT" />
+		<result column="code" property="code" jdbcType="VARCHAR" />
+		<result column="description" property="description" jdbcType="VARCHAR" />
+	</resultMap>
+
+	<select id="getAllLanguages" resultMap="LanguageMap">
+		SELECT
+		t1.language_id,
+		t1.code,
+		t1.description
+		FROM
+		SYS_LANG t1
+		order by t1.language_id
+	</select>
+	
+</mapper>

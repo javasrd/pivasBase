@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zc.pivas.backup.dao.BackDAO" >
+    <resultMap id="ServerNodeMap" type="com.zc.pivas.backup.bean.ServerNodeBean" >
+        <id column="ID" property="ID" jdbcType="INTEGER" />
+        <result column="IP" property="IP" jdbcType="VARCHAR" />
+        <result column="NAME" property="name" jdbcType="VARCHAR" />
+        <result column="FLAG" property="flag" jdbcType="INTEGER" />
+        <result column="PORT" property="port" jdbcType="VARCHAR" />
+        <result column="DOMAINNAME" property="domainName" jdbcType="VARCHAR" />
+    </resultMap>
+    
+    <select id="getServerNode" resultMap="ServerNodeMap">
+    SELECT ID,IP,NAME,FLAG,PORT,DOMAINNAME FROM SYS_SERVER_NODE WHERE
+    IP=#{ip}
+    </select>
+    
+</mapper>

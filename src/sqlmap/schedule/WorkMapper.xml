@@ -1,0 +1,250 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.zc.schedule.product.scheduleSettings.dao.WorkDao" >
+	
+  <!-- 查询班次信息 -->
+  <select id="getWorkInfoList" resultType="com.zc.schedule.product.scheduleSettings.entity.WorkBean">
+		SELECT
+			workid as "workId",
+			workname as "workName",
+			definetype as "defineType",
+			worktype as "workType",
+			totaltime as "totalTime",
+			time_interval as "timeInterval",
+			workcolour as "workColor",
+			workstatus as "workStatus",
+			status as "status",
+			count as "count",
+			creationtime as "creationTime",
+			creater as "creater",
+			copyid as "copyId"
+		from sche_work
+		<where>
+			status = 1
+			<if test="map.workstatus !=null and map.workstatus !=''">
+				and workstatus = #{map.workstatus}
+			</if>
+		</where>
+		ORDER BY
+			creationtime DESC
+  </select>
+  
+  <!-- 查询当个班次信息 -->
+  <select id="getWorkById" resultType="com.zc.schedule.product.scheduleSettings.entity.WorkBean">
+		SELECT
+			workid AS "workId",
+			workname AS "workName",
+			worktype AS "workType",
+			totaltime AS "totalTime",
+			time_interval AS "timeInterval",
+			workcolour as "workColor",
+			workstatus AS "workStatus",
+			STATUS AS "status",
+			count AS "count",
+			creationtime as "creationTime",
+			creater as "creater",
+			splitwork as "splitWork",
+			copyid AS "copyId"
+		FROM
+			sche_work
+		WHERE
+			workid = #{workId}
+  </select>
+  
+  <!-- 班次名称不重复验证 -->
+  <select id="checkWorkNameIsExitst" resultType="int">
+	  	SELECT count(1) FROM sche_work where workname = #{workName}
+  </select>
+  
+  <!-- 新增班次信息 -->
+  <insert id="addWorkInfo" parameterType="com.zc.schedule.product.scheduleSettings.entity.WorkBean">
+	INSERT INTO sche_work (
+		workname,
+		worktype,
+		totaltime,
+		time_interval,
+		workstatus,
+		STATUS,
+		workcolour,
+		creationtime,
+		splitwork,
+		CREATER
+	)
+	VALUES
+		(
+			#{workName},
+			#{workType},
+			#{totalTime},
+			#{timeInterval},
+			#{workStatus},
+			#{status},
+			'#FFFFFF',
+			sysdate,
+			#{splitWork},
+			#{creater}
+		)
+</insert>
+
+<!-- 修改班次颜色 -->
+<update id="changeWorkColor" parameterType="com.zc.schedule.product.scheduleSettings.entity.WorkBean">
+  	update sche_work set
+		workcolour = #{workColor}
+	where workid = #{workId}
+</update>
+
+<!-- 更新班次使用状态 -->
+<update id="changeWorkStatus" parameterType="com.zc.schedule.product.scheduleSettings.entity.WorkBean">
+  	update sche_work set
+		workstatus = #{workStatus}
+	where workid = #{workId}
+</update>
+
+<!-- 修改班次信息 -->
+<update id="updateWorkInfo" parameterType="com.zc.schedule.product.scheduleSettings.entity.WorkBean">
+  	update sche_work set
+		workname = #{workName},
+		worktype = #{workType},
+		totaltime = #{totalTime},
+		time_interval = #{timeInterval},
+		splitwork = #{splitWork}
+	where workid = #{workId}
+</update>
+
+<!-- 修改分组与班次的关联关系 -->
+<update id="changeGroupInfo" parameterType="com.zc.schedule.product.scheduleSettings.entity.WorkBean">
+	update sche_group_work set
+		workid = #{workId}
+	where workid = #{oldWorkId}
+</update>
+
+<!-- 修改一周排班中班次信息 -->
+<update id="changeDataInfo" parameterType="com.zc.schedule.product.scheduleSettings.entity.WorkBean">
+	update sche_record_week set
+		workid = #{workId}
+	where workid = #{oldWorkId}
+</update>
+
+<!-- 修改旧班次的状态  -->
+<update id="updateOldWorkInfo" parameterType="com.zc.schedule.product.scheduleSettings.entity.WorkBean">
+  	update sche_work set
+		STATUS = 0
+	where workid = #{workId}
+</update>
+
+<!-- 因修改新增新的班次信息 -->
+<insert id="addNewWorkInfo" parameterType="com.zc.schedule.product.scheduleSettings.entity.WorkBean">
+	INSERT INTO sche_work (
+			workname,
+			worktype,
+			totaltime,
+			time_interval,
+			workcolour,
+			workstatus,
+			STATUS,
+			count,
+			creationtime,
+			CREATER,
+			copyid,
+			splitwork
+	)
+	VALUES
+		(
+			#{workName},
+			#{workType},
+			#{totalTime},
+			#{timeInterval},
+			#{workColor},
+			#{workStatus},
+			#{status},
+			#{count},
+			#{creationTime},
+			#{creater},
+			#{copyId},
+			#{splitWork}
+		)
+</insert>
+
+<!-- 根据copyid获得新班次的信息 -->
+<select id="getWorkInfoByCopyId" resultType="com.zc.schedule.product.scheduleSettings.entity.WorkBean">
+		SELECT
+			workid AS "workId",
+			workname AS "workName",
+			worktype AS "workType",
+			totaltime AS "totalTime",
+			time_interval AS "timeInterval",
+			workcolour as "workColor",
+			workstatus AS "workStatus",
+			STATUS AS "status",
+			count AS "count",
+			creationtime as "creationTime",
+			creater as "creater",
+			copyid AS "copyId"
+		FROM
+			sche_work
+		WHERE
+			copyid = #{copyId}
+</select>
+
+
+<!-- 删除班次信息 -->
+  <delete id="delWorkInfo" parameterType="com.zc.schedule.product.scheduleSettings.entity.WorkBean">
+  	delete from sche_work
+		where workid = #{workId}
+  </delete>
+
+<!-- 删除分组与班次的关联关系 -->
+<delete id="deleteGroupInfo" parameterType="com.zc.schedule.product.scheduleSettings.entity.WorkBean">
+	delete from sche_group_work
+		where workid = #{workId}
+</delete>
+  
+  <!-- 查询班次是否存在一周排班表中 -->
+  <select id="getScheduleCount" resultType="int">
+	select count(1) from sche_record_week where workid in
+		<foreach collection="array" index="index" item="domain" open=" (" separator="," close=")">
+	         #{domain}
+	    </foreach>
+  </select>
+
+  <!-- 查询班次是否存在排班数据中 -->
+  <select id="getScheduleHistoryCount" resultType="int">
+	select count(1) from sche_record_week_his where workid in
+		<foreach collection="array" index="index" item="domain" open=" (" separator="," close=")">
+	         #{domain}
+	    </foreach>
+  </select>
+
+<!-- 查询当前选择的班次的历史信息 -->
+<select id="queryOldWorkInfo" resultType="com.zc.schedule.product.scheduleSettings.entity.WorkBean">
+	SELECT
+			workid as "workId",
+			workname as "workName",
+			definetype as "defineType",
+			worktype as "workType",
+			totaltime as "totalTime",
+			time_interval as "timeInterval",
+			workcolour as "workColor",
+			workstatus as "workStatus",
+			status as "status",
+			count as "count",
+			creationtime as "creationTime",
+			creater as "creater",
+			copyid as "copyId"
+		from sche_work
+		WHERE status = 0
+		START WITH workid = #{map.workId}
+		CONNECT BY PRIOR copyid = workid
+		ORDER BY
+			creationtime DESC
+</select>
+
+<!-- 查询历史信息用于删除操作 -->
+<select id="getOldWorkIds" resultType="com.zc.schedule.product.scheduleSettings.entity.WorkBean">
+	SELECT workid as "workId"
+		from sche_work
+		WHERE status = 0
+		START WITH workid = #{workId}
+		CONNECT BY PRIOR copyid = workid
+</select>
+</mapper>

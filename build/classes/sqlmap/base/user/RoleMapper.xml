@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zc.base.sys.modules.user.repository.RoleDao" >
+	<resultMap id="RoleMap" type="com.zc.base.sys.modules.user.entity.Role" >
+		<id column="role_id" property="roleId" jdbcType="BIGINT" />
+		<result column="name" property="name" jdbcType="VARCHAR" />
+		<result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+		<result column="description" property="description" jdbcType="VARCHAR" />
+		<result column="creator" property="roleNumber" jdbcType="BIGINT" />
+		<result property="isUse" />
+		<result property="isCheck"/>
+	</resultMap>
+	
+
+
+<!-- 获取系统角色及已有角色及当前用户可授予角色 -->
+<select id="getRolesByUserId" resultMap="RoleMap">
+	SELECT b.*,
+	CASE when EXISTS(
+		SELECT null from sys_user_ref_role a where a.role_id = b.role_id and a.user_id=#{0}
+	) then 1 else 0 END as isCheck,
+	case when b.creator=#{1} then 1 else 0 end as isUse
+	from SYS_ROLE b
+</select>
+<select id="getRoleCount" parameterType="java.util.List" resultType="int">
+	select count(1) from SYS_ROLE  where role_id in
+	<foreach item="item" index="index" collection="list"
+			      open="(" separator="," close=")">
+			        #{item}
+	</foreach> 
+</select>
+ <insert id="addRole" parameterType="com.zc.base.sys.modules.user.entity.Role">
+	  	INSERT INTO SYS_ROLE (
+		name,
+		create_time,
+		description,
+		creator
+	)
+	VALUES
+		(
+			#{name},
+			#{createTime},
+			#{description},
+			#{roleNumber}
+		)
+</insert>
+  
+<sql id="getRoleSql">
+  	SELECT
+		SYS_ROLE.role_id,
+		SYS_ROLE.name,
+		SYS_ROLE.create_time,
+		SYS_ROLE.description,
+		SYS_ROLE.creator
+		
+	FROM
+		SYS_ROLE
+	<where>
+			<if test="1==1">
+				SYS_ROLE.creator is not null
+			</if>
+			<if test="role != null">
+				<if test="role.roleId != null and '' neq role.roleId">
+					and SYS_ROLE.role_id = #{role.roleId}
+				</if>
+				 
+				<if test="role.nameList != null and '' neq role.nameList">
+					and 
+					<foreach item="name" index="index" collection="role.nameList"  open="(" separator="or" close=")" >  
+						SYS_ROLE.name like  '%'||#{name}||'%'  escape '\'       
+					</foreach>
+				</if>
+				
+				<if test="role.descList != null and '' neq role.descList">
+					and 
+					<foreach item="desc" index="index" collection="role.descList"  open="(" separator="or" close=")" >  
+						SYS_ROLE.description like '%'||#{desc}||'%'   escape '\'         
+					</foreach>
+				</if>
+				
+				<if test="role.sortname != null and '' neq role.sortname and role.sortname=='name'">
+	   			 order by SYS_ROLE.name
+				</if>
+				<if test="role.sortname != null and '' neq role.sortname and role.sortorder != null and '' neq role.sortorder and role.sortorder=='asc' ">
+		    		 asc
+				</if>
+			
+				<if test="role.sortname != null and '' neq role.sortname and role.sortorder != null and '' neq role.sortorder and role.sortorder=='desc' ">
+		 		   desc 
+				</if>
+				<if test="role.sortname == null || '' eq role.sortname">
+	   			 	order by SYS_ROLE.create_time asc
+				</if>
+			</if>
+			
+			<if test="role == null">
+				order by SYS_ROLE.create_time asc
+			</if>
+		</where>
+		
+		
+  </sql>
+  
+  <select id="getRole" resultMap="RoleMap">
+  	<include refid="common.jqueryPageHead" />
+  	<include refid="getRoleSql"/>
+  	<include refid="common.jqueryPageBottom" />
+  </select>
+  
+  <select id="getRoleTotal" resultType="int">
+  	select count(1) from (
+  		<include refid="getRoleSql"/>
+  	) t1
+  </select>
+  
+  
+ <update id="updateRole" parameterType="com.zc.base.sys.modules.user.entity.Role">
+  	update SYS_ROLE set 
+		name = #{name},
+		description = #{description}
+		where role_id = #{roleId}
+  </update>
+  
+<!--软删除-->
+<delete id="delRole" parameterType="com.zc.base.sys.modules.user.entity.Role">
+  	delete from SYS_ROLE
+		where role_id = #{roleId}
+</delete>
+
+  <select id="getRoleID" resultMap="RoleMap">
+	  	SELECT
+		SYS_ROLE.role_id,
+		SYS_ROLE.name,
+		SYS_ROLE.create_time,
+		SYS_ROLE.description
+	FROM
+		SYS_ROLE
+	<where>
+			<if test="role != null">
+				<if test="role.roleId != null and '' neq role.roleId">
+					and SYS_ROLE.role_id = #{role.roleId}
+				</if>
+				<if test="role.name != null and '' neq role.name">
+					and SYS_ROLE.name = #{role.name}
+				</if>
+			</if>
+		</where>
+  </select>
+  
+    <select id="getRoleListID" resultType="int">
+    	<![CDATA[
+	  	select count(1) 
+	  	from SYS_ROLE 
+	  	where
+	  	SYS_ROLE.name= #{role.name} 
+	  	and SYS_ROLE.role_id <> #{role.roleId}
+	  	]]>
+  </select>
+  
+  
+  
+
+<sql id="getRoleNumberSql">
+  	SELECT
+		SYS_ROLE.role_id,
+		SYS_ROLE.name,
+		SYS_ROLE.create_time,
+		SYS_ROLE.description,
+		SYS_ROLE.creator
+		
+	FROM
+		SYS_ROLE
+	<where>
+	1=1
+			<if  test="role.createIds != null and '' neq role.createIds">
+				SYS_ROLE.creator in
+					<foreach item="item" index="index" collection="role.createIds"  open="(" separator="," close=")" >  
+						#{item}              
+					</foreach>
+			</if>
+			<if test="role != null">
+				
+				<if test="role.nameList != null and '' neq role.nameList">
+					and 
+					<foreach item="name" index="index" collection="role.nameList"  open="(" separator="or" close=")" >  
+						SYS_ROLE.name like  '%'||#{name}||'%'              
+					</foreach>
+				</if>
+				
+				<if test="role.descList != null and '' neq role.descList">
+					and 
+					<foreach item="desc" index="index" collection="role.descList"  open="(" separator="or" close=")" >  
+						SYS_ROLE.description like '%'||#{desc}||'%'            
+					</foreach>
+				</if>
+				
+				<if test="role.roleId != null and '' neq role.roleId">
+					and SYS_ROLE.role_id = #{role.roleId}
+				</if>
+				<if test="role.name != null and '' neq role.name">
+					and SYS_ROLE.name like #{role.name} escape '\' 
+				</if>
+					<if test="role.sortname != null and '' neq role.sortname and role.sortname=='name'">
+	   			 order by SYS_ROLE.name
+				</if>
+				<if test="role.sortname != null and '' neq role.sortname and role.sortorder != null and '' neq role.sortorder and role.sortorder=='asc' ">
+		    		 asc
+				</if>
+			
+				<if test="role.sortname != null and '' neq role.sortname and role.sortorder != null and '' neq role.sortorder and role.sortorder=='desc' ">
+		 		   desc 
+				</if>
+				<if test="role.sortname == null || '' eq role.sortname">
+	   			 	order by SYS_ROLE.create_time asc
+				</if>
+			</if>
+			<if test="role == null">
+				order by SYS_ROLE.create_time asc
+			</if>
+		</where>
+		
+  </sql>
+  
+  <select id="getRoleNumber" resultMap="RoleMap">
+  	<include refid="common.jqueryPageHead" />
+  	<include refid="getRoleNumberSql"/>
+  	<include refid="common.jqueryPageBottom" />
+  </select>
+  
+  <select id="getRoleNumberTotal" resultType="int">
+  	select count(1) from (
+  		<include refid="getRoleNumberSql"/>
+  	) t1
+  </select>
+  
+<select id="queryRoleID" resultType="int" resultMap="RoleMap">
+	  	SELECT
+		SYS_ROLE.role_id,
+		SYS_ROLE.name,
+		SYS_ROLE.create_time,
+		SYS_ROLE.description
+	FROM
+		SYS_ROLE where SYS_ROLE.role_id = #{roleId}  
+  </select>
+</mapper>

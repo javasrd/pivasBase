@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zc.pivas.configfee.dao.ConfigFeeDAO" >
+	<resultMap id="ConfigFeeMap" type="com.zc.pivas.configfee.bean.ConfigFeeBean" >
+		<id column="gid" property="gid" jdbcType="VARCHAR" />
+		<result column="costcode" property="costCode" jdbcType="VARCHAR" />
+		<result column="costname" property="costName" jdbcType="VARCHAR" />
+		<result column="price" property="price" jdbcType="VARCHAR" />
+		<result column="configfeetype" property="configFeeType" jdbcType="INTEGER" />
+		<result column="reserve0" property="reserve0" jdbcType="VARCHAR" />
+		<result column="reserve1" property="reserve1" jdbcType="VARCHAR" />
+		<result column="reserve2" property="reserve2" jdbcType="VARCHAR" />
+	</resultMap>
+	
+	<sql id="getConfigFeeSql">
+<!--   		SELECT
+  		gid,
+  			costcode,
+			costname,
+			price,
+			configfeetype
+		FROM
+			SRVS_CONFIG_FEE -->
+		SELECT cf.gid, 
+			   costcode, 
+			   costname, 
+			   price, 
+			   configfeetype, 
+			   cft.typedesc as "configFeeTypeName"
+		FROM SRVS_CONFIG_FEE cf
+		left join SRVS_CONFIG_FEETYPE cft
+		on cf.configfeetype = cft.gid
+		<where>
+  		    1=1 
+			<if test="configFee != null">
+				<if test="configFee.costNames != null and '' neq configFee.costNames">
+				and 
+				<foreach item="costName" index="index" collection="configFee.costNames"  open="(" separator="or" close=")" >  
+					costname like  '%'||#{costName}||'%' escape '\'             
+				</foreach>
+				</if>
+				
+				<if test="configFee.costCodes != null and '' neq configFee.costCodes">
+				and 
+				<foreach item="costCode" index="index" collection="configFee.costCodes"  open="(" separator="or" close=")" >  
+					costcode like  '%'||#{costCode}||'%'  escape '\'             
+				</foreach>
+				</if>
+				<if test="configFee.configFeeType != null and '' neq configFee.configFeeType">
+					and configfeetype = #{configFee.configFeeType}
+				</if>
+			</if>
+		  </where>
+ 	</sql>
+  
+  <select id="getConfigFeeList" resultMap="ConfigFeeMap">
+  	<include refid="common.jqueryPageHead" />
+  	<include refid="getConfigFeeSql"/>
+  	<include refid="common.jqueryPageBottom" />
+  </select>
+  
+  <select id="getConfigFeeTotal" resultType="int">
+  	select count(1) from (
+  		<include refid="getConfigFeeSql"/>
+  	) t1
+  </select>
+  
+  <select id="getConfigFee" resultMap="ConfigFeeMap">
+	  	SELECT
+	  	gid,
+  			costcode,
+			costname,
+			price,
+			configfeetype
+		FROM
+			SRVS_CONFIG_FEE
+			<where>
+  		    1=1 
+			<if test="configFee != null">
+			    <if test="configFee.gid != null and '' neq configFee.gid ">
+					and gid = #{configFee.gid}
+				</if>
+				<if test="configFee.costName != null and '' neq configFee.costName ">
+					and costname = #{configFee.costName}
+				</if>
+				
+				<if test="configFee.costCode != null and '' neq configFee.costCode ">
+					and costcode = #{configFee.costCode}
+				</if>
+			</if>
+		  </where>
+  </select>
+  
+  <insert id="addConfigFee" parameterType="com.zc.pivas.configfee.bean.ConfigFeeBean">
+	  	INSERT INTO SRVS_CONFIG_FEE (
+	  	costcode,
+		costname,
+		price,
+		configfeetype
+	)
+	VALUES
+		(
+		#{costCode},
+			#{costName},
+			#{price},
+			#{configFeeType}
+		)
+	</insert>
+
+	<update id="updateConfigFee" parameterType="com.zc.pivas.configfee.bean.ConfigFeeBean">
+  		update SRVS_CONFIG_FEE set
+  		costCode = #{costCode},
+			costname = #{costName},
+			price = #{price},
+			configfeetype = #{configFeeType}
+		where gid = #{gid}
+  	</update>
+  
+  	<delete id="delConfigFee" parameterType="com.zc.pivas.configfee.bean.ConfigFeeBean">
+  		delete from SRVS_CONFIG_FEE
+		where gid = #{gid}
+	</delete>
+
+    <select id="getConfigFees" resultMap="ConfigFeeMap">
+  		SELECT
+	  	gid,
+  			costcode,
+			costname,
+			price,
+			configfeetype
+		FROM
+			SRVS_CONFIG_FEE
+			<where>
+  		    1=1 
+			<if test="configFee != null">
+			    <if test="configFee.gid != null and '' neq configFee.gid ">
+					and gid = #{configFee.gid}
+				</if>
+				<if test="configFee.costName != null and '' neq configFee.costName ">
+					and costname = #{configFee.costName}
+				</if>
+				
+				<if test="configFee.costCode != null and '' neq configFee.costCode ">
+					and costcode = #{configFee.costCode}
+				</if>
+			</if>
+		  </where>
+    </select>
+    
+    <select id="getConfigFeeForUPdate" resultMap="ConfigFeeMap">
+  		SELECT
+	  	gid,
+  			costcode,
+			costname,
+			price,
+			configfeetype
+		FROM
+			SRVS_CONFIG_FEE
+			<where>
+  		    1=1 
+			<if test="configFee != null">
+			    <if test="configFee.gid != null and '' neq configFee.gid ">
+			    	<![CDATA[ and gid <> #{configFee.gid} ]]>
+				</if>
+				<if test="configFee.costName != null and '' neq configFee.costName ">
+					and costname = #{configFee.costName}
+				</if>
+				
+				<if test="configFee.costCode != null and '' neq configFee.costCode ">
+					and costcode = #{configFee.costCode}
+				</if>
+			</if>
+		  </where>
+    </select>
+</mapper>

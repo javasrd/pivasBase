@@ -1,0 +1,2449 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zc.pivas.docteradvice.repository.PrescriptionMainDao">
+
+	<!-- 药单列表 查询条件 -->
+	<sql id="sqlFromWhere">
+		<choose>
+			<when test="qry.compareTime !=null and qry.compareTime == '0'.toString()">from SRVS_PRESCRIPTION_MAIN_HIS ydm  </when>
+			<otherwise>from SRVS_PRESCRIPTION_MAIN ydm  </otherwise>
+		</choose>
+		<if test="qry.leftWithPB !=null or qry.zxbcS !=null">
+			left join srvs_batch pb
+			on ydm.ZXBC = pb.ID_
+			and
+			pb.ENABLED_ = 1
+		</if>
+		left join SRVS_INPATIENTAREA area on area.DEPTCODE = ydm.ward_code
+		left join SRVS_LABEL pqRC on pqRC.PIDSJ=ydm.PIDSJ
+		
+		<if test ="qry.operationLog != null">
+		left join  srvs_batch_LOG l on l.pidsj = ydm.PIDSJ
+		</if>
+		
+		where 1=1
+		and area.enabled = 1
+		<choose>
+			<when
+				test="qry.today !=null and qry.today !='' and qry.yesterday !=null and qry.yesterday!=''">
+				and (
+					(
+					    ydm.scrq &gt;= to_date(to_char(sysdate,'yyyy-MM-DD')||'00:00:00','yyyy-MM-DD hh24:mi:ss') 
+					and ydm.scrq &lt;  to_date(to_char(sysdate+1,'yyyy-MM-DD')||'00:00:00','yyyy-MM-DD hh24:mi:ss')
+					)
+				or (
+				        ydm.scrq &gt;= to_date(to_char(sysdate-1,'yyyy-MM-DD')||'00:00:00','yyyy-MM-DD hh24:mi:ss')
+				    and ydm.scrq &lt;  to_date(to_char(sysdate,'yyyy-MM-DD')||'00:00:00','yyyy-MM-DD hh24:mi:ss')
+				)
+				)
+			</when>
+			<when test="qry.today !=null and qry.today !=''">
+				and ydm.scrq &gt;= to_date(to_char(sysdate,'yyyy-MM-DD')||'00:00:00','yyyy-MM-DD hh24:mi:ss') 
+				and ydm.scrq &lt;  to_date(to_char(sysdate+1,'yyyy-MM-DD')||'00:00:00','yyyy-MM-DD hh24:mi:ss')
+			</when>
+			<when test="qry.yesterday !=null and qry.yesterday!=''">
+				and ydm.scrq &gt;= to_date(to_char(sysdate-1,'yyyy-MM-DD')||'00:00:00','yyyy-MM-DD hh24:mi:ss')
+				and ydm.scrq &lt; to_date(to_char(sysdate,'yyyy-MM-DD')||'00:00:00','yyyy-MM-DD hh24:mi:ss')
+			</when>
+		</choose>
+		<if test="qry.sydStatusQry !=null and qry.sydStatusQry !=''">
+			<choose>
+				<when test="qry.sydStatusQry ==0">and pqRC.ydzt=1</when>
+				<when test="qry.sydStatusQry ==2">and pqRC.ydzt=0 and ydm.ydreorder_status=0</when>
+				<when test="qry.sydStatusQry ==3">and pqRC.ydzt=0 and ydm.ydreorder_status=1</when>
+				<when test="qry.sydStatusQry ==4">and pqRC.ydzt=4</when>
+				<when test="qry.sydStatusQry ==5">and pqRC.ydzt=5</when>
+				<when test="qry.sydStatusQry ==6">and pqRC.ydzt=6</when>
+				<when test="qry.sydStatusQry ==7">and pqRC.ydzt=7</when>
+				<!-- 药单状态步骤  0,执行  1,停止  2,撤销 3,未打印  4,已打印  5,入仓扫描核对完成  6,仓内扫描核对完成 7,出仓扫描核对完成  -->
+			</choose>
+		</if>
+		<if test="qry.unprint !=null and qry.unprint !=''">
+			and ydm.DYBZ = 1
+		</if>
+		<if test="qry.print !=null and qry.print !=''">
+			and ydm.DYBZ = 0
+		</if>
+		<if test="qry.dyzt !=null and qry.dyzt !=''">
+			and ydm.DYBZ = #{qry.dyzt}
+		</if>
+		
+		<if test="qry.pcNotNull !=null and qry.pcNotNull !=''">
+			and ydm.zxbc is not null
+		</if>
+		<if test="qry.yyrqToday !=null and qry.yyrqToday !=''">
+			and ydm.yyrq &gt;=
+			to_date(to_char(sysdate,'yyyy-MM-DD')||'00:00:00','yyyy-MM-DD
+			hh24:mi:ss')
+			and ydm.yyrq &lt; to_date(to_char(sysdate+1
+			,'yyyy-MM-DD')||'00:00:00','yyyy-MM-DD hh24:mi:ss')
+		</if>
+		<if test="qry.yyrqNextDay !=null and qry.yyrqNextDay !=''">
+			and ydm.yyrq &gt;=
+			to_date(to_char(sysdate+1,'yyyy-MM-DD')||'00:00:00','yyyy-MM-DD
+			hh24:mi:ss')
+			and ydm.yyrq &lt; to_date(to_char(sysdate+2
+			,'yyyy-MM-DD')||'00:00:00','yyyy-MM-DD hh24:mi:ss')
+		</if>
+
+		<if test="qry.pidsjLike !=null and qry.pidsjLike !=''">
+			and ydm.pidsj like #{qry.pidsjLike,jdbcType=VARCHAR}||'%'
+		</if>
+
+		<if test="qry.areaN !=null and qry.areaN !='' ">
+			and ydm.WARD_CODE in
+			<foreach collection="qry.areaN" item="areaId" separator=","
+				open="(" close=")">
+				#{areaId,jdbcType=VARCHAR}
+			</foreach>
+		</if>
+
+		<if test="qry.pcN !=null and qry.pcN !=''">
+			and ydm.ZXBC in
+			<foreach collection="qry.pcN" item="pcid" separator="," open="("
+				close=")">
+				#{pcid,jdbcType=INTEGER}
+			</foreach>
+		</if>
+
+		<if test="qry.scrq !=null and qry.scrq !=''">
+			and ydm.scrq &gt;=
+			to_date(#{qry.scrq,jdbcType=VARCHAR}||'00:00:00','yyyy-MM-DD
+			hh24:mi:ss')
+			and ydm.scrq &lt;=
+			to_date(#{qry.scrq,jdbcType=VARCHAR}||'23:59:59','yyyy-MM-DD
+			hh24:mi:ss')
+		</if>
+		
+		<if test="qry.scrqStart !=null and qry.scrqStart !='' and qry.scrqEnd !=null and qry.scrqEnd !='' ">
+			and ydm.scrq &gt;=
+			to_date(#{qry.scrqStart,jdbcType=VARCHAR}||'00:00:00','yyyy-MM-DD
+			hh24:mi:ss')
+			and ydm.scrq &lt;=
+			to_date(#{qry.scrqEnd,jdbcType=VARCHAR}||'23:59:59','yyyy-MM-DD
+			hh24:mi:ss')
+		</if>
+		
+		<if test="qry.yyrq !=null and qry.yyrq !=''">
+			and ydm.yyrq &gt;=
+			to_date(#{qry.yyrq,jdbcType=VARCHAR}||' '||'${@com.zc.pivas.common.util.DataFormat@getTimeStart()}','yyyy-MM-DD hh24:mi:ss')
+			and ydm.yyrq &lt;
+			to_date('${@com.zc.pivas.common.util.DataFormat@getNextDate(qry.yyrq)}'||' '||'${@com.zc.pivas.common.util.DataFormat@getTimeEnd()}','yyyy-MM-DD hh24:mi:ss')
+		</if>
+		<!-- 
+		<if test="qry.scrqUpToday !=null and qry.scrqUpToday !=''">
+			and ydm.scrq &gt;=
+			to_date(to_char(sysdate,'yyyy-MM-DD')||'00:00:00','yyyy-MM-DD
+			hh24:mi:ss')
+		</if>
+		<if test="qry.yyrqUpToday !=null and qry.yyrqUpToday !=''">
+			and ydm.yyrq &gt;=
+			to_date(to_char(sysdate,'yyyy-MM-DD')||'00:00:00','yyyy-MM-DD
+			hh24:mi:ss')
+		</if> -->
+		<if test="qry.yzlx !=null and qry.yzlx!=''">
+			and ydm.yzlx = #{qry.yzlx,jdbcType=INTEGER}
+		</if>
+
+		<if test="qry.yzResource !=null and qry.yzResource !=''">
+			and ydm.yzresource = #{qry.yzResource,jdbcType=INTEGER}
+		</if>
+
+		<if test="qry.wardCode !=null">
+			and ydm.WARD_CODE = #{qry.wardCode,jdbcType=VARCHAR}
+		</if>
+
+		<if test="qry.inpatientNo !=null">
+			and ydm.INPATIENT_NO = #{qry.inpatientNo,jdbcType=VARCHAR}
+		</if>
+		
+		<if test="qry.inpatientNoArray !=null and qry.inpatientNoArray !='' and qry.inpatientNoArray.size>0">
+			and ydm.INPATIENT_NO in  
+			<foreach collection="qry.inpatientNoArray" item="inpatientNo"
+				separator="," open="(" close=")">
+				#{inpatientNo}
+			</foreach>
+		</if>
+
+		<if test="qry.yzResourceUpEQN !=null and qry.yzResourceUpEQN !=''">
+			and ydm.yzresource &gt;=
+			#{qry.yzResourceUpEQN,jdbcType=INTEGER}
+		</if>
+
+		<if test="qry.yzResourceLowN !=null and qry.yzResourceLowN !=''">
+			and ydm.yzresource &lt;
+			#{qry.yzResourceLowN,jdbcType=INTEGER}
+		</if>
+
+		<if test="qry.ydMainId !=null">
+			and ydm.YD_MAIN_ID = #{qry.ydMainId,jdbcType=BIGINT}
+		</if>
+		<if test="qry.pidrqzxbcN !=null and qry.pidrqzxbcN.size>0">
+			and ydm.pidrqzxbc in
+			<foreach collection="qry.pidrqzxbcN" item="pidrqzxbc"
+				separator="," open="(" close=")">
+				#{pidrqzxbc,jdbcType=VARCHAR}
+			</foreach>
+		</if>
+		<if test="qry.ydMainIdN !=null and qry.ydMainIdN.size>0">
+			and ydm.YD_MAIN_ID in
+			<foreach collection="qry.ydMainIdN" item="ydMainId"
+				separator="," open="(" close=")">
+				#{ydMainId,jdbcType=BIGINT}
+			</foreach>
+		</if>
+		<if test="qry.parentNo !=null">
+			and ydm.parent_no = #{qry.parentNo,jdbcType=VARCHAR}
+		</if>
+		<if test="qry.zxrq !=null">
+			and ydm.zxrq = #{qry.zxrq,jdbcType=VARCHAR}
+		</if>
+		<if test="qry.zxbc !=null">
+			and ydm.zxbc = #{qry.zxbc,jdbcType=INTEGER}
+		</if>
+		<if test="qry.ydzxzt !=null">
+			and ydm.ydzxzt = #{qry.ydzxzt,jdbcType=INTEGER}
+		</if>
+
+		<if test="qry.bednoS !=null">
+			and (
+			<foreach collection="qry.bednoS" item="bedno" separator="or">
+				ydm.BEDNO like '%'||#{bedno,jdbcType=VARCHAR}||'%' escape '\'
+			</foreach>
+			)
+		</if>
+		<if test="qry.patnameS !=null">
+			and (
+			<foreach collection="qry.patnameS" item="patname" separator="or">
+				ydm.PATNAME like '%'||#{patname,jdbcType=VARCHAR}||'%' escape '\'
+			</foreach>
+			)
+		</if>
+		<if test="qry.parentNoS !=null">
+			and (
+			<foreach collection="qry.parentNoS" item="parentNo"
+				separator="or">
+				ydm.PARENT_NO like '%'||#{parentNo,jdbcType=VARCHAR}||'%'
+				escape '\'
+			</foreach>
+			)
+		</if>
+		<if test="qry.wardNameS !=null">
+			and (
+			<foreach collection="qry.wardNameS" item="wardName"
+				separator="or">
+				ydm.WARDNAME like '%'||#{wardName,jdbcType=VARCHAR}||'%'
+				escape '\'
+			</foreach>
+			)
+		</if>
+		<if test="qry.freqCodeS !=null">
+			and (
+			<foreach collection="qry.freqCodeS" item="freqCode"
+				separator="or">
+				ydm.FREQ_CODE like '%'||#{freqCode,jdbcType=VARCHAR}||'%'
+				escape '\'
+			</foreach>
+			)
+		</if>
+		<if test="qry.zxbcS !=null">
+			and (
+			<foreach collection="qry.zxbcS" item="zxbc" separator="or">
+				pb.num_ like '%'||#{zxbc,jdbcType=VARCHAR}||'%'
+			</foreach>
+			)
+		</if>
+
+		<if test="qry.pidsj !=null">
+			and ydm.PIDSJ = #{qry.pidsj,jdbcType=VARCHAR}
+		</if>
+		
+		<if test="qry.bottleNum !=null">
+			and ydm.PIDSJ in ( select pidsj from SRVS_LABEL where ydpq = #{qry.bottleNum,jdbcType=VARCHAR} or instr(ydpq_last, #{qry.bottleNum,jdbcType=VARCHAR}) > 0 )
+		</if>
+
+		<if test="qry.pidsjN !=null and qry.pidsjN.size>0">
+			and ydm.PIDSJ in
+			<foreach collection="qry.pidsjN" item="pidsj" separator=","
+				open="(" close=")">
+				#{pidsj,jdbcType=VARCHAR}
+			</foreach>
+		</if>
+		<if test="qry.ydztLowN !=null">
+			and not exists (
+			select 1 from SRVS_LABEL pqRC where
+			pqRC.pidsj = ydm.pidsj
+			and pqRC.ydzt &gt;=#{qry.ydztLowN}
+			)
+		</if>
+		<if test="qry.ydztUpN !=null">
+			and exists (
+			select 1 from SRVS_LABEL pqRC where pqRC.pidsj =
+			ydm.pidsj and
+			pqRC.ydzt &gt; #{qry.ydztUpN}
+			)
+		</if>
+		<if test="qry.ydreorderCode !=null and qry.ydreorderCode !=''">
+			and ydm.ydreorder_code
+			#{qry.ydreorderCode,jdbcType=INTEGER}
+		</if>
+		<if test="qry.ydreorderCodeUpN !=null and qry.ydreorderCodeUpN !=''">
+			and ydm.ydreorder_code &gt;
+			#{qry.ydreorderCodeUpN,jdbcType=INTEGER}
+		</if>
+		<if test="qry.ydreorderStatus !=null and qry.ydreorderStatus !=''">
+			and ydm.ydreorder_status =
+			#{qry.ydreorderStatus}
+		</if>
+		<if test = "qry.inpatientString != null and qry.inpatientString !='' and qry.inpatientString.size>0"  >
+			and ydm.ward_code in
+			<foreach collection="qry.inpatientString" item="inpatientString" separator=","
+				open="(" close=")">
+				#{inpatientString}
+			</foreach>
+		</if>
+	</sql>
+
+
+	<sql id="YDMainREFchargeState">
+		prcf.gid as "gid",
+		prcf.fee_result as "chargeStatus",
+		ydm.YD_MAIN_ID as "ydMainId",
+		ydm.ACT_ORDER_NO as "actOrderNo",
+		ydm.PARENT_NO as "parentNo",
+		ydm.DYBZ as "dybz",
+		ydm.YYRQ as "yyrq",
+		to_char(ydm.YYRQ, 'yyyy-MM-DD') as "yyrqS",
+		ydm.SCRQ as "scrq",
+		ydm.ZXBC as "zxbc",
+		ydm.YDZXZT as "ydzxzt",
+		ydm.MEDICAMENTS_CODE as
+		"medicamentsCode",
+		ydm.CHARGE_CODE as "chargeCode",
+		ydm.DRUGNAME as
+		"drugname",
+		ydm.SPECIFICATIONS as "specifications",
+		ydm.DOSE as "dose",
+		ydm.DOSE_UNIT as "doseUnit",
+		ydm.QUANTITY as "quantity",
+		ydm.BOTTLE_LABEL_NUM as "bottleLabelNum",
+		ydm.RESERVE1 as "reserve1",
+		ydm.RESERVE2 as "reserve2",
+		ydm.RESERVE3 as "reserve3",
+		ydm.MEDICAMENTS_PACKING_UNIT as "medicamentsPackingUnit",
+		ydm.FREQ_CODE as "freqCode",
+		ydm.YZSHZT as "yzshzt",
+		ydm.YZZDSHZT as
+		"yzzdshzt",
+		ydm.WARD_CODE as "wardCode",
+		ydm.WARDNAME as "wardName",
+		ydm.INPATIENT_NO as "inpatientNo",
+		ydm.PATNAME as "patname",
+		ydm.SEX as
+		"sex",
+		ydm.BEDNO as "bedno",
+		ydm.CASE_ID as "caseId",
+		ydm.BIRTHDAY as
+		"birthday",
+		ydm.AGE as "age",
+		ydm.AGEUNIT as "ageunit",
+		ydm.ZXRQ as
+		"zxrq",
+		ydm.ZXSJ as "zxsj",
+		ydm.PIDSJ as "pidsj",
+		ydm.YZLX as "yzlx",
+		ydm.SFYSMC as "sfysmc",
+		ydm.SFYSCODE as "sfyscode",
+		ydm.SFRQ as "sfrq",
+		ydm.PIDRQZXBC as "pidrqzxbc",
+		ydm.DOCTOR as "doctor",
+		ydm.DOCTOR_NAME as
+		"doctorName",
+		ydm.AVDP as "avdp",
+		ydm.transfusion as "transfusion",
+		ydm.dropSpeed as "dropSpeed",
+		ydm.yzResource as "yzResource",
+		pb.name_
+		as "pcName"
+	</sql>
+
+
+	<!-- 药单主表列表 查询条件 -->
+	<sql id="sqlFromWhereYDMainRefChargeState">
+		from SRVS_LABEL_REF_CONFIG_FEE prcf
+		left join SRVS_PRESCRIPTION_MAIN ydm
+		on
+		prcf.pidsj = ydm.pidsj
+		left join srvs_batch pb
+		on ydm.zxbc = pb.id_
+		where ydm.YD_MAIN_ID is not null
+		<if test="qry.parentNo !=null">
+			and ydm.parent_no = #{qry.parentNo,jdbcType=VARCHAR}
+		</if>
+		<if test="qry.zxrq !=null">
+			and ydm.zxrq = #{qry.zxrq,jdbcType=VARCHAR}
+		</if>
+		<if test="qry.zxbc !=null">
+			and ydm.zxbc = #{qry.zxbc,jdbcType=INTEGER}
+		</if>
+		<if test="qry.bednoS !=null">
+			and (
+			<foreach collection="qry.bednoS" item="bedno" separator="or">
+				ydm.BEDNO like '%'||#{bedno,jdbcType=VARCHAR}||'%' escape '\'
+			</foreach>
+			)
+		</if>
+		<if test="qry.patnameS !=null">
+			and (
+			<foreach collection="qry.patnameS" item="patname" separator="or">
+				ydm.PATNAME like '%'||#{patname,jdbcType=VARCHAR}||'%' escape '\'
+			</foreach>
+			)
+		</if>
+		<if test="qry.parentNoS !=null">
+			and (
+			<foreach collection="qry.parentNoS" item="parentNo"
+				separator="or">
+				ydm.PARENT_NO like '%'||#{parentNo,jdbcType=VARCHAR}||'%'
+				escape '\'
+			</foreach>
+			)
+		</if>
+		<if test="qry.wardNameS !=null">
+			and (
+			<foreach collection="qry.wardNameS" item="wardName"
+				separator="or">
+				ydm.WARDNAME like '%'||#{wardName,jdbcType=VARCHAR}||'%'
+				escape '\'
+			</foreach>
+			)
+		</if>
+		<if test="qry.freqCodeS !=null">
+			and (
+			<foreach collection="qry.freqCodeS" item="freqCode"
+				separator="or">
+				ydm.FREQ_CODE like '%'||#{freqCode,jdbcType=VARCHAR}||'%'
+				escape '\'
+			</foreach>
+			)
+		</if>
+		<if test="qry.freqZXBCS !=null">
+			and (
+			<foreach collection="qry.freqZXBCS" item="freqZXBC"
+				separator="or">
+				pb.NAME_ like '%'||#{freqZXBC,jdbcType=VARCHAR}||'%' escape '\'
+			</foreach>
+			)
+		</if>
+		<if test="qry.chargeStateS !=null">
+			and (
+			<foreach collection="qry.chargeStateS" item="chargeState"
+				separator="or">
+				prcf.FEE_RESULT_DETAILS like '%'||#{chargeState,jdbcType=VARCHAR}||'%'
+			</foreach>
+			)
+		</if>
+
+		<if test="qry.chargeDate !=null">
+			and (
+			prcf.SQRQ_DETAILS like '%'||#{qry.chargeDate,jdbcType=VARCHAR}||'%'
+
+			)
+		</if>
+		
+		<if test="qry.areaN !=null and qry.areaN !='' and qry.areaN.size>0">
+			and ydm.ward_code in
+			<foreach collection="qry.areaN" item="areaId" separator="," open="(" close=")">
+				#{areaId,jdbcType=VARCHAR}
+			</foreach>
+		</if>
+
+		order by ydm.ZXRQ desc ,ydm.INPATIENT_NO
+	</sql>
+
+	<sql id="drugSuchama">
+		)temp where 1=1
+		and (
+		<foreach collection="qry.drugnameQry" item="drugnameQry" separator="or">
+			temp.drugname like '%'||#{drugnameQry,jdbcType=VARCHAR}||'%' escape '\'
+		</foreach>
+		)
+	</sql>
+	
+	<select id="qryListBeanByMap" resultType="com.zc.pivas.docteradvice.entity.PrescriptionMain">
+		<include refid="common.jqueryPageHead" />
+		
+		<choose>
+	    <when test="qry.drugnameQry !=null and qry.drugnameQry != '' ">
+	      select * from (select
+	    </when>
+	    <otherwise>
+	     select
+	    </otherwise>
+	  	</choose>
+	  	
+		<include refid="fieldBean" />
+		<include refid="sqlFromWhere" />
+		<if test="qry.yyrqdesc !=null">
+			order by ydm.scrq desc
+		</if>
+		
+		<if test="qry.yyrqdesc ==null">
+			<choose>
+			<when test="qry.orderByPB !=null and qry.orderByPB !=''">
+				order by
+				ydm.yzlx,ydm.ward_code,ydm.parent_no,pb.ORDER_NUM
+			</when>
+			<when test="qry.pici !=null and qry.pici !=''">
+				order by ydm.wardname_en,ydm.bedno_en,ydm.inpatient_no ,ydm.drugname ,pb.ORDER_NUM
+			</when>
+			<otherwise>
+				order by ydm.wardname_en,ydm.bedno_en,ydm.inpatient_no ,ydm.drugname
+			</otherwise>
+		</choose>
+		</if>
+		<if test="qry.drugnameQry !=null and qry.drugnameQry != ''">
+		<include refid="drugSuchama" />
+		</if>
+		<include refid="common.jqueryPageBottom" />
+	</select>
+
+	<select id="getYDMainbySearchParam" resultType="com.zc.pivas.docteradvice.entity.PrescriptionMain">
+		<include refid="common.jqueryPageHead" />
+		select
+		<include refid="YDMainREFchargeState" />
+		<include refid="sqlFromWhereYDMainRefChargeState" />
+		<include refid="common.jqueryPageBottom" />
+	</select>
+
+	<select id="getYDMainbySearchParamCount" resultType="int">
+		select count(*)
+		<include refid="sqlFromWhereYDMainRefChargeState" />
+	</select>
+
+	<select id="qryCountByMap" resultType="Integer">
+		SELECT count(*) from (
+		<choose>
+	    <when test="qry.drugnameQry !=null and qry.drugnameQry != '' ">
+	      select * from (select
+	    </when>
+	    <otherwise>
+	     select
+	    </otherwise>
+	  	</choose>
+		<include refid="fieldBean" />
+		<include refid="sqlFromWhere" />
+		<if test="qry.drugnameQry !=null and qry.drugnameQry != ''">
+		<include refid="drugSuchama" />
+		</if>
+		)
+	</select>
+
+	<select id="groupAreaByMap" resultType="Map">
+		SELECT ydm.ward_code as "deptcode",count(*) as "deptRownum"
+		<include refid="sqlFromWhere" />
+		group by ydm.ward_code 
+	</select>
+
+	<sql id="fieldBean">
+		ydm.YD_MAIN_ID as "ydMainId",
+		ydm.ACT_ORDER_NO as "actOrderNo",
+		ydm.PARENT_NO as "parentNo",
+		ydm.DYBZ as "dybz",
+		ydm.YYRQ as "yyrq",
+		to_char(ydm.YYRQ,'yyyy-MM-DD hh24:mi:ss') as "yyrqS",
+		ydm.SCRQ as "scrq",
+		to_char(ydm.SCRQ,'yyyy-MM-DD') as "scrqS",
+		ydm.ZXBC as "zxbc",
+		ydm.YDZXZT as "ydzxzt",
+		ydm.MEDICAMENTS_CODE as "medicamentsCode",
+		ydm.CHARGE_CODE as "chargeCode",
+		ydm.DRUGNAME as drugname,
+		<if test="qry.drugnameQry !=null and qry.drugnameQry != ''">
+		 (select LISTAGG(m.medicaments_suchama, ',') WITHIN GROUP(ORDER BY m.medicaments_code)
+	                         from SRVS_MEDICAMENTS m
+	                        where m.medicaments_code in
+	                              (select t.charge_code
+	                                 from SRVS_DOCTOR_ADVICE t
+	                                where t.parent_no = ydm.parent_no)) as drugsuchama,
+	    </if>          
+		ydm.SPECIFICATIONS as "specifications",
+		ydm.DOSE as "dose",
+		ydm.DOSE_UNIT as "doseUnit",
+		ydm.QUANTITY as "quantity",
+		ydm.BOTTLE_LABEL_NUM as "bottleLabelNum",
+		ydm.RESERVE1 as "reserve1",
+		ydm.RESERVE2 as "reserve2",
+		ydm.RESERVE3 as "reserve3",
+		ydm.MEDICAMENTS_PACKING_UNIT as "medicamentsPackingUnit",
+		ydm.FREQ_CODE as "freqCode",
+		ydm.YZSHZT as "yzshzt",
+		ydm.YZZDSHZT as
+		"yzzdshzt",
+		ydm.WARD_CODE as "wardCode",
+		ydm.WARDNAME as "wardName",
+		ydm.INPATIENT_NO as "inpatientNo",
+		ydm.PATNAME as "patname",
+		ydm.SEX as
+		"sex",
+		ydm.BEDNO as "bedno",
+		ydm.CASE_ID as "caseId",
+		ydm.BIRTHDAY as
+		"birthday",
+		to_char(ydm.BIRTHDAY,'yyyy-MM-DD') as "birthdayS",
+		ydm.AGE
+		as "age",
+		ydm.AGEUNIT as "ageunit",
+		ydm.ZXRQ as
+		"zxrq",
+		ydm.ZXSJ as
+		"zxsj",
+		ydm.PIDSJ as "pidsj",
+		ydm.YZLX as "yzlx",
+		ydm.SFYSMC as "sfysmc",
+		ydm.SFYSCODE as "sfyscode",
+		ydm.SFRQ as "sfrq",
+		ydm.PIDRQZXBC as
+		"pidrqzxbc",
+		ydm.DOCTOR as "doctor",
+		ydm.DOCTOR_NAME as
+		"doctorName",
+
+		ydm.AVDP as "avdp",
+		ydm.transfusion as "transfusion",
+		ydm.dropSpeed as
+		"dropSpeed",
+		ydm.yzResource as "yzResource",
+		ydm.start_time as
+		"startTime",
+		to_char(ydm.start_time,'yyyy-MM-DD hh24:mi:ss') as
+		"startTimeS",
+		sign (ydm.start_time -
+		to_date(to_char(sysdate,'yyyy-MM-DD')||' 00:00:00','yyyy-MM-DD
+		hh24:mi:ss') ) as "startDayDelNum" ,
+		to_char(ydm.START_TIME,'hh24') as
+		"startHour",
+		
+		ydm.yzconfig_status as "yzconfigStatus",
+		ydm.yzconfig_time as "yzconfigTime",
+		ydm.yzconfig_uid as "yzconfigUid",
+		ydm.yzconfig_uname as "yzconfigUname",		
+		
+		ydm.end_time as "endTime",
+		to_char(ydm.end_time,'yyyy-MM-DD hh24:mi:ss') as
+		"endTimeS",
+
+		ydreorder_status as "ydreorderStatus",
+		ydreorder_code as "ydreorderCode",
+		ydreorder_time as "ydreorderTime",
+		to_char(ydm.ydreorder_time,'yyyy-MM-DD hh24:mi:ss') as
+		"ydreorderTimeS",
+		ydreorder_mess as "ydreorderMess",
+		zxbc_change_before
+		as "zxbcChangeBefore",
+		zxbc_change_beforeS as "zxbcChangeBeforeS",
+		pqRC.tfaccount as "tfAccount",
+		<if test="qry.leftWithPB !=null">
+			pb.ID_ as "pb_id",
+			pb.NUM_ as "pb_num",
+			pb.NAME_ as
+			"pb_name",
+			pb.IS_EMPTY_BATCH_ as "pb_isEmptyBatch",
+			pb.START_TIME_ as
+			"pb_startTime",
+			pb.END_TIME_ as "pb_endTime",
+			pb.IS_SECEND_ADVICE_ as
+			"pb_isSecendAdvice",
+			pb.COLOR_ as "pb_color",
+			pb.ENABLED_ as
+			"pb_enabled",
+			pb.is0p as "pb_is0p",
+			pb.timetype as "pb_timetype",
+			pb.order_num as "pb_orderNum",
+			pb.RESERVE1_ as "pb_reserve1",
+			pb.RESERVE2_ as "pb_reserve2",
+			pb.RESERVE3_ as "pb_reserve3",
+		</if>
+		
+		decode(sign(pqRC.ydzt-5),-1,0,1) as "rucangOKNum",
+		decode(sign(pqRC.ydzt-6),-1,0,1) as "chucangOKNum",
+		pqRC.ydzt as "pqYdzt"
+		
+		<if test ="qry.operationLog != null">
+		,nvl2(l.content,l.content||'操作时间为：'||l.updatetime,'') as "operationLog"
+		</if>
+		
+	</sql>
+
+	<insert id="insertYDMainManyByBean">
+		begin
+		<foreach collection="map.ydMainList" item="ydMain" index="index"
+			separator=";">
+			insert into SRVS_PRESCRIPTION_MAIN(
+			ACT_ORDER_NO,
+			PARENT_NO,
+			DYBZ,
+			YYRQ,
+			SCRQ,
+			ZXBC,
+			YDZXZT,
+			MEDICAMENTS_CODE,
+			CHARGE_CODE,
+			DRUGNAME,
+			SPECIFICATIONS,
+			DOSE,
+			DOSE_UNIT,
+			QUANTITY,
+			BOTTLE_LABEL_NUM,
+			RESERVE1,
+			RESERVE2,
+			RESERVE3,
+			MEDICAMENTS_PACKING_UNIT,
+			FREQ_CODE,
+			YZSHZT,
+			YZZDSHZT,
+			WARD_CODE,
+			WARDNAME,
+			INPATIENT_NO,
+			PATNAME,
+			SEX,
+			BEDNO,
+			CASE_ID,
+			BIRTHDAY,
+			AGE,
+			AGEUNIT,
+			ZXRQ,
+			ZXSJ,
+			PIDSJ,
+			YZLX,
+			SFYSMC,
+			SFYSCODE,
+			SFRQ,
+			DOCTOR,
+			DOCTOR_NAME,
+			AVDP,
+			transfusion,
+			dropSpeed,
+			yzResource,
+			start_time,
+			end_time,
+			wardName_en,
+			bedno_en,
+			SERIAL_NUMBER,
+			YDREORDER_CODE,
+			YDREORDER_STATUS
+			<if test="ydMain.pidrqzxbc !=null">
+				,PIDRQZXBC
+			</if>
+			)
+			values
+			(
+			#{ydMain.actOrderNo,jdbcType=VARCHAR},
+			#{ydMain.parentNo,jdbcType=VARCHAR},
+			#{ydMain.dybz,jdbcType=INTEGER},
+			#{ydMain.yyrq,jdbcType=TIMESTAMP},
+			#{ydMain.scrq,jdbcType=TIMESTAMP},
+			#{ydMain.zxbc,jdbcType=INTEGER},
+			#{ydMain.ydzxzt,jdbcType=INTEGER},
+			#{ydMain.medicamentsCode,jdbcType=VARCHAR},
+			#{ydMain.chargeCode,jdbcType=VARCHAR},
+			#{ydMain.drugname,jdbcType=VARCHAR},
+			#{ydMain.specifications,jdbcType=VARCHAR},
+			#{ydMain.dose,jdbcType=VARCHAR},
+			#{ydMain.doseUnit,jdbcType=VARCHAR},
+			#{ydMain.quantity,jdbcType=VARCHAR},
+			#{ydMain.bottleLabelNum,jdbcType=VARCHAR},
+			#{ydMain.reserve1,jdbcType=VARCHAR},
+			#{ydMain.reserve2,jdbcType=VARCHAR},
+			#{ydMain.reserve3,jdbcType=VARCHAR},
+			#{ydMain.medicamentsPackingUnit,jdbcType=VARCHAR},
+			#{ydMain.freqCode,jdbcType=VARCHAR},
+			#{ydMain.yzshzt,jdbcType=INTEGER},
+			#{ydMain.yzzdshzt,jdbcType=INTEGER},
+			#{ydMain.wardCode,jdbcType=BIGINT},
+			#{ydMain.wardName,jdbcType=VARCHAR},
+			#{ydMain.inpatientNo,jdbcType=VARCHAR},
+			#{ydMain.patname,jdbcType=VARCHAR},
+			#{ydMain.sex,jdbcType=INTEGER},
+			#{ydMain.bedno,jdbcType=VARCHAR},
+			#{ydMain.caseId,jdbcType=VARCHAR},
+			#{ydMain.birthday,jdbcType=TIMESTAMP},
+			#{ydMain.age,jdbcType=INTEGER},
+			#{ydMain.ageunit,jdbcType=VARCHAR},
+			#{ydMain.zxrq,jdbcType=VARCHAR},
+			#{ydMain.zxsj,jdbcType=VARCHAR},
+			#{ydMain.pidsj,jdbcType=VARCHAR},
+			#{ydMain.yzlx,jdbcType=INTEGER},
+			#{ydMain.sfysmc,jdbcType=VARCHAR},
+			#{ydMain.sfyscode,jdbcType=VARCHAR},
+			#{ydMain.sfrq,jdbcType=TIMESTAMP},
+			#{ydMain.doctor,jdbcType=VARCHAR},
+			#{ydMain.doctorName,jdbcType=VARCHAR},
+			#{ydMain.avdp,jdbcType=VARCHAR},
+			#{ydMain.transfusion,jdbcType=VARCHAR},
+			#{ydMain.dropSpeed,jdbcType=VARCHAR},
+			#{ydMain.yzResource,jdbcType=INTEGER},
+			#{ydMain.startTime,jdbcType=TIMESTAMP},
+			#{ydMain.endTime,jdbcType=TIMESTAMP},
+			#{ydMain.wardNameEn,jdbcType=VARCHAR},
+			#{ydMain.bednoEn,jdbcType=VARCHAR},
+			#{ydMain.serialNumber,jdbcType=INTEGER},
+			0,
+			0
+			<if test="ydMain.pidrqzxbc !=null">
+				,#{ydMain.parentNo,jdbcType=VARCHAR}||'_'||#{ydMain.yzlx,jdbcType=INTEGER}||'_'||#{ydMain.pidRQ,jdbcType=VARCHAR}||'_'||#{ydMain.zxbc,jdbcType=INTEGER}
+			</if>
+			)
+		</foreach>
+		;end;
+	</insert>
+	<!-- ,#{ydMain.pidrqzxbc,jdbcType=VARCHAR} -->
+
+	<insert id="insertYDManyByBean">
+		begin
+		<foreach collection="map.ydList" item="yd" index="index"
+			separator=";">
+			insert into SRVS_PRESCRIPTION(
+			ACT_ORDER_NO,
+			PARENT_NO,
+			DYBZ,
+			YYRQ,
+			SCRQ,
+			ZXBC,
+			YDZXZT,
+			MEDICAMENTS_CODE,
+			CHARGE_CODE,
+			DRUGNAME,
+			SPECIFICATIONS,
+			DOSE,
+			DOSE_UNIT,
+			QUANTITY,
+			BOTTLE_LABEL_NUM,
+			RESERVE1,
+			RESERVE2,
+			RESERVE3,
+			MEDICAMENTS_PACKING_UNIT,
+			FREQ_CODE,
+			YZSHZT,
+			YZZDSHZT,
+			WARD_CODE,
+			WARDNAME,
+			INPATIENT_NO,
+			PATNAME,
+			SEX,
+			BEDNO,
+			CASE_ID,
+			BIRTHDAY,
+			AGE,
+			AGEUNIT,
+			ZXRQ,
+			ZXSJ,
+			PIDSJ,
+			YZLX,
+			SFYSMC,
+			SFYSCODE,
+			SFRQ,
+			DOCTOR,
+			DOCTOR_NAME,
+			AVDP,
+			TRANSFUSION,
+			DROPSPEED,
+			YZRESOURCE,
+			SERIAL_NUMBER
+			<if test="yd.pidrqzxbc !=null">
+				,PIDRQZXBC
+			</if>
+			)
+			values
+			(
+			#{yd.actOrderNo,jdbcType=VARCHAR},
+			#{yd.parentNo,jdbcType=VARCHAR},
+			#{yd.dybz,jdbcType=INTEGER},
+			#{yd.yyrq,jdbcType=TIMESTAMP},
+			#{yd.scrq,jdbcType=TIMESTAMP},
+			#{yd.zxbc,jdbcType=INTEGER},
+			#{yd.ydzxzt,jdbcType=INTEGER},
+			#{yd.medicamentsCode,jdbcType=VARCHAR},
+			#{yd.chargeCode,jdbcType=VARCHAR},
+			#{yd.drugname,jdbcType=VARCHAR},
+			#{yd.specifications,jdbcType=VARCHAR},
+			#{yd.dose,jdbcType=VARCHAR},
+			#{yd.doseUnit,jdbcType=VARCHAR},
+			#{yd.quantity,jdbcType=VARCHAR},
+			#{yd.bottleLabelNum,jdbcType=VARCHAR},
+			#{yd.reserve1,jdbcType=VARCHAR},
+			#{yd.reserve2,jdbcType=VARCHAR},
+			#{yd.reserve3,jdbcType=VARCHAR},
+			#{yd.medicamentsPackingUnit,jdbcType=VARCHAR},
+			#{yd.freqCode,jdbcType=VARCHAR},
+			#{yd.yzshzt,jdbcType=INTEGER},
+			#{yd.yzzdshzt,jdbcType=INTEGER},
+			#{yd.wardCode,jdbcType=BIGINT},
+			#{yd.wardName,jdbcType=VARCHAR},
+			#{yd.inpatientNo,jdbcType=VARCHAR},
+			#{yd.patname,jdbcType=VARCHAR},
+			#{yd.sex,jdbcType=INTEGER},
+			#{yd.bedno,jdbcType=VARCHAR},
+			#{yd.caseId,jdbcType=VARCHAR},
+			#{yd.birthday,jdbcType=TIMESTAMP},
+			#{yd.age,jdbcType=INTEGER},
+			#{yd.ageunit,jdbcType=VARCHAR},
+			#{yd.zxrq,jdbcType=VARCHAR},
+			#{yd.zxsj,jdbcType=VARCHAR},
+			#{yd.pidsj,jdbcType=VARCHAR},
+			#{yd.yzlx,jdbcType=INTEGER},
+			#{yd.sfysmc,jdbcType=VARCHAR},
+			#{yd.sfyscode,jdbcType=VARCHAR},
+			#{yd.sfrq,jdbcType=TIMESTAMP},
+			#{yd.doctor,jdbcType=VARCHAR},
+			#{yd.doctorName,jdbcType=VARCHAR},
+			#{yd.avdp,jdbcType=VARCHAR},
+			#{yd.transfusion,jdbcType=VARCHAR},
+			#{yd.dropSpeed,jdbcType=VARCHAR},
+			#{yd.yzResource,jdbcType=INTEGER},
+			#{yd.serialNumber,jdbcType=INTEGER}
+			<if test="yd.pidrqzxbc !=null">
+				,#{yd.parentNo,jdbcType=VARCHAR}||'_'||#{yd.yzlx,jdbcType=INTEGER}||'_'||#{yd.pidRQ,jdbcType=VARCHAR}||'_'||#{yd.zxbc,jdbcType=INTEGER}
+			</if>
+			)
+		</foreach>
+		;end;
+	</insert>
+	<!-- ,#{yd.pidrqzxbc,jdbcType=VARCHAR} -->
+
+	<insert id="insertPQManyByBean" parameterType="Map">
+		begin
+		<foreach collection="map.pqList" item="pq" index="index"
+			separator=";">
+			insert into SRVS_LABEL(
+			PARENT_NO,
+			ZXBC,
+			ZXBC_LAST,
+			YYRQ,
+			YDZT,
+			YDPQ,
+			YDPQ_LAST,
+			DEPTNAME,
+			CATEGORY_CODE_LIST,
+			INHOSPNO,
+			PATNAME,
+			SEX,
+			CASE_ID,
+			BIRTHDAY,
+			AGE,
+			AGEUNIT,
+			AVDP,
+			SFYSMC,
+			BEDNO,
+			ZXRQ,
+			ZXSJ,
+			PIDSJ,
+			ISREPEAT,
+			DEPTCODE,
+			YZLX,
+			PIDRQZXBC
+			)
+			values
+			(
+			#{pq.parentNo,jdbcType=VARCHAR},
+			#{pq.zxbc,jdbcType=INTEGER},
+			#{pq.zxbcLast,jdbcType=INTEGER},
+			#{pq.yyrq,jdbcType=TIMESTAMP},
+			#{pq.ydzt,jdbcType=INTEGER},
+			#{pq.ydpq,jdbcType=VARCHAR},
+			#{pq.ydpqLast,jdbcType=VARCHAR},
+			#{pq.deptname,jdbcType=VARCHAR},
+			#{pq.categoryCodeList,jdbcType=VARCHAR},
+			#{pq.inhospno,jdbcType=VARCHAR},
+			#{pq.patname,jdbcType=VARCHAR},
+			#{pq.sex,jdbcType=INTEGER},
+			#{pq.caseId,jdbcType=VARCHAR},
+			#{pq.birthday,jdbcType=TIMESTAMP},
+			#{pq.age,jdbcType=VARCHAR},
+			#{pq.ageunit,jdbcType=INTEGER},
+			#{pq.avdp,jdbcType=VARCHAR},
+			#{pq.sfysmc,jdbcType=VARCHAR},
+			#{pq.bedno,jdbcType=VARCHAR},
+			#{pq.zxrq,jdbcType=VARCHAR},
+			#{pq.zxsj,jdbcType=VARCHAR},
+			#{pq.pidsj,jdbcType=VARCHAR},
+			#{pq.isrepeat,jdbcType=INTEGER},
+			#{pq.deptcode,jdbcType=VARCHAR},
+			#{pq.yzlx,jdbcType=INTEGER},
+			#{pq.parentNo,jdbcType=VARCHAR}||'_'||#{pq.yzlx,jdbcType=INTEGER}||'_'||#{pq.pidRQ,jdbcType=VARCHAR}||'_'||#{pq.zxbc,jdbcType=INTEGER}
+			)
+		</foreach>
+		;end;
+	</insert>
+
+	<!-- <update id="updateYDPiN" > begin <foreach item="row" index="index" 
+		collection="piNList" separator=";" > update SRVS_PRESCRIPTION set zxbc = #{row.zxbc,jdbcType=BIGINT}
+		where PIDSJ = #{row.pidsj,jdbcType=VARCHAR} and zxrq = #{row.zxrq,jdbcType=VARCHAR} 
+		and zxsj = #{row.zxsj,jdbcType=VARCHAR} </foreach> ;end; </update> <update 
+		id="updateYDMainPiN" > begin <foreach item="row" index="index" collection="piNList" 
+		separator=";" > update SRVS_PRESCRIPTION_MAIN set zxbc = #{row.zxbc,jdbcType=BIGINT}
+		where PIDSJ = #{row.pidsj,jdbcType=VARCHAR} and zxrq = #{row.zxrq,jdbcType=VARCHAR} 
+		and zxsj = #{row.zxsj,jdbcType=VARCHAR} </foreach> ;end; </update> -->
+
+	<!-- 旧版1：PIDRQZXBC = PARENT_NO||'_'||ZXRQ||'_'||YZLX||'_'||#{row.zxbc,jdbcType=BIGINT} -->
+	<update id="updateYDPiN">
+		begin
+		<foreach item="row" index="index" collection="map.listYD"
+			separator=";">
+			update SRVS_PRESCRIPTION set
+			zxbc = #{row.zxbc,jdbcType=BIGINT} ,
+			DYBZ=1,
+			BOTTLE_LABEL_NUM=#{row.bottleLabelNum,jdbcType=VARCHAR} ,
+			<!-- yyrq
+			= CASE to_char(SCRQ,'yyyy-MM-DD') WHEN to_char(SYSDATE,'yyyy-MM-DD')
+			THEN #{row.yyrq,jdbcType=TIMESTAMP} ELSE yyrq END , -->
+			PIDRQZXBC =
+			PARENT_NO||'_'||YZLX||'_'||to_char(SCRQ,'yyyy-MM-DD')||'_'||#{row.zxbc,jdbcType=BIGINT}
+			where PIDSJ = #{row.pidsj,jdbcType=VARCHAR}
+		</foreach>
+		;end;
+	</update>
+	
+	<update id="updateYDSignPC">
+		update SRVS_PRESCRIPTION set
+			zxbc = #{zxbc,jdbcType=BIGINT} ,
+			<if test="dybz == null">
+			DYBZ=1,
+			</if>
+			BOTTLE_LABEL_NUM=#{bottleLabelNum,jdbcType=VARCHAR} ,
+			PIDRQZXBC =
+			PARENT_NO||'_'||YZLX||'_'||to_char(SCRQ,'yyyy-MM-DD')||'_'||#{zxbc,jdbcType=BIGINT}
+			where PIDSJ = #{pidsj,jdbcType=VARCHAR}
+	</update>
+	
+	<!-- update SRVS_PRESCRIPTION set zxbc = #{map.zxbc,jdbcType=BIGINT} ,PIDRQZXBC =
+		PARENT_NO||'_'||ZXRQ||'_'||#{map.zxbc,jdbcType=BIGINT} , BOTTLE_LABEL_NUM 
+		= '' , yyrq=#{row.yyrq,jdbcType=TIMESTAMP} where pidsj in <foreach item="pidsj" 
+		index="index" collection="map.piNList" separator="," open="(" close=")" > 
+		#{pidsj,jdbcType=VARCHAR} </foreach> -->
+
+	<update id="updateYDMainPiN">
+		begin
+		<foreach item="row" index="index" collection="map.listYD"
+			separator=";">
+			update SRVS_PRESCRIPTION_MAIN set
+			zxbc = #{row.zxbc,jdbcType=BIGINT}
+			, DYBZ=1,
+			BOTTLE_LABEL_NUM=#{row.bottleLabelNum,jdbcType=VARCHAR} ,
+			<!-- yyrq = CASE to_char(SCRQ,'yyyy-MM-DD') WHEN
+			to_char(SYSDATE,'yyyy-MM-DD')
+			THEN #{row.yyrq,jdbcType=TIMESTAMP} ELSE
+			yyrq END ,-->
+			PIDRQZXBC =
+			PARENT_NO||'_'||YZLX||'_'||to_char(SCRQ,'yyyy-MM-DD')||'_'||#{row.zxbc,jdbcType=BIGINT}
+			where PIDSJ = #{row.pidsj,jdbcType=VARCHAR}
+		</foreach>
+		;end;
+	</update>
+	
+	<update id="updateYDMainSignPC">
+		update SRVS_PRESCRIPTION_MAIN set
+			zxbc = #{zxbc,jdbcType=BIGINT}, 
+			<if test="dybz == null">
+			DYBZ=1,
+			</if>
+			
+			BOTTLE_LABEL_NUM=#{bottleLabelNum,jdbcType=VARCHAR} ,
+			PIDRQZXBC =
+			PARENT_NO||'_'||YZLX||'_'||to_char(SCRQ,'yyyy-MM-DD')||'_'||#{zxbc,jdbcType=BIGINT}
+			where PIDSJ = #{pidsj,jdbcType=VARCHAR}
+	</update>
+	<!-- update SRVS_PRESCRIPTION_MAIN set BOTTLE_LABEL_NUM = '' , yyrq=#{row.yyrq,jdbcType=TIMESTAMP}
+		where pidsj in <foreach item="pidsj" index="index" collection="map.piNList" 
+		separator="," open="(" close=")" > #{pidsj,jdbcType=VARCHAR} </foreach> -->
+
+	<update id="updatePQPiN">
+		begin
+		<foreach item="row" index="index" collection="map.listPQ"
+			separator=";">
+			update SRVS_LABEL set
+			zxbc_last=zxbc,ydpq_last=ydpq_last||','||ydpq, zxbc =
+			#{row.zxbc,jdbcType=BIGINT} ,
+			ydpq=#{row.ydpq,jdbcType=VARCHAR} ,
+			YDZT=3 ,
+			<!-- yyrq = CASE (select to_char(SCRQ,'yyyy-MM-DD') from
+			SRVS_PRESCRIPTION_main where
+			SRVS_PRESCRIPTION_main.pidsj=SRVS_LABEL.pidsj and rownum
+			&lt;2) WHEN
+			to_char(SYSDATE,'yyyy-MM-DD') THEN
+			#{row.yyrq,jdbcType=TIMESTAMP}
+			ELSE yyrq END , -->
+			PIDRQZXBC =
+			PARENT_NO||'_'||YZLX||'_'||(select to_char(SCRQ,'yyyy-MM-DD') from
+			SRVS_PRESCRIPTION_main where SRVS_PRESCRIPTION_main.pidsj=SRVS_LABEL.pidsj and rownum
+			&lt;2)||'_'||#{row.zxbc,jdbcType=BIGINT}
+			where PIDSJ =
+			#{row.pidsj,jdbcType=VARCHAR}
+		</foreach>
+		;end;
+	</update>
+	<update id="updatePQSignPC">
+		update SRVS_LABEL set
+			zxbc_last=zxbc,
+			
+			<if test="tfAccount == null">
+			ydpq_last=ydpq_last||','||ydpq,
+			</if>
+			
+			<if test="zxbc != null">
+			zxbc = #{zxbc,jdbcType=BIGINT},
+			</if>
+			
+			<if test="ydpq != null">
+			ydpq = #{ydpq,jdbcType=VARCHAR},
+			</if>
+			
+			<if test="ydzt == null">
+			YDZT=3 ,
+			</if>
+			
+			<if test="tfAccount != null">
+			tfAccount= #{tfAccount,jdbcType=VARCHAR},
+			</if>
+			
+			PIDRQZXBC =
+			PARENT_NO||'_'||YZLX||'_'||(select to_char(SCRQ,'yyyy-MM-DD') from
+			SRVS_PRESCRIPTION_main where SRVS_PRESCRIPTION_main.pidsj=SRVS_LABEL.pidsj and rownum
+			&lt;2)||'_'||#{zxbc,jdbcType=BIGINT}
+			where PIDSJ =
+			#{pidsj,jdbcType=VARCHAR}
+	</update>
+	
+	<!-- <delete id="deletePCByPiN" > delete from SRVS_LABEL where pidsj in <foreach
+		item="pidsj" index="index" collection="map.piNList" separator="," open="(" 
+		close=")" > #{pidsj,jdbcType=VARCHAR} </foreach> </delete> -->
+	<select id="queryPidsjRuCangOK" parameterType="List" resultType="String">
+		select pidsj from SRVS_PRESCRIPTION_MAIN
+		where 1=1
+		<choose>
+			<when test="pidsjN !=null and pidsjN.size>0">
+				and 1=1
+				and exists (select 1 from SRVS_LABEL where
+				SRVS_PRESCRIPTION_MAIN.pidsj=SRVS_LABEL.pidsj and SRVS_LABEL.ydzt &gt; 4 )
+				and
+				<foreach collection="pidsjN" item="pidsj" separator="or"
+					open="(" close=")">
+					pidsj like #{pidsj,jdbcType=VARCHAR}||'%'
+				</foreach>
+			</when>
+			<otherwise>
+				and 1=0
+			</otherwise>
+		</choose>
+	</select>
+
+	<select id="qryChangeBedPidsjN" parameterType="com.zc.pivas.printlabel.entity.BottleLabel"
+		resultType="String">
+		select
+		pidsj
+		from SRVS_PRESCRIPTION_main t1
+		<where>
+			exists (
+			select 1 from SRVS_LABEL pq where t1.pidsj = pq.pidsj and
+			pq.BEDNO &lt;&gt;
+			t1.BEDNO
+			)
+			<if test="useDate != null and useDate != ''">
+				and TO_CHAR(t1.SCRQ, 'yyyy-MM-dd') = TO_CHAR(#{useDate},
+				'yyyy-MM-dd')
+			</if>
+			<if test="batchId != null and batchId != ''">
+				and t1.ZXBC = #{batchId}
+			</if>
+			<if test="wardCode != null and wardCode != ''">
+				and t1.ward_code = #{wardCode}
+			</if>
+			<if test="bottleNumList != null">
+				and t1.pidsj IN
+				<foreach collection="bottleNumList" item="num" open="("
+					separator="," close=")">
+					#{num}
+				</foreach>
+			</if>
+		</where>
+	</select>
+
+
+	<update id="updatePrintTimeByPidsjN" parameterType="com.zc.pivas.printlabel.entity.BottleLabel">
+		update SRVS_LABEL set print_time = sysdate
+		where pidsj in (
+		select
+		t1.pidsj
+		from SRVS_PRESCRIPTION_main t1
+		left join SRVS_PRESCRIPTION t2 on t1.pidsj =
+		t2.pidsj
+		<where>
+			1=1
+			<if test="useDate != null and useDate != ''">
+				and TO_CHAR(t1.SCRQ, 'yyyy-MM-dd') = TO_CHAR(#{useDate},
+				'yyyy-MM-dd')
+			</if>
+			<if test="batchId != null and batchId != ''">
+				and t1.ZXBC = #{batchId}
+			</if>
+			<if test="wardCode != null and wardCode != ''">
+				and t1.ward_code = #{wardCode}
+			</if>
+
+			<if test="medicamentsCode != null and '' neq medicamentsCode ">
+				and t1.charge_code like '%' || #{medicamentsCode,jdbcType=VARCHAR}
+				||'%'
+			</if>
+
+			<if test="categoryId != null and '' neq categoryId ">
+				and t2.charge_code in (select medicaments_code from SRVS_MEDICAMENTS
+				where CATEGORY_ID = #{categoryId,jdbcType=VARCHAR})
+			</if>
+
+			<if test="bottleNumList != null">
+				and t1.pidsj IN
+				<foreach collection="bottleNumList" item="num" open="("
+					separator="," close=")">
+					#{num}
+				</foreach>
+			</if>
+		</where>
+		)
+	</update>
+
+	<update id="updateYDByYZConfig" parameterType="Map">
+
+	</update>
+
+
+	<update id="updateYDReOrder" parameterType="com.zc.pivas.docteradvice.entity.PrescriptionMain">
+		<choose>
+			<when test="ydreorderCode ==12 or ydreorderCode ==22 ">
+				begin
+
+				update SRVS_PRESCRIPTION_main set
+				zxbc = #{zxbc,jdbcType=INTEGER} ,
+				pidrqzxbc = #{pidrqzxbc,jdbcType=VARCHAR},
+
+				ydreorder_code = #{ydreorderCode,jdbcType=INTEGER},
+				ydreorder_time = sysdate,
+				ydreorder_mess = #{ydreorderMess,jdbcType=VARCHAR},
+				zxbc_change_before = #{zxbcChangeBefore,jdbcType=INTEGER},
+				zxbc_change_beforeS = #{zxbcChangeBeforeS,jdbcType=VARCHAR}
+				where pidsj = #{pidsj,jdbcType=VARCHAR} ;
+
+				update SRVS_PRESCRIPTION set
+				zxbc = #{zxbc,jdbcType=INTEGER} ,
+				pidrqzxbc = #{pidrqzxbc,jdbcType=VARCHAR}
+				where pidsj = #{pidsj,jdbcType=VARCHAR} ;
+
+				update SRVS_LABEL set
+				zxbc = #{zxbc,jdbcType=INTEGER} ,
+				pidrqzxbc = #{pidrqzxbc,jdbcType=VARCHAR}
+				where pidsj = #{pidsj,jdbcType=VARCHAR} ;
+
+				end;
+			</when>
+			<otherwise>
+				update SRVS_PRESCRIPTION_main set
+				ydreorder_code = #{ydreorderCode,jdbcType=INTEGER},
+				ydreorder_time = sysdate,
+				ydreorder_mess = #{ydreorderMess,jdbcType=VARCHAR},
+				zxbc_change_before = #{zxbcChangeBefore,jdbcType=INTEGER},
+				zxbc_change_beforeS = #{zxbcChangeBeforeS,jdbcType=VARCHAR}
+				where pidsj = #{pidsj,jdbcType=VARCHAR}
+			</otherwise>
+		</choose>
+	</update>
+
+	<select id="getMedicamentsUseInfo" resultType="com.zc.pivas.medicaments.entity.Medicaments">
+		<include refid="common.jqueryPageHead" />
+		select yd.charge_code as medicamentsCode,
+		yd.drugname as medicamentsName,
+		yd.specifications as medicamentsSpecifications,
+		(select medicaments_danger from SRVS_MEDICAMENTS where medicaments_code =
+		yd.charge_code ) as medicamentsDanger,
+		sum(yd.dose) || yd.dose_unit as medicamentsDosage,
+		'(' || count(1) || '条记录)' as useInfo
+		<include refid="getMedicamentsUseInfoSql"></include>
+		<include refid="common.jqueryPageBottom" />
+	</select>
+	
+	<select id="getMedicamentsUseInfoTotal" resultType="int">
+		select count(*) from (select yd.charge_code as medicamentsCode,
+		yd.drugname as medicamentsName,
+		yd.specifications as medicamentsSpecifications,
+		(select medicaments_danger from SRVS_MEDICAMENTS where medicaments_code =
+		yd.charge_code ) as medicamentsDanger,
+		sum(yd.dose) || yd.dose_unit as medicamentsDosage,
+		'(' || count(1) || '条记录)' as useInfo
+		<include refid="getMedicamentsUseInfoSql"></include>
+		)
+	</select>
+	
+	<sql id="getMedicamentsUseInfoSql">
+	    from SRVS_PRESCRIPTION yd
+		left join SRVS_MEDICAMENTS drug on drug.medicaments_code = yd.charge_code
+		left join SRVS_PRESCRIPTION_main ydm on ydm.pidsj = yd.pidsj
+		where to_char(YD.SCRQ, 'yyyy-mm-dd') =
+		#{bottleLabel.useDateString,jdbcType=VARCHAR} and yd.ydzxzt = 0 and ydm.ydreorder_status = 1
+
+		<if test="bottleLabel.mainDrug == 0">
+			<if test="bottleLabel.medicamentsCode != null and '' neq bottleLabel.medicamentsCode ">
+				and yd.charge_code = #{bottleLabel.medicamentsCode,jdbcType=VARCHAR}
+			</if>
+
+			<if test="bottleLabel.medicamentsCode == null ||  '' eq bottleLabel.medicamentsCode">
+				and yd.charge_code in (select medicaments_code from SRVS_MEDICAMENTS
+				where MEDICAMENTS_ISMAINDRUG = 0)
+			</if>
+		</if>
+
+		<if test="bottleLabel.mainDrug == 1">
+			<if test="bottleLabel.medicamentsCode != null and '' neq bottleLabel.medicamentsCode ">
+				and yd.charge_code  in (select medicaments_code from
+				SRVS_MEDICAMENTS where MEDICAMENTS_ISMAINDRUG = 1 and MEDICAMENTS_MENSTRUUM = 0 )
+				and ydm.charge_code like '%' ||
+				#{bottleLabel.medicamentsCode,jdbcType=VARCHAR}||'%'
+			</if>
+
+			<if test="bottleLabel.medicamentsCode == null || '' eq bottleLabel.medicamentsCode ">
+				and yd.charge_code  in (select medicaments_code from
+				SRVS_MEDICAMENTS where MEDICAMENTS_ISMAINDRUG = 1 and MEDICAMENTS_MENSTRUUM = 0 )
+			</if>
+		</if>
+
+		<if test="bottleLabel.categoryId != null and '' neq bottleLabel.categoryId ">
+			and yd.charge_code in (select medicaments_code from SRVS_MEDICAMENTS
+			where CATEGORY_ID = #{bottleLabel.categoryId,jdbcType=VARCHAR})
+		</if>
+		<if test="bottleLabel.batchId != null and '' neq bottleLabel.batchId ">
+			and yd.zxbc = #{bottleLabel.batchId,jdbcType=VARCHAR}
+		</if>
+		<if test="bottleLabel.wardCode != null and '' neq bottleLabel.wardCode ">
+			and yd.ward_code = #{bottleLabel.wardCode,jdbcType=VARCHAR}
+		</if>
+		
+		<if test="bottleLabel.wardCode == null or '' eq bottleLabel.wardCode">
+			and yd.ward_code in (SELECT deptcode from SRVS_INPATIENTAREA where enabled = 1 )
+		</if>
+		
+		group by yd.charge_code,yd.dose_unit,
+		yd.drugname,yd.specifications,drug.medicaments_danger
+	
+	</sql>
+
+	<update id="updateYDReOrderStatus" parameterType="Map">
+		update
+		SRVS_PRESCRIPTION_main ydm set
+			ydreorder_status = 1 ,
+			yzconfig_uid = #{map.yzconfig_uid,jdbcType=INTEGER},
+			yzconfig_uname = #{map.yzconfig_uname,jdbcType=VARCHAR}
+		where ydreorder_status = 0
+		
+		<if test="map.inpatientNo !=null and map.inpatientNo !='' " >
+			and ydm.inpatient_no in
+			<foreach collection="map.inpatientNo" item="inNo" separator="," open="("
+				close=")">
+				#{inNo,jdbcType=VARCHAR}
+			</foreach>
+		</if>
+		
+		<if test="map.inpatientSingle !=null and map.inpatientSingle !='' " >
+			and ydm.inpatient_no = #{map.inpatientSingle,jdbcType=VARCHAR}
+		</if>
+		
+		<if test="map.wardCode !=null and map.wardCode !='' " >
+			and ydm.WARD_CODE = #{map.wardCode,jdbcType=VARCHAR}
+		</if>
+		
+		<if test="map.inpatientNo ==null or map.inpatientNo =='' ">
+			<if test="map.inpatientString !=null and map.inpatientString !=''">
+				and ydm.ward_code in
+				<foreach collection="map.inpatientString" item="wardCode" separator="," open="("
+					close=")">
+					#{wardCode,jdbcType=VARCHAR}
+				</foreach>
+			</if>
+		 </if>
+		and ydm.yyrq &gt;= to_date(#{map.yyrq,jdbcType=VARCHAR}||' '||'${@DataFormat@getTimeStart()}','yyyy-MM-DD hh24:mi:ss')
+		and ydm.yyrq &lt; to_date('${@DataFormat@getNextDate(map.yyrq)}'||' '||'${@DataFormat@getTimeEnd()}','yyyy-MM-DD hh24:mi:ss')
+	</update>
+
+	<select id="qryYDListByMap" parameterType="Map"
+		resultType="com.zc.pivas.docteradvice.entity.Prescription">
+		select
+		yd.ACT_ORDER_NO as "actOrderNo",
+		yd.PARENT_NO as "parentNo",
+		yd.DYBZ as "dybz",
+		yd.YYRQ
+		as "yyrq",
+		to_char(yd.YYRQ,'yyyy-MM-DD') as "yyrqS",
+		yd.SCRQ as "scrq",
+		to_char(yd.SCRQ,'yyyy-MM-DD') as "scrqS",
+		yd.ZXBC as "zxbc",
+		yd.YDZXZT
+		as "ydzxzt",
+		yd.MEDICAMENTS_CODE as "medicamentsCode",
+		yd.CHARGE_CODE as
+		"chargeCode",
+		yd.DRUGNAME as "drugname",
+		yd.SPECIFICATIONS as
+		"specifications",
+		yd.DOSE as "dose",
+		yd.DOSE_UNIT as "doseUnit",
+		yd.QUANTITY as "quantity",
+		yd.BOTTLE_LABEL_NUM as "bottleLabelNum",
+		yd.RESERVE1 as "reserve1",
+		yd.RESERVE2 as "reserve2",
+		yd.RESERVE3 as
+		"reserve3",
+		yd.MEDICAMENTS_PACKING_UNIT as "medicamentsPackingUnit",
+		yd.FREQ_CODE as "freqCode",
+		yd.YZSHZT as "yzshzt",
+		yd.YZZDSHZT as
+		"yzzdshzt",
+		yd.WARD_CODE as "wardCode",
+		yd.WARDNAME as "wardName",
+		yd.INPATIENT_NO as "inpatientNo",
+		yd.PATNAME as "patname",
+		yd.SEX as
+		"sex",
+		yd.BEDNO as "bedno",
+		yd.CASE_ID as "caseId",
+		yd.BIRTHDAY as
+		"birthday",
+		yd.AGE as "age",
+		yd.AGEUNIT as "ageunit",
+		yd.ZXRQ as
+		"zxrq",
+		yd.ZXSJ as "zxsj",
+		yd.PIDSJ as "pidsj",
+		yd.YZLX as "yzlx",
+		yd.SFYSMC as
+		"sfysmc",
+		yd.SFYSCODE as "sfyscode",
+		yd.SFRQ as "sfrq",
+		yd.PIDRQZXBC as
+		"pidrqzxbc",
+		yd.DOCTOR as "doctor",
+		yd.DOCTOR_NAME as
+		"doctorName",
+
+		yd.AVDP as "avdp",
+		yd.transfusion as "transfusion",
+		yd.dropSpeed as
+		"dropSpeed",
+		yd.yzResource as "yzResource",
+		yd.start_time as
+		"startTime",
+		to_char(yd.start_time,'yyyy-MM-DD hh24:mi:ss') as
+		"startTimeS",
+		sign (yd.start_time -
+		to_date(to_char(sysdate,'yyyy-MM-DD')||' 00:00:00','yyyy-MM-DD
+		hh24:mi:ss') ) as "startDayDelNum" ,
+		to_char(yd.START_TIME,'hh24') as
+		"startHour",
+
+		yd.end_time as "endTime",
+		to_char(yd.end_time,'yyyy-MM-DD
+		hh24:mi:ss') as
+		"endTimeS"
+
+		,substr(yd.specifications,0, decode(
+		instr(yd.specifications,'*'),0,length(yd.specifications),instr(yd.specifications,'*')-1)
+		) as "specifications2"
+
+		,medc.CATEGORY_NAME as "categoryName"
+		from SRVS_PRESCRIPTION yd
+		left join SRVS_MEDICAMENTS med on med.MEDICAMENTS_CODE = yd.CHARGE_CODE
+		left join SRVS_MEDICAMENTS_CATEGORY medc on medc.CATEGORY_ID =
+		med.CATEGORY_ID
+		where 1=1
+		
+		<if test="qry.ydHistory ==null or qry.ydHistory ==''">
+			and yd.ydzxzt = 0
+		</if>
+		
+		
+		<if test="qry.pidsj !=null and qry.pidsj !=''">
+			and yd.pidsj = #{qry.pidsj,jdbcType=VARCHAR}
+		</if>
+	</select>
+	
+	<insert id="saveOperationLog">
+    	insert into srvs_batch_log
+		(
+			pidsj,content,updatetime,updateaccount
+		)
+		values
+		(
+			#{pidsj},#{content},to_char(sysdate,'yyyy-mm-dd hh24:mi:ss'),#{account}
+		)
+	</insert>
+	
+	<delete id="delOperationLog" >
+  		delete from srvs_batch_log l where l.pidsj = #{pidsj}
+  	</delete>
+	
+	<select id="qryBCTimeBYId" resultType="String">
+		select start_time_ from srvs_batch  where id_ = #{id}
+	</select>
+	
+	<select id="getTrackingRecord" resultType="com.zc.pivas.docteradvice.bean.TrackingRecord">
+  		select t.operator,to_char(t.operation_time,'yyyy-MM-DD hh24:mi:ss') operation_time,t.type_name from SRVS_TRACKINGRECORD t
+  		where relevance = #{pidsj} order by operation_time
+  	</select>
+	
+	<select id="qryPQList" resultType="com.zc.pivas.docteradvice.bean.BLabelWithPrescription">
+		select yd.pidsj as yd_pidsj,yd.ydzxzt as yd_ydzxzt,p.ydzt as pq_ydzt, p.yyrq as yd_yyrq from SRVS_PRESCRIPTION_MAIN yd,SRVS_LABEL p
+		where yd.bottle_label_num = #{pqStr}
+		and p.pidsj = yd.pidsj
+  	</select>
+  	
+  	
+  	<update id="updatePQStatus" >
+        update SRVS_LABEL set ydzt = 8
+        where ydpq = #{pqStr}
+    </update>
+  	
+  	<insert id="addTrackingRecord" >
+    	insert into SRVS_TRACKINGRECORD
+		(
+			operator,operation_time,type_num,type_name,relevance
+		)
+		values
+		(
+			#{account},sysdate,#{typeNum},#{typeName},#{pidsj}
+		)
+	</insert>
+	
+	
+	<select id="getYDMainList" resultType="com.zc.pivas.docteradvice.bean.BLabelWithPrescription">
+
+	<if test="qry.drugnameQry !=null and qry.drugnameQry != ''">
+		select * from (
+	</if>
+	select ydm.yd_main_id as "yd_ydMainId",
+           ydm.act_order_no as "yd_actNrderNo",
+           ydm.parent_no as "yd_parentNo",
+           ydm.bottle_label_num as "yd_bottleLabelNum",
+           ydm.zxbc as yd_zxbc,
+           ydm.ydzxzt as yd_ydzxzt,
+           ydm.charge_code as "yd_chargeCode",
+           ydm.drugname as yd_drugname,
+           <if test="qry.drugnameQry !=null and qry.drugnameQry != ''">
+           (select LISTAGG(m.medicaments_suchama, ',') WITHIN GROUP(ORDER BY m.medicaments_code)
+              from SRVS_MEDICAMENTS m
+             where m.medicaments_code in
+                   (select t.charge_code
+                      from SRVS_DOCTOR_ADVICE t
+                     where t.parent_no = ydm.parent_no)) as drugsuchama,
+           </if>         
+           ydm.pidsj as yd_pidsj,
+           ydm.yzlx as yd_yzlx,
+           pqtable.ydzt as pq_ydzt
+    from SRVS_PRESCRIPTION_MAIN ydm
+    left join srvs_batch pb
+    	on ydm.zxbc = pb.id_
+    left join SRVS_INPATIENTAREA area
+    	on area.deptcode = ydm.ward_code
+    left join SRVS_LABEL pqtable
+      	on pqtable.pidsj = ydm.pidsj
+    where   pb.enabled_ = 1
+     	and area.enabled = 1
+     	and ydm.zxbc is not null
+     	and ydm.ydzxzt = 0
+     	and pqtable.ydzt = 7
+    	<if test="qry.areaS !=null and qry.areaS !=''and qry.areaS.size>0">
+			and ydm.ward_code in
+			<foreach collection="qry.areaS" item="areaId" separator="," open="(" close=")">
+				#{areaId,jdbcType=VARCHAR}
+			</foreach>
+		</if>
+     	<if test="qry.yyrq !=null and qry.yyrq !=''">
+			and ydm.yyrq &gt;=
+			to_date(#{qry.yyrq,jdbcType=VARCHAR}||'00:00:00','yyyy-MM-DD
+			hh24:mi:ss')
+			and ydm.yyrq &lt;=
+			to_date(#{qry.yyrq,jdbcType=VARCHAR}||'23:59:59','yyyy-MM-DD
+			hh24:mi:ss')
+		</if>
+     	<if test="qry.yzlx !=null and qry.yzlx!=''">
+			and ydm.yzlx = #{qry.yzlx,jdbcType=INTEGER}
+		</if>
+     	<if test="qry.pcS !=null and qry.pcS !=''and qry.pcS.size>0">
+			and ydm.zxbc in
+			<foreach collection="qry.pcS" item="pcid" separator="," open="(" close=")">
+				#{pcid,jdbcType=INTEGER}
+			</foreach>
+		</if>
+		<if test="qry.bednoS !=null">
+			and (
+			<foreach collection="qry.bednoS" item="bedno" separator="or">
+				ydm.bedno like '%'||#{bedno,jdbcType=VARCHAR}||'%' escape '\'
+			</foreach>
+			)
+		</if>
+		<if test="qry.patnameS !=null">
+			and (
+			<foreach collection="qry.patnameS" item="patname" separator="or">
+				ydm.patname like '%'||#{patname,jdbcType=VARCHAR}||'%' escape '\'
+			</foreach>
+			)
+		</if>
+		<if test="qry.parentNoS !=null">
+			and (
+			<foreach collection="qry.parentNoS" item="parentNo" separator="or">
+				ydm.parent_no like '%'||#{parentNo,jdbcType=VARCHAR}||'%' escape '\'
+			</foreach>
+			)
+		</if>
+		<if test="qry.freqCodeS !=null">
+			and (
+			<foreach collection="qry.freqCodeS" item="freqCode" separator="or">
+				ydm.freq_code like '%'||#{freqCode,jdbcType=VARCHAR}||'%' escape '\'
+			</foreach>
+			)
+		</if>
+		<if test="qry.drugnameQry !=null and qry.drugnameQry != ''">
+		)temp where 1=1
+		and (
+		<foreach collection="qry.drugnameQry" item="drugnameQry" separator="or">
+			temp.yd_drugname like '%'||#{drugnameQry,jdbcType=VARCHAR}||'%' escape '\' or
+			temp.drugsuchama like '%'||Upper(#{drugnameQry,jdbcType=VARCHAR})||'%' escape '\' 
+		</foreach>
+		)
+		</if>
+  	</select>
+	
+	<select id="getCustomBatch" resultType="com.zc.pivas.docteradvice.entity.BatchBean">
+	select * from srvs_batch where RESERVE1_ = 1 order by order_num
+	</select>
+	
+	<select id="queryKongBatch" resultType="com.zc.pivas.docteradvice.entity.BatchBean">
+	select * from srvs_batch where enabled_ = 1 and is_empty_batch_ = 1
+	order by order_num
+	</select>
+	
+	<select id="getBatchByID" resultType="com.zc.pivas.docteradvice.entity.BatchBean">
+	select * from srvs_batch where ID_ = #{pcId} and enabled_ = 1
+	</select>
+	
+	<select id="getCheckYZList" resultType="String">
+	select distinct(yz.parent_no) parentNo from SRVS_DOCTOR_ADVICE_MAIN yz
+	where yz.yzzt = 0
+	and yz.yzshzt = 1
+	</select>
+	
+	<insert id="saveCheckYZTemp"  parameterType="String">
+		insert into SRVS_CHECK_DOCTORADVICE_TEMP(groupno)
+		select distinct(t.groupno) from SRVS_PRESCRIPTION_RECORD t left join SRVS_DOCTOR_ADVICE_main yz on t.groupno = yz.parent_no
+		<![CDATA[ where t.occdt like '%' || #{yyrq} || '%' and yz.yzshzt = 1 ]]>
+		and t.groupno not in  ( select distinct(t.parent_no) from SRVS_DOCTOR_ADVICE t
+			where  t.act_order_no not in (select distinct(yd.recipeid) from SRVS_PRESCRIPTION_RECORD yd where occdt like '%' || #{yyrq} || '%' )
+				and t.parent_no in ( select distinct(yd.groupno) from SRVS_PRESCRIPTION_RECORD yd where occdt like '%' || #{yyrq} || '%')  )
+	</insert>
+	
+	<delete id="deleteCheckYZTemp">
+		delete from SRVS_CHECK_DOCTORADVICE_TEMP
+	</delete>
+	
+	<select id="getDifferentYdForAll" resultType="com.zc.pivas.excuteRecord.bean.ExcuteRecordBean">
+	select groupno as "groupNo",state as state,amount as "useCount" from (
+	select ydr.groupno,ydr.state,ydr.amount from SRVS_PRESCRIPTION_RECORD ydr
+	where 1=1
+	and ydr.groupno in (select groupno from SRVS_CHECK_DOCTORADVICE_TEMP)
+	and substr(ydr.occdt,0,10) = #{yyrq}
+	group by ydr.groupno,ydr.state,ydr.amount 
+	)temp1
+	minus 
+	select parent_no as "groupNo",state as state,amount as "useCount"  from (
+	select ydm.parent_no ,ydm.ydzxzt as state,to_char(count(*)) as amount from SRVS_PRESCRIPTION_MAIN ydm
+	where 1=1
+	and parent_no in (select groupno from SRVS_CHECK_DOCTORADVICE_TEMP)
+	and to_char(ydm.yyrq,'yyyy-mm-dd') = #{yyrq}
+	and ydm.ydzxzt = 0
+	group by ydm.parent_no,ydm.ydzxzt
+	)temp2
+	</select>
+	
+	
+	<select id="getDifferentYdForSplit" resultType="com.zc.pivas.excuteRecord.bean.ExcuteRecordBean">
+	
+	select groupno as "groupNo",state as state,batch_id as "batchID" from (
+	select ydr.groupno,ydr.batch_id,ydr.state from SRVS_PRESCRIPTION_RECORD ydr
+	where 1=1
+	and ydr.groupno in (select groupno from SRVS_CHECK_DOCTORADVICE_TEMP)
+	and substr(ydr.occdt,0,10) = #{yyrq}
+
+		<if test="condition != null and '' neq condition">
+			and  substr(ydr.groupno, -1,1) in 
+				<foreach item="groupno" index="index"
+					collection="condition" open="(" separator=","
+					close=")">
+						#{groupno}
+				</foreach>
+		</if>
+
+	group by ydr.groupno,ydr.batch_id,ydr.state
+	order by ydr.groupno
+	)temp1
+	minus 
+	select parent_no as "groupNo",state as state,pc as "batchID"  from (
+	select ydm.parent_no ,SUBSTR(ydm.pidsj,INSTR(ydm.pidsj,'_',1,3)+1) as pc,ydm.ydzxzt as state from SRVS_PRESCRIPTION_MAIN ydm
+	where 1=1
+	and parent_no in (select groupno from SRVS_CHECK_DOCTORADVICE_TEMP)
+	and to_char(ydm.yyrq,'yyyy-mm-dd') = #{yyrq}
+	order by ydm.parent_no
+	)temp2
+	
+	</select>
+	
+	<select id="getDifferentYdForSplitNotPC" resultType="com.zc.pivas.excuteRecord.bean.ExcuteRecordBean">
+	  select groupno as "groupNo",state as state,count(*) as "useCount" from (
+	  select ydr.groupno,ydr.state from SRVS_PRESCRIPTION_RECORD ydr
+	  where 1=1
+	  and ydr.groupno in (select groupno from SRVS_CHECK_DOCTORADVICE_TEMP)
+	  and substr(ydr.occdt,0,10) = #{yyrq}
+	  and ydr.state = 0
+	  group by ydr.groupno,ydr.schedule,ydr.state
+	  order by ydr.groupno,ydr.schedule
+	  )temp1 group by groupno,state
+	  minus 
+	  select parent_no as "groupNo",state as state,count(*) as "useCount"  from (
+	  select ydm.parent_no ,ydm.ydzxzt as state from SRVS_PRESCRIPTION_MAIN ydm
+	  where 1=1
+	  and parent_no in (select groupno from SRVS_CHECK_DOCTORADVICE_TEMP)
+	  and to_char(ydm.yyrq,'yyyy-mm-dd') = #{yyrq}
+	  and ydm.ydzxzt = 0
+	  order by ydm.parent_no,ydm.ydzxzt
+	  )temp2 group by parent_no,state
+	</select>
+	
+	<select id="getYDMainListByParent" resultType="com.zc.pivas.docteradvice.entity.PrescriptionMain">
+	select 
+		ydm.YD_MAIN_ID as "ydMainId",
+		ydm.ACT_ORDER_NO as "actOrderNo",
+		ydm.PARENT_NO as "parentNo",
+		ydm.DYBZ as "dybz",
+		ydm.YYRQ as "yyrq",
+		to_char(ydm.YYRQ,'yyyy-MM-DD') as "yyrqS",
+		ydm.SCRQ as "scrq",
+		to_char(ydm.SCRQ,'yyyy-MM-DD') as "scrqS",
+		ydm.ZXBC as "zxbc",
+		ydm.YDZXZT as "ydzxzt",
+		ydm.MEDICAMENTS_CODE as "medicamentsCode",
+		ydm.CHARGE_CODE as "chargeCode",
+		ydm.DRUGNAME as drugname,
+		 <!-- (select LISTAGG(m.medicaments_suchama, ',') WITHIN GROUP(ORDER BY m.medicaments_code)
+	                         from SRVS_MEDICAMENTS m
+	                        where m.medicaments_code in
+	                              (select t.charge_code
+	                                 from SRVS_DOCTOR_ADVICE t
+	                                where t.parent_no = ydm.parent_no)) as drugsuchama, -->
+		ydm.SPECIFICATIONS as "specifications",
+		ydm.DOSE as "dose",
+		ydm.DOSE_UNIT as "doseUnit",
+		ydm.QUANTITY as "quantity",
+		ydm.BOTTLE_LABEL_NUM as "bottleLabelNum",
+		ydm.RESERVE1 as "reserve1",
+		ydm.RESERVE2 as "reserve2",
+		ydm.RESERVE3 as "reserve3",
+		ydm.MEDICAMENTS_PACKING_UNIT as "medicamentsPackingUnit",
+		ydm.FREQ_CODE as "freqCode",
+		ydm.YZSHZT as "yzshzt",
+		ydm.YZZDSHZT as "yzzdshzt",
+		ydm.WARD_CODE as "wardCode",
+		ydm.WARDNAME as "wardName",
+		ydm.INPATIENT_NO as "inpatientNo",
+		ydm.PATNAME as "patname",
+		ydm.SEX as "sex",
+		ydm.BEDNO as "bedno",
+		ydm.CASE_ID as "caseId",
+		ydm.BIRTHDAY as "birthday",
+		to_char(ydm.BIRTHDAY,'yyyy-MM-DD') as "birthdayS",
+		ydm.AGE as "age",
+		ydm.AGEUNIT as "ageunit",
+		ydm.ZXRQ as "zxrq",
+		ydm.ZXSJ as "zxsj",
+		ydm.PIDSJ as "pidsj",
+		ydm.YZLX as "yzlx",
+		ydm.SFYSMC as "sfysmc",
+		ydm.SFYSCODE as "sfyscode",
+		ydm.SFRQ as "sfrq",
+		ydm.PIDRQZXBC as "pidrqzxbc",
+		ydm.DOCTOR as "doctor",
+		ydm.DOCTOR_NAME as "doctorName",
+		ydm.AVDP as "avdp",
+		ydm.transfusion as "transfusion",
+		ydm.dropSpeed as "dropSpeed",
+		ydm.yzResource as "yzResource",
+		ydm.start_time as "startTime",
+		to_char(ydm.start_time,'yyyy-MM-DD hh24:mi:ss') as "startTimeS",
+		sign (ydm.start_time - to_date(to_char(sysdate,'yyyy-MM-DD')||' 00:00:00','yyyy-MM-DD hh24:mi:ss') ) as "startDayDelNum" ,
+		to_char(ydm.START_TIME,'hh24') as "startHour",
+		ydm.yzconfig_status as "yzconfigStatus",
+		ydm.yzconfig_time as "yzconfigTime",
+		ydm.yzconfig_uid as "yzconfigUid",
+		ydm.yzconfig_uname as "yzconfigUname",		
+		ydm.end_time as "endTime",
+		to_char(ydm.end_time,'yyyy-MM-DD hh24:mi:ss') as "endTimeS",
+		ydm.ydreorder_status as "ydreorderStatus",
+		ydm.ydreorder_code as "ydreorderCode",
+		ydm.ydreorder_time as "ydreorderTime",
+		to_char(ydm.ydreorder_time,'yyyy-MM-DD hh24:mi:ss') as"ydreorderTimeS",
+		ydm.ydreorder_mess as "ydreorderMess",
+		ydm.zxbc_change_before as "zxbcChangeBefore",
+		ydm.zxbc_change_beforeS as "zxbcChangeBeforeS"
+		from SRVS_PRESCRIPTION_MAIN ydm,srvs_batch ba
+		where 1 = 1
+		and ydm.parent_no = #{groupNo}
+		and to_char(ydm.yyrq,'yyyy-mm-dd') = #{yyrq}
+		<if test="type !=null and type != 2">
+		and ydm.ydzxzt = #{type}
+		</if>
+		and ydm.yzshzt = 1
+		and ydm.zxbc = ba.id_
+		<if test="order !=null and order =='asc'">
+		order by ba.order_num
+		</if>
+		<if test="order !=null and order =='desc'">
+		order by ba.order_num desc
+		</if>
+		
+		
+	</select>
+	
+	
+	<select id="getYDArrayOrderPCByParent" resultType="com.zc.pivas.docteradvice.entity.PrescriptionMain">
+	select 
+		ydm.YD_MAIN_ID as "ydMainId",
+		ydm.ACT_ORDER_NO as "actOrderNo",
+		ydm.PARENT_NO as "parentNo",
+		ydm.DYBZ as "dybz",
+		ydm.YYRQ as "yyrq",
+		to_char(ydm.YYRQ,'yyyy-MM-DD') as "yyrqS",
+		ydm.SCRQ as "scrq",
+		to_char(ydm.SCRQ,'yyyy-MM-DD') as "scrqS",
+		ydm.ZXBC as "zxbc",
+		ydm.YDZXZT as "ydzxzt",
+		ydm.MEDICAMENTS_CODE as "medicamentsCode",
+		ydm.CHARGE_CODE as "chargeCode",
+		ydm.DRUGNAME as drugname,
+		 <!-- (select LISTAGG(m.medicaments_suchama, ',') WITHIN GROUP(ORDER BY m.medicaments_code)
+	                         from SRVS_MEDICAMENTS m
+	                        where m.medicaments_code in
+	                              (select t.charge_code
+	                                 from SRVS_DOCTOR_ADVICE t
+	                                where t.parent_no = ydm.parent_no)) as drugsuchama, -->
+		ydm.SPECIFICATIONS as "specifications",
+		ydm.DOSE as "dose",
+		ydm.DOSE_UNIT as "doseUnit",
+		ydm.QUANTITY as "quantity",
+		ydm.BOTTLE_LABEL_NUM as "bottleLabelNum",
+		ydm.RESERVE1 as "reserve1",
+		ydm.RESERVE2 as "reserve2",
+		ydm.RESERVE3 as "reserve3",
+		ydm.MEDICAMENTS_PACKING_UNIT as "medicamentsPackingUnit",
+		ydm.FREQ_CODE as "freqCode",
+		ydm.YZSHZT as "yzshzt",
+		ydm.YZZDSHZT as "yzzdshzt",
+		ydm.WARD_CODE as "wardCode",
+		ydm.WARDNAME as "wardName",
+		ydm.INPATIENT_NO as "inpatientNo",
+		ydm.PATNAME as "patname",
+		ydm.SEX as "sex",
+		ydm.BEDNO as "bedno",
+		ydm.CASE_ID as "caseId",
+		ydm.BIRTHDAY as "birthday",
+		to_char(ydm.BIRTHDAY,'yyyy-MM-DD') as "birthdayS",
+		ydm.AGE as "age",
+		ydm.AGEUNIT as "ageunit",
+		ydm.ZXRQ as "zxrq",
+		ydm.ZXSJ as "zxsj",
+		ydm.PIDSJ as "pidsj",
+		ydm.YZLX as "yzlx",
+		ydm.SFYSMC as "sfysmc",
+		ydm.SFYSCODE as "sfyscode",
+		ydm.SFRQ as "sfrq",
+		ydm.PIDRQZXBC as "pidrqzxbc",
+		ydm.DOCTOR as "doctor",
+		ydm.DOCTOR_NAME as "doctorName",
+		ydm.AVDP as "avdp",
+		ydm.transfusion as "transfusion",
+		ydm.dropSpeed as "dropSpeed",
+		ydm.yzResource as "yzResource",
+		ydm.start_time as "startTime",
+		to_char(ydm.start_time,'yyyy-MM-DD hh24:mi:ss') as "startTimeS",
+		sign (ydm.start_time - to_date(to_char(sysdate,'yyyy-MM-DD')||' 00:00:00','yyyy-MM-DD hh24:mi:ss') ) as "startDayDelNum" ,
+		to_char(ydm.START_TIME,'hh24') as "startHour",
+		ydm.yzconfig_status as "yzconfigStatus",
+		ydm.yzconfig_time as "yzconfigTime",
+		ydm.yzconfig_uid as "yzconfigUid",
+		ydm.yzconfig_uname as "yzconfigUname",		
+		ydm.end_time as "endTime",
+		to_char(ydm.end_time,'yyyy-MM-DD hh24:mi:ss') as "endTimeS",
+		ydm.ydreorder_status as "ydreorderStatus",
+		ydm.ydreorder_code as "ydreorderCode",
+		ydm.ydreorder_time as "ydreorderTime",
+		to_char(ydm.ydreorder_time,'yyyy-MM-DD hh24:mi:ss') as"ydreorderTimeS",
+		ydm.ydreorder_mess as "ydreorderMess",
+		ydm.zxbc_change_before as "zxbcChangeBefore",
+		ydm.zxbc_change_beforeS as "zxbcChangeBeforeS"
+		from SRVS_PRESCRIPTION_MAIN ydm,srvs_batch ba
+		where 1 = 1
+		and ydm.parent_no = #{groupNo}
+		and to_char(ydm.yyrq,'yyyy-mm-dd') = #{yyrq}
+		<!-- and SUBSTR(ydm.pidsj,INSTR(ydm.pidsj,'_',1,3)+1) = #{pc} -->
+		and ydm.ydzxzt = 0
+		and ydm.yzshzt = 1
+		and ydm.zxbc = ba.id_
+    	order by ba.reserve1_,ba.order_num
+	</select>
+	
+	
+	<select id="getYDMainListByParentAndPC" resultType="com.zc.pivas.docteradvice.entity.PrescriptionMain">
+	select 
+		ydm.YD_MAIN_ID as "ydMainId",
+		ydm.ACT_ORDER_NO as "actOrderNo",
+		ydm.PARENT_NO as "parentNo",
+		ydm.DYBZ as "dybz",
+		ydm.YYRQ as "yyrq",
+		to_char(ydm.YYRQ,'yyyy-MM-DD') as "yyrqS",
+		ydm.SCRQ as "scrq",
+		to_char(ydm.SCRQ,'yyyy-MM-DD') as "scrqS",
+		ydm.ZXBC as "zxbc",
+		ydm.YDZXZT as "ydzxzt",
+		ydm.MEDICAMENTS_CODE as "medicamentsCode",
+		ydm.CHARGE_CODE as "chargeCode",
+		ydm.DRUGNAME as drugname,
+		 <!-- (select LISTAGG(m.medicaments_suchama, ',') WITHIN GROUP(ORDER BY m.medicaments_code)
+	                         from SRVS_MEDICAMENTS m
+	                        where m.medicaments_code in
+	                              (select t.charge_code
+	                                 from SRVS_DOCTOR_ADVICE t
+	                                where t.parent_no = ydm.parent_no)) as drugsuchama, -->
+		ydm.SPECIFICATIONS as "specifications",
+		ydm.DOSE as "dose",
+		ydm.DOSE_UNIT as "doseUnit",
+		ydm.QUANTITY as "quantity",
+		ydm.BOTTLE_LABEL_NUM as "bottleLabelNum",
+		ydm.RESERVE1 as "reserve1",
+		ydm.RESERVE2 as "reserve2",
+		ydm.RESERVE3 as "reserve3",
+		ydm.MEDICAMENTS_PACKING_UNIT as "medicamentsPackingUnit",
+		ydm.FREQ_CODE as "freqCode",
+		ydm.YZSHZT as "yzshzt",
+		ydm.YZZDSHZT as "yzzdshzt",
+		ydm.WARD_CODE as "wardCode",
+		ydm.WARDNAME as "wardName",
+		ydm.INPATIENT_NO as "inpatientNo",
+		ydm.PATNAME as "patname",
+		ydm.SEX as "sex",
+		ydm.BEDNO as "bedno",
+		ydm.CASE_ID as "caseId",
+		ydm.BIRTHDAY as "birthday",
+		to_char(ydm.BIRTHDAY,'yyyy-MM-DD') as "birthdayS",
+		ydm.AGE as "age",
+		ydm.AGEUNIT as "ageunit",
+		ydm.ZXRQ as "zxrq",
+		ydm.ZXSJ as "zxsj",
+		ydm.PIDSJ as "pidsj",
+		ydm.YZLX as "yzlx",
+		ydm.SFYSMC as "sfysmc",
+		ydm.SFYSCODE as "sfyscode",
+		ydm.SFRQ as "sfrq",
+		ydm.PIDRQZXBC as "pidrqzxbc",
+		ydm.DOCTOR as "doctor",
+		ydm.DOCTOR_NAME as "doctorName",
+		ydm.AVDP as "avdp",
+		ydm.transfusion as "transfusion",
+		ydm.dropSpeed as "dropSpeed",
+		ydm.yzResource as "yzResource",
+		ydm.start_time as "startTime",
+		to_char(ydm.start_time,'yyyy-MM-DD hh24:mi:ss') as "startTimeS",
+		sign (ydm.start_time - to_date(to_char(sysdate,'yyyy-MM-DD')||' 00:00:00','yyyy-MM-DD hh24:mi:ss') ) as "startDayDelNum" ,
+		to_char(ydm.START_TIME,'hh24') as "startHour",
+		ydm.yzconfig_status as "yzconfigStatus",
+		ydm.yzconfig_time as "yzconfigTime",
+		ydm.yzconfig_uid as "yzconfigUid",
+		ydm.yzconfig_uname as "yzconfigUname",		
+		ydm.end_time as "endTime",
+		to_char(ydm.end_time,'yyyy-MM-DD hh24:mi:ss') as "endTimeS",
+		ydm.ydreorder_status as "ydreorderStatus",
+		ydm.ydreorder_code as "ydreorderCode",
+		ydm.ydreorder_time as "ydreorderTime",
+		to_char(ydm.ydreorder_time,'yyyy-MM-DD hh24:mi:ss') as"ydreorderTimeS",
+		ydm.ydreorder_mess as "ydreorderMess",
+		ydm.zxbc_change_before as "zxbcChangeBefore",
+		ydm.zxbc_change_beforeS as "zxbcChangeBeforeS"
+		from SRVS_PRESCRIPTION_MAIN ydm
+		where 1 = 1
+		and ydm.parent_no = #{groupNo}
+		and to_char(ydm.yyrq,'yyyy-mm-dd') = #{yyrq}
+		and SUBSTR(ydm.pidsj,INSTR(ydm.pidsj,'_',1,3)+1) = #{pc}
+		<if test="type !=null and type != 2">
+		and ydm.ydzxzt = #{type}
+		</if>
+		and ydm.yzshzt = 1
+	</select>
+	
+	
+	<update id="updateYDMain" >
+		update SRVS_PRESCRIPTION_MAIN set ydzxzt = #{type},
+		dybz=1,
+		bottle_label_num = #{ydBean.bottleLabelNum},
+		zxbc = #{ydBean.zxbc},
+		pidrqzxbc = #{ydBean.pidrqzxbc}
+		where 1 = 1
+		<if test="ydBean.parentNo !=null and ydBean.parentNo !=''">
+		and parent_no = #{ydBean.parentNo}
+		</if>
+		<if test="ydBean.pidsj !=null and ydBean.pidsj !=''">
+		and pidsj = #{ydBean.pidsj}
+		</if>
+	</update>
+	
+	<update id="updateYDChildren" >
+		update SRVS_PRESCRIPTION set ydzxzt = #{type},
+		dybz=1,
+		bottle_label_num = #{ydBean.bottleLabelNum},
+		zxbc = #{ydBean.zxbc},
+		pidrqzxbc = #{ydBean.pidrqzxbc}
+		where 1 = 1
+		<if test="ydBean.parentNo !=null and ydBean.parentNo !=''">
+		and parent_no = #{ydBean.parentNo}
+		</if>
+		<if test="ydBean.pidsj !=null and ydBean.pidsj !=''">
+		and pidsj = #{ydBean.pidsj}
+		</if>
+	</update>
+	<update id="updateYDPQ" >
+		update SRVS_LABEL set ydzt = #{type},
+		zxbc_last = zxbc,
+		ydpq_last = ydpq_last||','||ydpq,
+		ydpq = #{ydBean.bottleLabelNum},
+		zxbc = #{ydBean.zxbc},
+		pidrqzxbc = #{ydBean.pidrqzxbc}
+		where 1 = 1 and ydpq_last not like '%'|| ydpq ||'%'
+		<if test="ydBean.parentNo !=null and ydBean.parentNo !=''">
+		and parent_no = #{ydBean.parentNo}
+		</if>
+		<if test="ydBean.pidsj !=null and ydBean.pidsj !=''">
+		and pidsj = #{ydBean.pidsj}
+		</if>
+	</update>
+	
+	<select id="ydConfirmGetYdCountsList" resultType="com.zc.pivas.docteradvice.entity.PrescriptionMain">
+		<include refid="common.jqueryPageHead" />
+		
+		<choose>
+	    <when test="qry.drugnameQry !=null and qry.drugnameQry != '' ">
+		select tempSet.bedno,tempSet.patname,tempSet.inpatient_no as inpatientNo,tempSet.wardname_en,tempSet.bedno_en,tempSet.ydreorder_status,
+		( select count(ydm.inpatient_no)
+		      from SRVS_PRESCRIPTION_main ydm
+		      join SRVS_LABEL pq on pq.pidsj=ydm.pidsj
+		      join SRVS_INPATIENTAREA area on area.deptcode = ydm.ward_code
+		      where  ydm.ydzxzt = 0
+		      and area.enabled = 1
+		      and ydm.YZSHZT = 1
+		      and pq.ydzt &lt;= 4
+		   	  <include refid="ydConfirmQryYdListWhere" />
+		      and ydm.bedno = tempSet.bedno 
+		      and ydm.patname = tempSet.patname 
+		      and ydm.inpatient_no = tempSet.inpatient_no
+		      and ydm.wardname_en = tempSet.wardname_en
+		      and ydm.bedno_en = tempSet.bedno_en
+		      and ydm.ydreorder_status = tempSet.ydreorder_status
+		      group by ydm.bedno,ydm.patname,ydm.inpatient_no,ydm.wardname_en,ydm.bedno_en,ydm.ydreorder_status
+		)  as ydCount
+		from (
+		select temp.* from (select ydm.bedno,
+		       ydm.patname,
+		       ydm.inpatient_no,
+		       ydm.wardname_en,
+		       ydm.ydreorder_status,
+		       (select LISTAGG(m.medicaments_suchama, ',') WITHIN GROUP(ORDER BY m.medicaments_code)
+		                           from SRVS_MEDICAMENTS m
+		                          where m.medicaments_code in
+		                                (select t.charge_code
+			                                 from SRVS_DOCTOR_ADVICE t
+			                                where t.parent_no = ydm.parent_no)) drugsuchama,
+		       ydm.drugname,
+		       ydm.bedno_en
+		  from SRVS_PRESCRIPTION_main ydm
+		  join SRVS_LABEL pq
+		    on pq.pidsj = ydm.pidsj
+		  join SRVS_INPATIENTAREA area
+		    on area.deptcode = ydm.ward_code
+		 where ydm.ydzxzt = 0
+		   and area.enabled = 1
+		   and ydm.YZSHZT = 1
+		   and pq.ydzt &lt;= 4
+		   <include refid="ydConfirmQryYdListWhere" />
+		   order by ydm.ydreorder_status, ydm.wardname_en, ydm.bedno_en
+		   ) temp
+		   where 1 = 1
+		   and (
+			<foreach collection="qry.drugnameQry" item="drugnameQry" separator="or">
+				temp.drugname like '%'||#{drugnameQry,jdbcType=VARCHAR}||'%' escape '\' or
+				temp.drugsuchama like '%'||Upper(#{drugnameQry,jdbcType=VARCHAR})||'%' escape '\' 
+			</foreach>
+			)
+		) tempSet
+		group by tempSet.bedno,tempSet.patname,tempSet.inpatient_no,tempSet.wardname_en,tempSet.bedno_en,tempSet.ydreorder_status
+	    </when>
+	    <otherwise>
+	    select ydm.bedno,
+			   ydm.patname,
+			   count(ydm.inpatient_no) as ydCount,
+			   ydm.inpatient_no as inpatientNo
+			from SRVS_PRESCRIPTION_main ydm
+			join SRVS_LABEL pq on pq.pidsj=ydm.pidsj
+			join SRVS_INPATIENTAREA area on area.deptcode = ydm.ward_code
+			where  ydm.ydzxzt = 0
+		  		and area.enabled = 1
+				and ydm.YZSHZT = 1
+				and pq.ydzt &lt;= 4
+			<include refid="ydConfirmQryYdListWhere" />
+			group by ydm.bedno,ydm.patname,ydm.inpatient_no,ydm.wardname_en,ydm.bedno_en,ydm.ydreorder_status
+			order by ydm.ydreorder_status,ydm.wardname_en,ydm.bedno_en
+	    </otherwise>
+	  	</choose>
+		
+		<include refid="common.jqueryPageBottom" />
+	</select>
+	
+	<select id="ydConfirmQryYdList" resultType="com.zc.pivas.docteradvice.entity.PrescriptionMain">
+		select
+		ydm.YD_MAIN_ID as "ydMainId",
+		ydm.ACT_ORDER_NO as "actOrderNo",
+		ydm.PARENT_NO as "parentNo",
+		ydm.DYBZ as "dybz",
+		ydm.YYRQ as "yyrq",
+		to_char(ydm.YYRQ,'yyyy-MM-DD') as "yyrqS",
+		ydm.SCRQ as "scrq",
+		to_char(ydm.SCRQ,'yyyy-MM-DD') as "scrqS",
+		ydm.ZXBC as "zxbc",
+		ydm.YDZXZT as "ydzxzt",
+		ydm.MEDICAMENTS_CODE as "medicamentsCode",
+		ydm.CHARGE_CODE as "chargeCode",
+		ydm.DRUGNAME as "drugname",
+		ydm.SPECIFICATIONS as "specifications",
+		ydm.DOSE as "dose",
+		ydm.DOSE_UNIT as "doseUnit",
+		ydm.QUANTITY as "quantity",
+		ydm.BOTTLE_LABEL_NUM as "bottleLabelNum",
+		ydm.RESERVE1 as "reserve1",
+		ydm.RESERVE2 as "reserve2",
+		ydm.RESERVE3 as "reserve3",
+		ydm.MEDICAMENTS_PACKING_UNIT as "medicamentsPackingUnit",
+		ydm.FREQ_CODE as "freqCode",
+		ydm.YZSHZT as "yzshzt",
+		ydm.YZZDSHZT as "yzzdshzt",
+		ydm.WARD_CODE as "wardCode",
+		ydm.WARDNAME as "wardName",
+		ydm.INPATIENT_NO as "inpatientNo",
+		ydm.PATNAME as "patname",
+		ydm.SEX as "sex",
+		ydm.BEDNO as "bedno",
+		ydm.CASE_ID as "caseId",
+		ydm.BIRTHDAY as "birthday",
+		to_char(ydm.BIRTHDAY,'yyyy-MM-DD') as "birthdayS",
+		ydm.AGE as "age",
+		ydm.AGEUNIT as "ageunit",
+		ydm.ZXRQ as "zxrq",
+		ydm.ZXSJ as "zxsj",
+		ydm.PIDSJ as "pidsj",
+		ydm.YZLX as "yzlx",
+		ydm.SFYSMC as "sfysmc",
+		ydm.SFYSCODE as "sfyscode",
+		ydm.SFRQ as "sfrq",
+		ydm.PIDRQZXBC as "pidrqzxbc",
+		ydm.DOCTOR as "doctor",
+		ydm.DOCTOR_NAME as "doctorName",
+		ydm.AVDP as "avdp",
+		ydm.transfusion as "transfusion",
+		ydm.dropSpeed as "dropSpeed",
+		ydm.yzResource as "yzResource",
+		ydm.start_time as "startTime",
+		to_char(ydm.start_time,'yyyy-MM-DD hh24:mi:ss') as "startTimeS",
+		sign (ydm.start_time - to_date(to_char(sysdate,'yyyy-MM-DD')||' 00:00:00','yyyy-MM-DD hh24:mi:ss') ) as "startDayDelNum" ,
+		to_char(ydm.START_TIME,'hh24') as "startHour",
+		ydm.yzconfig_status as "yzconfigStatus",
+		ydm.yzconfig_time as "yzconfigTime",
+		ydm.yzconfig_uid as "yzconfigUid",
+		ydm.yzconfig_uname as "yzconfigUname",		
+		ydm.end_time as "endTime",
+		to_char(ydm.end_time,'yyyy-MM-DD hh24:mi:ss') as "endTimeS",
+		ydreorder_status as "ydreorderStatus",
+		ydreorder_code as "ydreorderCode",
+		ydreorder_time as "ydreorderTime",
+		to_char(ydm.ydreorder_time,'yyyy-MM-DD hh24:mi:ss') as
+		"ydreorderTimeS",
+		ydreorder_mess as "ydreorderMess",
+		zxbc_change_before
+		as "zxbcChangeBefore",
+		zxbc_change_beforeS as "zxbcChangeBeforeS",
+		<if test="qry.leftWithPB !=null">
+			pb.ID_ as "pb_id",
+			pb.NUM_ as "pb_num",
+			pb.NAME_ as "pb_name",
+			pb.IS_EMPTY_BATCH_ as "pb_isEmptyBatch",
+			pb.START_TIME_ as "pb_startTime",
+			pb.END_TIME_ as "pb_endTime",
+			pb.IS_SECEND_ADVICE_ as "pb_isSecendAdvice",
+			pb.COLOR_ as "pb_color",
+			pb.ENABLED_ as "pb_enabled",
+			pb.is0p as "pb_is0p",
+			pb.timetype as "pb_timetype",
+			pb.order_num as "pb_orderNum",
+			pb.RESERVE1_ as "pb_reserve1",
+			pb.RESERVE2_ as "pb_reserve2",
+			pb.RESERVE3_ as "pb_reserve3"
+		</if>
+		<if test ="qry.operationLog != null">
+		,nvl2(l.content,l.content||'操作时间为：'||l.updatetime,'') as "operationLog"
+		</if>
+		
+		from SRVS_PRESCRIPTION_MAIN ydm
+		<if test="qry.leftWithPB !=null or qry.zxbcS !=null">
+			left join srvs_batch pb on ydm.ZXBC = pb.ID_ and pb.ENABLED_ = 1
+		</if>
+		left join SRVS_INPATIENTAREA area on area.DEPTCODE = ydm.ward_code
+		<if test ="qry.operationLog != null">
+			left join  srvs_batch_LOG l on l.pidsj = ydm.PIDSJ
+		</if>
+		left join SRVS_LABEL pqRC on pqRC.PIDSJ=ydm.PIDSJ
+		where 1=1
+		and ydm.ydzxzt = 0
+		and area.enabled = 1
+		and ydm.YZSHZT = 1
+		and pqRC.ydzt &lt;= 4
+	
+		<include refid="ydConfirmQryYdListWhere" />
+		<!-- 住院号-->
+		<if test="qry.inpatientNo !=null and qry.inpatientNo !=''">
+			and ydm.inpatient_no in
+			<foreach collection="qry.inpatientNo" item="inNo" separator="," open="("
+				close=")">
+				#{inNo,jdbcType=INTEGER}
+			</foreach>
+		</if>
+		
+		<if test="qry.inpatientNo ==null or qry.inpatientNo ==''">
+			and ydm.inpatient_no in ('')
+		</if>
+		
+		<if test="qry.leftWithPB !=null or qry.zxbcS !=null">
+			order by ydm.bedno desc,pb.order_num
+		</if>
+		<if test="qry.leftWithPB ==null and qry.zxbcS ==null">
+			order by ydm.bedno desc
+		</if>
+		
+	</select>
+	
+	<select id="ydConfirmQryCount" resultType="Integer">
+		SELECT count(1) 
+		
+		from SRVS_PRESCRIPTION_MAIN ydm
+		<if test="qry.leftWithPB !=null or qry.zxbcS !=null">
+			left join srvs_batch pb on ydm.ZXBC = pb.ID_ and pb.ENABLED_ = 1
+		</if>
+		left join SRVS_INPATIENTAREA area on area.DEPTCODE = ydm.ward_code
+		<if test ="qry.operationLog != null">
+			left join  srvs_batch_LOG l on l.pidsj = ydm.PIDSJ
+		</if>
+		left join SRVS_LABEL pqRC on pqRC.PIDSJ=ydm.PIDSJ
+		where 1=1
+		and ydm.ydzxzt = 0
+		and area.enabled = 1
+		and ydm.YZSHZT = 1
+		and pqRC.ydzt &lt;= 4
+		<include refid="ydConfirmQryYdListWhere" />
+		<if test="qry.leftWithPB !=null or qry.zxbcS !=null">
+			order by ydm.bedno desc
+		</if>
+		<if test="qry.leftWithPB ==null and qry.zxbcS ==null">
+			order by ydm.bedno desc
+		</if>
+	</select>
+	
+	<sql id="ydConfirmQryYdListWhere">
+		<!-- 病区 -->
+		<if test="qry.inpatientString !=null and qry.inpatientString !=''and qry.inpatientString.size>0">
+			and ydm.WARD_CODE in
+			<foreach collection="qry.inpatientString" item="areaId" separator=","
+				open="(" close=")">
+				#{areaId,jdbcType=VARCHAR}
+			</foreach>
+		</if>
+		
+		<!-- 用药日期 -->
+		<if test="qry.yyrq !=null and qry.yyrq !=''">  
+			and ydm.yyrq &gt;= 
+			to_date(#{qry.yyrq,jdbcType=VARCHAR}||' '||'${@com.zc.pivas.common.util.DataFormat@getTimeStart()}','yyyy-MM-DD hh24:mi:ss')
+			and ydm.yyrq &lt;
+			to_date('${@com.zc.pivas.common.util.DataFormat@getNextDate(qry.yyrq)}'||' '||'${@com.zc.pivas.common.util.DataFormat@getTimeEnd()}','yyyy-MM-DD hh24:mi:ss')
+		</if>
+		
+		<!-- 是否确认 -->
+		<if test="qry.confirmStatus !=null and qry.confirmStatus !=''">
+			and ydm.YDREORDER_STATUS = TO_NUMBER(#{qry.confirmStatus,jdbcType=INTEGER})
+		</if>
+		
+		<!-- 药品分类 -->
+		<if test="qry.medicamentType !=null and qry.medicamentType !=''">
+			and
+			<foreach collection="qry.medicamentType" item="medicType" open="(" separator="or" close=")" >  
+				#{medicType} in (select category_id
+				from SRVS_MEDICAMENTS where medicaments_code in (SELECT *
+				FROM TABLE(CAST(fn_split(ydm.charge_code,
+				'@@') AS ty_str_split))))          
+			</foreach> 
+		</if>
+		
+		<!-- 批次 -->
+		<if test="qry.batchId !=null and qry.batchId !=''">
+			and ydm.zxbc in
+			<foreach collection="qry.batchId" item="batch" separator="," open="("
+				close=")">
+				#{batch,jdbcType=INTEGER}
+			</foreach>
+		</if>
+		
+		<if test="qry.bednoS !=null" >
+			and 
+			<foreach collection="qry.bednoS" item="bedno" open="(" separator="or" close=")" >  
+			(	ydm.BEDNO like  '%'||#{bedno}||'%'   escape '\'  
+				or
+				ydm.bedno_en like Upper(#{bedno}) || '%' escape '\'
+			)      
+			</foreach>
+		</if>
+		
+		<if test="qry.patnameS !=null" >
+			and 
+			<foreach collection="qry.patnameS" item="patname" open="(" separator="or" close=")" >  
+				ydm.PATNAME like  '%'||#{patname}||'%'   escape '\'           
+			</foreach>
+		</if>
+		
+		<if test="qry.parentNoS !=null" >
+			and 
+			<foreach collection="qry.parentNoS" item="parentNo" open="(" separator="or" close=")" >  
+				ydm.PARENT_NO like  '%'||#{parentNo}||'%'   escape '\'           
+			</foreach>
+		</if>
+		
+		<if test="qry.freqCodeS !=null" >
+			and 
+			<foreach collection="qry.freqCodeS" item="freqCode" open="(" separator="or" close=")" >  
+				lower(ydm.FREQ_CODE) like  '%'||lower(#{freqCode})||'%'   escape '\'           
+			</foreach>
+		</if>
+		
+	</sql>
+	
+	<select id="getCategoryCodeByMedicId" resultType="String" >
+		select CATEGORY_ID from SRVS_MEDICAMENTS where MEDICAMENTS_CODE = #{medicamentCode}
+	</select>
+	
+	<select id="getCategoryNameByHUA" resultType="String">
+		select cate.category_id from SRVS_MEDICAMENTS_category cate where cate.category_name like '%化疗%'
+	</select>
+	
+	<select id="getMenstruumCodeByQuantity" resultType="String">
+		select medic.medicaments_code
+		  from SRVS_PRESCRIPTION yd
+		  join SRVS_MEDICAMENTS medic
+		    on yd.medicaments_code = medic.medicaments_code
+		where yd.pidsj = #{pidsj}
+		   and medic.medicaments_menstruum = 1
+		   and instr(yd.quantity, '.') > 0
+	</select>
+	
+	<select id="getLabelCode" resultType="java.lang.Integer">
+		select label.LABEL_ID from SRVS_MEDICAMENTS_ref_label refLabel
+			 left join SRVS_MEDICAMENTS_label label on refLabel.LABEL_ID = label.LABEL_ID
+             left join SRVS_MEDICAMENTS t on t.medicaments_id = refLabel.MEDICAMENTS_ID
+		 where label.IS_ACTIVE = 1
+   				and label.is_null = 1
+   				and t.medicaments_code  in (select yd.charge_code from SRVS_PRESCRIPTION yd where yd.pidsj=#{pidsj,jdbcType=VARCHAR})
+	</select>
+	
+	<select id="checkYDMenstruum" resultType="java.lang.Integer">
+		select 
+			medic.medicaments_id 
+		from 
+			SRVS_MEDICAMENTS medic
+		where 
+			medic.medicaments_menstruum=1 
+		  and medic.medicaments_code  in (select yd.charge_code from SRVS_PRESCRIPTION yd where yd.pidsj=#{pidsj,jdbcType=VARCHAR})
+	</select>
+	
+	
+	<select id="getYouHuaDePiCi" resultType="com.zc.pivas.docteradvice.entity.PrescriptionMain">
+		select
+			ydm.YD_MAIN_ID as "ydMainId",
+			ydm.ACT_ORDER_NO as "actOrderNo",
+			ydm.PARENT_NO as "parentNo",
+			ydm.DYBZ as "dybz",
+			ydm.SCRQ as "scrq",
+			to_char(ydm.SCRQ,'yyyy-MM-DD HH:mm:ss') as "scrqS",
+			ydm.ZXBC as "zxbc",
+			ydm.YDZXZT as "ydzxzt",
+			ydm.MEDICAMENTS_CODE as "medicamentsCode",
+			ydm.MEDICAMENTS_PACKING_UNIT as "medicamentsPackingUnit",
+			ydm.FREQ_CODE as "freqCode",
+			ydm.YZSHZT as "yzshzt",
+			ydm.YZZDSHZT as "yzzdshzt",
+			ydm.WARD_CODE as "wardCode",
+			ydm.WARDNAME as "wardName",
+			ydm.INPATIENT_NO as "inpatientNo",
+			ydm.PATNAME as "patname",
+			ydm.SEX as "sex",
+			ydm.BEDNO as "bedno",
+			ydm.CASE_ID as "caseId",
+			ydm.AGE as "age",
+			ydm.AGEUNIT as "ageunit",
+			ydm.ZXRQ as "zxrq",
+			ydm.ZXSJ as "zxsj",
+			ydm.PIDSJ as "pidsj",
+			ydm.YZLX as "yzlx",
+			ydm.SFYSMC as "sfysmc",
+			ydm.SFYSCODE as "sfyscode",
+			ydm.SFRQ as "sfrq",
+			ydm.PIDRQZXBC as "pidrqzxbc",	
+			ydm.ydreorder_status as "ydreorderStatus",
+			ydm.ydreorder_code as "ydreorderCode",
+			ydm.ydreorder_mess as "ydreorderMess",
+			ydm.zxbc_change_before as "zxbcChangeBefore",
+			ydm.zxbc_change_beforeS as "zxbcChangeBeforeS"
+		from SRVS_PRESCRIPTION_MAIN ydm
+		left join SRVS_LABEL pqRC on pqRC.PIDSJ=ydm.PIDSJ
+		where 1=1
+		and ydm.ydreorder_status = 1
+		and pqRC.ydzt &gt;4
+		<if test="qry.yyrq !=null and qry.yyrq !=''">
+			and ydm.yyrq &gt;=
+			to_date(#{qry.yyrq,jdbcType=VARCHAR}||' '||'${@com.zc.pivas.common.util.DataFormat@getTimeStart()}','yyyy-MM-DD hh24:mi:ss')
+			and ydm.yyrq &lt;
+			to_date('${@com.zc.pivas.common.util.DataFormat@getNextDate(qry.yyrq)}'||' '||'${@com.zc.pivas.common.util.DataFormat@getTimeEnd()}','yyyy-MM-DD hh24:mi:ss')
+		</if>
+		<if test="qry.inpatientNo !=null and qry.inpatientNo !=''">
+			and ydm.INPATIENT_NO= #{qry.inpatientNo,jdbcType=VARCHAR}
+		</if> 
+	</select>
+	
+	<select id="qryBatchCode" resultType = "String">
+		select id_ from srvs_batch  where num_= #{pcNum} and enabled_ = 1
+	</select>
+	
+	<select id="qryBatchNum" resultType = "String">
+		select num_ from srvs_batch  where id_= #{zxbc} and enabled_ = 1
+	</select>
+	
+</mapper>

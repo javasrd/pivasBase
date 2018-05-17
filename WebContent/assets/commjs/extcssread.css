@@ -1,0 +1,11 @@
+@CHARSET "UTF-8";
+.x-box-layout-ct, .x-border-layout-ct{
+	color:white;
+}
+.x-panel .x-grid-body{
+	border-color:white;
+}
+div#treepanel-1009-innerCt{
+	border-color:#F5F5F5;
+	width: 100%;
+}

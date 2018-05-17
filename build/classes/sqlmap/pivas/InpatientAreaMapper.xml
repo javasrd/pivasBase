@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zc.pivas.inpatientarea.dao.InpatientAreaDAO" >
+	<resultMap id="InpatientAreaMap" type="com.zc.pivas.inpatientarea.bean.InpatientAreaBean" >
+		<id column="gid" property="gid" jdbcType="VARCHAR" />
+		<result column="deptcode" property="deptCode" jdbcType="VARCHAR" />
+		<result column="deptname" property="deptName" jdbcType="VARCHAR" />
+		<result column="enabled" property="enabled" jdbcType="INTEGER" />
+		<result column="reserve0" property="reserve0" jdbcType="VARCHAR" />
+		<result column="reserve1" property="reserve1" jdbcType="VARCHAR" />
+		<result column="reserve2" property="reserve2" jdbcType="VARCHAR" />
+		<result column="enabled" property="enabled" jdbcType="VARCHAR" />
+		<result column="deptAliasName" property="deptAliasName" jdbcType="VARCHAR" />
+	</resultMap>
+	
+	<sql id="getInpatientAreaSql">
+  		SELECT
+			deptcode,
+			deptname,
+			enabled,
+			deptAliasName
+		FROM
+			SRVS_INPATIENTAREA
+		<where>
+		1=1
+			<if test="inpatientArea != null">
+				<if test="inpatientArea.deptCodes != null and '' neq inpatientArea.deptCodes">
+				and 
+				<foreach item="deptCode" index="index" collection="inpatientArea.deptCodes"  open="(" separator="or" close=")" >  
+					deptCode like  '%'||#{deptCode}||'%'   escape '\'          
+				</foreach>
+				</if>
+				
+				<if test="inpatientArea.deptCode != null and '' neq inpatientArea.deptCodes">
+				and  deptCode =  #{inpatientArea.deptCode} 
+				</if>
+				
+				<if test="inpatientArea.deptNames != null and '' neq inpatientArea.deptNames">
+				and 
+				<foreach item="deptName" index="index" collection="inpatientArea.deptNames"  open="(" separator="or" close=")" >  
+					deptName like  '%'||#{deptName}||'%'   escape '\'           
+				</foreach>
+				</if>
+				
+				<if test="inpatientArea.enabled != null and '' neq inpatientArea.enabled">
+					and enabled = #{inpatientArea.enabled} 
+				</if>
+				
+				<if test="inpatientArea.glUserId != null and '' neq inpatientArea.glUserId">
+					and exists (
+						select 1 from sys_user where user_id = #{inpatientArea.glUserId} and user_type &lt;&gt; 6 
+						union 
+						select 1 from SRVS_GL_NURSE_AREA gl,sys_user u where gl.user_id = u.user_id and u.user_type = 6
+						and u.user_id = #{inpatientArea.glUserId}  
+						and gl.deptcode = SRVS_INPATIENTAREA.deptcode
+					)
+				</if>
+			
+			</if>
+		</where>
+		order by deptName 
+ 	</sql>
+  
+  <select id="getInpatientAreaList" resultMap="InpatientAreaMap">
+  	<include refid="common.jqueryPageHead" />
+  	<include refid="getInpatientAreaSql"/>
+  	<include refid="common.jqueryPageBottom" />
+  </select>
+  
+  <select id="queryInpatientAreaAllList" resultMap="InpatientAreaMap">
+  	SELECT *  FROM SRVS_INPATIENTAREA  where SRVS_INPATIENTAREA.Enabled='1'
+  </select>
+  
+  <select id="queryInpatientAreaInAll" resultMap="InpatientAreaMap">
+  	SELECT *  FROM SRVS_INPATIENTAREA  where 1=1
+  </select>
+  
+  <select id="queryInpatientAreaAllListForYDStatistic" resultMap="InpatientAreaMap">
+  	SELECT *  FROM SRVS_INPATIENTAREA where deptcode in (select ward_code from  SRVS_PRESCRIPTION) and SRVS_INPATIENTAREA.ENABLED='1'
+  </select>
+  
+  <select id="getInpatientAreaTotal" resultType="int">
+  	select count(1) from (
+  		<include refid="getInpatientAreaSql"/>
+  	) t1
+  </select>
+  
+  <insert id="addInpatientArea" parameterType="com.zc.pivas.inpatientarea.bean.InpatientAreaBean">
+	  	INSERT INTO SRVS_INPATIENTAREA (
+			deptcode,
+			deptname,
+			enabled,
+			deptAliasName
+		)
+		VALUES
+		(
+			#{deptCode},
+			#{deptName},
+			#{enabled},
+			#{deptAliasName}
+		)
+	</insert>
+
+	<update id="updateInpatientArea" parameterType="com.zc.pivas.inpatientarea.bean.InpatientAreaBean">
+  		update SRVS_INPATIENTAREA set
+  		
+  		<if test="deptName != null and '' neq deptName">
+			deptname = #{deptName},
+		</if>
+		
+		<if test="deptAliasName != null and '' neq deptAliasName">
+			deptAliasName = #{deptAliasName},
+		</if>
+			enabled = #{enabled}
+		where deptcode = #{deptCode}
+  	</update>
+  	
+  	<update id="synData" parameterType="com.zc.pivas.inpatientarea.bean.InpatientAreaBean">
+
+		merge into SRVS_INPATIENTAREA t1
+		using (
+		select #{deptCode} as deptcode from
+		dual ) t2
+		ON
+		(
+		t1.deptcode = t2.deptcode
+		)
+		WHEN MATCHED THEN UPDATE SET
+		    deptname = #{deptName},
+			enabled = #{enabled}
+		where deptcode = #{deptCode}
+		WHEN NOT MATCHED THEN
+		INSERT(
+		deptcode,
+			deptname,
+			enabled,
+			deptAliasName
+		)
+		VALUES
+		(
+		#{deptCode},
+			#{deptName},
+			#{enabled},
+			#{deptName}
+		)
+	</update>
+	
+	<select id="getInpatientAreaBean" resultMap="InpatientAreaMap">
+  	 	<include refid="getInpatientAreaSql"/>
+  	</select>
+</mapper>
