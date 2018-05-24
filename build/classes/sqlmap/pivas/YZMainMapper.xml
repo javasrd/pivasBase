@@ -593,17 +593,17 @@
 	<select id="qryListBeanByMap" resultType="com.zc.pivas.docteradvice.entity.DoctorAdviceMain">
 		<include refid="common.jqueryPageHead" />
 		<choose>
-	    <when test="qry.drugnameQry !=null and qry.drugnameQry != '' ">
-	      select * from (select
-	    </when>
-	    <otherwise>
-	     select
-	    </otherwise>
-	  	</choose>
+		    <when test="qry.drugnameQry !=null and qry.drugnameQry != '' ">
+		      select * from (select
+		    </when>
+	    	<otherwise>
+	     		select
+	    	</otherwise>
+	  	</choose>	  	
 		<include refid="fieldBean" />
 		<include refid="sqlFromWhere" />
 		<if test="qry.drugnameQry !=null and qry.drugnameQry != ''">
-		<include refid="drugSuchama" />
+			<include refid="drugSuchama" />
 		</if>
 		<include refid="common.jqueryPageBottom" />
 	</select>

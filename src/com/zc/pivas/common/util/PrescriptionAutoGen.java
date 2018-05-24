@@ -70,6 +70,7 @@ public class PrescriptionAutoGen extends QuartzJobBean {
 
     }
 
+    //生成批次 commented by jch 
     public static boolean genPC(Integer newYzshzt, List<DoctorAdviceMain> yzMainList, List<DoctorAdvice> yzList, List<String> pidsjRuCang,
                                 Date scrqD, Date yyrqD, String account) {
 
@@ -123,12 +124,16 @@ public class PrescriptionAutoGen extends QuartzJobBean {
 
             List<PrescriptionMain> ydMainList = null;
             List<Prescription> ydList = null;
+            
             List<PrescriptionMain> ydMainListTemp = null;
             List<Prescription> ydListTemp = null;
+            
             Map<String, String> pidPC_bottLab = null;
             List<BottleLabel> pqList = null;
+            
             BottleLabel pqTemp = null;
             List<Frequency> pcListTemp = null;
+            
             Long ruleId = null;
             List<Frequency> pcListAll = null;
             List<Frequency> pcListOK = null;
@@ -244,6 +249,7 @@ public class PrescriptionAutoGen extends QuartzJobBean {
     }
 
     /**
+     * 生成药单:  commented by jch 2018/05/23
      * 定时任务执行调度方法
      *
      * @return
@@ -265,7 +271,9 @@ public class PrescriptionAutoGen extends QuartzJobBean {
 
                 DoctorAdviceService yzService = ServletContextUtil.yzService;
                 DoctorAdviceMainService yzMainService = ServletContextUtil.yzMainService;
+                
                 PrescriptionMainService ydMainService = ServletContextUtil.ydMainService;
+                
                 if (yzMainService != null) {
                     //System.out.println("stopTempYZNotToday");
                     yzMainService.stopTempYZNotToday();
