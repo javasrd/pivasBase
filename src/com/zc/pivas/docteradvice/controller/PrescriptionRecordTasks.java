@@ -54,13 +54,13 @@ public class PrescriptionRecordTasks extends QuartzJobBean
     /** 日志类 */
     private static final Logger log = LoggerFactory.getLogger(PrescriptionRecordTasks.class);
     
-    public final static String SPLIT_MODE = Propertiesconfiguration.getStringProperty("pivas.yz.split.mode");
+    public final static String SPLIT_MODE = Propertiesconfiguration.getStringProperty("pivas.yz.split.mode");//医嘱拆分规则 ydzxjl：药单执行记录  ybgz：根据一般规则
     
-    final static String SPLIT_rule = Propertiesconfiguration.getStringProperty("pivas.ydzxjl.rule");
+    final static String SPLIT_rule = Propertiesconfiguration.getStringProperty("pivas.ydzxjl.rule");//药单执行记录规则 allDay:全天用药次数 split：用药拆开
     
-    final static String SPLIT_yysj = Propertiesconfiguration.getStringProperty("pivas.ydzxjl.yysj");
+    final static String SPLIT_yysj = Propertiesconfiguration.getStringProperty("pivas.ydzxjl.yysj");//药单执行记录是否存在用药时间 exist
     
-    final static String SPLIT_yyxx = Propertiesconfiguration.getStringProperty("pivas.ydzxjl.yyxx");
+    final static String SPLIT_yyxx = Propertiesconfiguration.getStringProperty("pivas.ydzxjl.yyxx");//药单执行记录是否存在用药信息 exist
     
     final static String RETUFN_PREFIX = Propertiesconfiguration.getStringProperty("pivas.return.batch.prefix");
     
@@ -114,16 +114,16 @@ public class PrescriptionRecordTasks extends QuartzJobBean
         // 第三天
         Date ThirdDay = DateUtil.addDay(dayNow, 2);
         
-        String yyrq = DateUtil.getCurrentDay8Str();
+        String yyrq = DateUtil.getCurrentDay8Str();//系统日期
         
-        String[] needCheckYD = ydMainService.getCheckYZList(yyrq);
+        String[] needCheckYD = ydMainService.getCheckYZList(yyrq);//根据医嘱状态为0，医嘱审核状态为1查询医嘱主表parent_no字段，并根据parent_no字段执行去重操作
         
         if (needCheckYD.length == 0)
         {
             return;
         }
         
-        ydMainService.deleteCheckYZTemp();
+        ydMainService.deleteCheckYZTemp();//删除定时任务检查YZ临时表内容
         ydMainService.saveCheckYZTemp(yyrq);
         
         Boolean resultF = false;

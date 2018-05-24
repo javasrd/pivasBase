@@ -254,6 +254,15 @@
 								<div class="lt-icon-user"></div>
 								<div class="input-text"><input  id="password" name="password"  placeholder="请输入密码" type="password"  value=""></div>
 							</div>
+							<%-- <c:if test="${enableCaptcha}">
+								<div class="input-group-item">
+									<spring:message code="login.identifyingCode" />
+									<div style="float: left;">
+										<input class="Text" type="text" style="width: 82px; height: 16px; line-height: 22px;" id="code_id" name="captcha" />
+									</div>
+							    	<img style="margin: 10px;" src="${pageContext.request.contextPath}/captchaCode" onClick="onClickCode();" id="onCode_id" />
+							    </div>
+							</c:if> --%>
 							<div class="input-group-item">
 								<div class="lt-icon-user"></div>
 								<div class="input-text"><input type="submit" onclick="return login();" class="login" value="登录" style="text-align:center;text-indent:0px; height:45px;background-color:#4CAF50;border:0px;padding:0px;"></div>
